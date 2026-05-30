@@ -160,7 +160,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
   const LIVING_WITH: Record<string, string> = { family: '가족과', alone: '혼자', other: '기타' };
 
   if (profile === 'loading') return <Spinner />;
-  if (!profile) return <NoProfile />;
+  if (!profile) return <NoProfileCard />;
 
   const birthYear = profile.birth_year < 100 ? 1900 + profile.birth_year : profile.birth_year;
 
@@ -304,6 +304,58 @@ function NoProfile() {
         className="inline-block rounded-xl bg-cana px-6 py-3 text-sm font-medium text-white transition hover:bg-cana-dark"
       >
         프로필 작성하기
+      </Link>
+    </div>
+  );
+}
+
+function NoProfileCard() {
+  return (
+    <div className="flex flex-col gap-4">
+      {/* 안내 카드 */}
+      <div className="rounded-2xl bg-cana/5 px-5 py-5">
+        <p className="mb-4 text-base font-semibold text-cana">프로필 카드 작성 전 확인해주세요</p>
+        <div className="flex flex-col gap-4">
+
+          {/* 소요 시간 */}
+          <div className="flex items-start gap-3">
+            <img src="/icons/clock.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+            <div>
+              <p className="text-base font-medium text-cana-ink">약 10분 소요돼요</p>
+              <p className="text-sm text-cana-ink3">신앙, 가치관, 라이프스타일에 관한 질문들이 있어요</p>
+            </div>
+          </div>
+
+          {/* 서류 안내 */}
+          <div className="flex items-start gap-3">
+            <img src="/icons/docs.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+            <div>
+              <p className="text-base font-medium text-cana-ink">마지막 단계에서 서류 인증이 필요해요</p>
+              <p className="mb-3 text-sm text-cana-ink3">아래 서류를 미리 준비해주세요</p>
+              <div className="flex flex-col gap-2">
+                {[
+                  { icon: '/icons/profile.svg',   text: '프로필 사진 (본인이 잘 나온 사진)' },
+                  { icon: '/icons/job.svg',        text: '직장 인증서류 — 명함, 사원증, 재직증명서, 4대보험 가입내역 중 하나' },
+                  { icon: '/icons/christian.svg',  text: '교인 인증서류 — 최근 3개월 내 주보 또는 교인증명서' },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="flex items-start gap-2">
+                    <img src={icon} alt="" className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                    <p className="text-sm text-cana-ink3">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* CTA */}
+      <Link
+        href="/profile/create"
+        className="block w-full rounded-xl bg-cana py-3.5 text-center text-base font-semibold text-white transition hover:bg-cana-dark active:scale-[0.99]"
+      >
+        프로필 카드 작성하기
       </Link>
     </div>
   );
