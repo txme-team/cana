@@ -97,36 +97,41 @@ export default function Events({ preview = false, standalone = false }: Props) {
 
               {(() => {
                 const pct = Math.min((event.confirmed_count / event.capacity) * 100, 100);
+                const isFull = event.confirmed_count >= event.capacity;
                 return (
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between text-base">
-                      <span className="text-cana-ink3">확정 인원</span>
-                      <span className="font-semibold text-cana">
-                        {event.confirmed_count} / {event.capacity}명
-                      </span>
+                  <div className="flex items-end gap-4">
+                    {/* 확정 인원 + 바 */}
+                    <div className="flex flex-1 flex-col gap-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-cana-ink3">확정 인원</span>
+                        <span className="font-semibold text-cana">
+                          {event.confirmed_count} / {event.capacity}명
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-xl bg-cana-rule">
+                        <div className="h-full rounded-xl bg-cana transition-all" style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-xl bg-cana-rule">
-                      <div className="h-full rounded-xl bg-cana transition-all" style={{ width: `${pct}%` }} />
-                    </div>
+
+                    {/* 버튼 */}
+                    {isFull ? (
+                      <Link
+                        href="/apply"
+                        className="flex-shrink-0 rounded-xl border border-cana px-4 py-2 text-sm font-semibold text-cana transition hover:bg-cana/5 active:scale-95"
+                      >
+                        대기 신청
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/apply"
+                        className="flex-shrink-0 rounded-xl bg-cana px-4 py-2 text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
+                      >
+                        신청하기
+                      </Link>
+                    )}
                   </div>
                 );
               })()}
-
-              {event.confirmed_count >= event.capacity ? (
-                <Link
-                  href="/apply"
-                  className="mt-auto block rounded-xl border border-cana bg-white py-3.5 text-center text-base font-semibold text-cana transition hover:bg-cana/5 active:scale-95"
-                >
-                  대기 신청하기
-                </Link>
-              ) : (
-                <Link
-                  href="/apply"
-                  className="mt-auto block rounded-xl bg-cana py-3.5 text-center text-base font-semibold text-white transition hover:bg-cana-dark active:scale-95"
-                >
-                  이 일정 신청하기
-                </Link>
-              )}
             </div>
           );
         })}

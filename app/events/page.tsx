@@ -11,8 +11,8 @@ export default function EventsPage() {
   return (
     <>
       <Nav />
-      <main className="min-h-screen bg-cana-cream px-5 pb-20 pt-24">
-        <div className="mx-auto max-w-2xl">
+      <main className="min-h-screen bg-cana-cream pb-20 pt-24">
+        <div className="mx-auto max-w-2xl px-5">
           <BackButton />
           <h1 className="mb-8 text-xl font-bold text-cana-ink">소개팅 일정</h1>
           <Events standalone />
