@@ -34,7 +34,7 @@ function StepProfileReview({ profile, onProceed }: StepProfileReviewProps) {
   if (!profile) {
     return (
       <div className="flex flex-col items-center gap-4 py-6 text-center">
-        <p className="text-base text-gray-600">프로필 정보를 불러오는 중...</p>
+        <p className="text-base text-cana-ink3">프로필 정보를 불러오는 중...</p>
       </div>
     );
   }
@@ -44,39 +44,39 @@ function StepProfileReview({ profile, onProceed }: StepProfileReviewProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-gray-800">프로필 확인</h2>
-        <p className="text-sm text-gray-400">이 프로필로 이벤트에 신청할게요.</p>
+        <h2 className="text-lg font-semibold text-cana-ink">프로필 확인</h2>
+        <p className="text-sm text-cana-ink3">이 프로필로 이벤트에 신청할게요.</p>
       </div>
 
-      <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-5">
+      <div className="rounded-2xl border border-cana-rule bg-cana-cream px-5 py-5">
         <div className="grid grid-cols-2 gap-y-3 gap-x-4">
           <div>
-            <p className="text-xs text-gray-400">닉네임</p>
-            <p className="text-base font-medium text-gray-800">{profile.nickname ?? '—'}</p>
+            <p className="text-xs text-cana-ink3">닉네임</p>
+            <p className="text-base font-medium text-cana-ink">{profile.nickname ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">성별</p>
-            <p className="text-base font-medium text-gray-800">
+            <p className="text-xs text-cana-ink3">성별</p>
+            <p className="text-base font-medium text-cana-ink">
               {profile.gender === 'male' ? '남성' : profile.gender === 'female' ? '여성' : '—'}
             </p>
           </div>
           {age !== null && (
             <div>
-              <p className="text-xs text-gray-400">나이</p>
-              <p className="text-base font-medium text-gray-800">{age}세</p>
+              <p className="text-xs text-cana-ink3">나이</p>
+              <p className="text-base font-medium text-cana-ink">{age}세</p>
             </div>
           )}
           <div>
-            <p className="text-xs text-gray-400">직업</p>
-            <p className="text-base font-medium text-gray-800">{profile.job ?? '—'}</p>
+            <p className="text-xs text-cana-ink3">직업</p>
+            <p className="text-base font-medium text-cana-ink">{profile.job ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">교회</p>
-            <p className="text-base font-medium text-gray-800">{profile.church_name ?? '—'}</p>
+            <p className="text-xs text-cana-ink3">교회</p>
+            <p className="text-base font-medium text-cana-ink">{profile.church_name ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">MBTI</p>
-            <p className="text-base font-medium text-gray-800">{profile.mbti ?? '—'}</p>
+            <p className="text-xs text-cana-ink3">MBTI</p>
+            <p className="text-base font-medium text-cana-ink">{profile.mbti ?? '—'}</p>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@ function StepProfileReview({ profile, onProceed }: StepProfileReviewProps) {
         <button
           type="button"
           onClick={handleEdit}
-          className="w-full rounded-xl border border-gray-200 py-3 text-base text-gray-600 transition active:bg-gray-50"
+          className="w-full rounded-xl border border-cana-rule py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
         >
           수정하고 올게요
         </button>
@@ -119,29 +119,29 @@ function ConsentBlock({ required, label, description, content, checked, onChange
   return (
     <div className={[
       'rounded-2xl border px-4 py-4 transition',
-      checked ? 'border-cana bg-cana/5' : 'border-gray-200 bg-white',
+      checked ? 'border-cana bg-cana/5' : 'border-cana-rule bg-white',
     ].join(' ')}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-base font-medium text-gray-800">{label}</span>
-            <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${required ? 'bg-cana/10 text-cana' : 'bg-gray-100 text-gray-400'}`}>
+            <span className="text-base font-medium text-cana-ink">{label}</span>
+            <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${required ? 'bg-cana/10 text-cana' : 'bg-cana-rule text-cana-ink3'}`}>
               {required ? '필수' : '선택'}
             </span>
           </div>
-          {description && <p className="text-sm text-gray-400">{description}</p>}
+          {description && <p className="text-sm text-cana-ink3">{description}</p>}
         </div>
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="flex-shrink-0 text-sm text-gray-400 underline underline-offset-2"
+          className="flex-shrink-0 text-sm text-cana-ink3 underline underline-offset-2"
         >
           {expanded ? '접기' : '내용 보기'}
         </button>
       </div>
 
       {expanded && (
-        <div className="mt-3 rounded-xl bg-gray-50 px-3 py-3 text-sm leading-relaxed text-gray-500">
+        <div className="mt-3 rounded-xl bg-cana-cream px-3 py-3 text-sm leading-relaxed text-cana-ink3">
           {content}
         </div>
       )}
@@ -153,7 +153,7 @@ function ConsentBlock({ required, label, description, content, checked, onChange
       >
         <span className={[
           'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 transition',
-          checked ? 'border-cana bg-cana' : 'border-gray-300 bg-white',
+          checked ? 'border-cana bg-cana' : 'border-cana-rule bg-white',
         ].join(' ')}>
           {checked && (
             <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
@@ -161,7 +161,7 @@ function ConsentBlock({ required, label, description, content, checked, onChange
             </svg>
           )}
         </span>
-        <span className={`text-base ${checked ? 'font-medium text-cana' : 'text-gray-500'}`}>
+        <span className={`text-base ${checked ? 'font-medium text-cana' : 'text-cana-ink3'}`}>
           동의합니다
         </span>
       </button>
@@ -177,8 +177,8 @@ function StepAgreements() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-gray-800">약관 동의</h2>
-        <p className="text-sm text-gray-400">이벤트 참여에 필요한 동의 항목이에요.</p>
+        <h2 className="text-lg font-semibold text-cana-ink">약관 동의</h2>
+        <p className="text-sm text-cana-ink3">이벤트 참여에 필요한 동의 항목이에요.</p>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -193,13 +193,13 @@ function StepAgreements() {
               label="개인정보 수집 및 이용 동의"
               content={
                 <div className="flex flex-col gap-2">
-                  <p className="font-medium text-gray-600">수집 항목</p>
+                  <p className="font-medium text-cana-ink2">수집 항목</p>
                   <p>이름, 생년, 성별, 키, 직업, 거주지, 근무지, 연락처, 신앙 정보, 프로필 사진, 직장/교인 인증 서류</p>
-                  <p className="font-medium text-gray-600">수집 목적</p>
+                  <p className="font-medium text-cana-ink2">수집 목적</p>
                   <p>매칭 서비스 운영 및 참여자 심사, 행사 진행</p>
-                  <p className="font-medium text-gray-600">보유 기간</p>
+                  <p className="font-medium text-cana-ink2">보유 기간</p>
                   <p>서비스 종료 후 즉시 파기 (최대 1년)</p>
-                  <p className="font-medium text-gray-600">제3자 제공</p>
+                  <p className="font-medium text-cana-ink2">제3자 제공</p>
                   <p>매칭 확정 시 상대방에게 연락처만 제공. 그 외 제3자 제공 없음.</p>
                 </div>
               }
@@ -403,7 +403,7 @@ export default function ApplyPage() {
         />
       </div>
 
-      <main className="mx-auto max-w-lg px-5 pb-20 pt-[84px]">
+      <main className="mx-auto max-w-2xl px-5 pb-20 pt-[84px]">
         {/* 스텝 레이블 */}
         <div className="mb-6 flex gap-1.5 overflow-x-auto pb-1">
           {STEPS.map((label, i) => (
@@ -415,7 +415,7 @@ export default function ApplyPage() {
                   ? 'bg-cana font-medium text-white'
                   : i < step
                   ? 'bg-cana/10 text-cana'
-                  : 'bg-gray-100 text-gray-400',
+                  : 'bg-cana-rule text-cana-ink3',
               ].join(' ')}
             >
               {i < step ? '✓ ' : ''}{label}
@@ -441,7 +441,7 @@ export default function ApplyPage() {
         {/* 폼 */}
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-cana-rule bg-white p-5 shadow-sm">
               {step === 0 && <Step0 />}
               {step === 1 && (
                 <StepProfileReview
@@ -467,7 +467,7 @@ export default function ApplyPage() {
                   <button
                     type="button"
                     onClick={handlePrev}
-                    className="flex-shrink-0 rounded-xl border border-gray-200 px-5 py-3 text-base text-gray-600 transition active:bg-gray-50"
+                    className="flex-shrink-0 rounded-xl border border-cana-rule px-5 py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
                   >
                     이전
                   </button>

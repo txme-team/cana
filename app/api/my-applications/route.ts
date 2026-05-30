@@ -4,14 +4,14 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 export async function GET() {
   const authClient = createClient();
   const { data: { user } } = await authClient.auth.getUser();
-
   if (!user) return NextResponse.json([]);
 
   const supabase = createServiceClient();
-
-  // profiles 테이블에서 user_id로 profile_id 조회
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
+  const supa = supabase as any;
+
+  // profile_id 조회
+  const { data: profile } = await supa
     .from('profiles')
     .select('id')
     .eq('user_id', user.id)
@@ -19,15 +19,25 @@ export async function GET() {
 
   if (!profile) return NextResponse.json([]);
 
-  // applications 테이블에서 profile_id로 신청한 이벤트 목록 조회
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  // 신청 내역 + 이벤트 정보 조인
+  const { data, error } = await supa
     .from('applications')
-    .select('event_id')
-    .eq('profile_id', profile.id);
+    .select('id, event_id, status, created_at, events(title, event_date, location)')
+    .eq('profile_id', profile.id)
+    .order('created_at', { ascending: false });
 
   if (error) return NextResponse.json([]);
 
-  const eventIds: string[] = (data ?? []).map((row: { event_id: string }) => row.event_id).filter(Boolean);
-  return NextResponse.json(eventIds);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = (data ?? []).map((row: any) => ({
+    id: row.id,
+    event_id: row.event_id,
+    status: row.status,
+    created_at: row.created_at,
+    event_title: row.events?.title ?? '',
+    event_date: row.events?.event_date ?? '',
+    event_location: row.events?.location ?? '',
+  }));
+
+  return NextResponse.json(result);
 }

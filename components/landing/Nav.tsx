@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -9,9 +9,7 @@ export default function Nav() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -28,17 +26,6 @@ export default function Nav() {
       setUserEmail(session?.user?.email ?? null);
     });
     return () => subscription.unsubscribe();
-  }, []);
-
-  // 드롭다운 바깥 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogoutConfirm = async () => {
@@ -59,71 +46,44 @@ export default function Nav() {
         ].join(' ')}
       >
         <div className="mx-auto flex max-w-5xl items-center justify-between py-4">
-          <div className="flex items-center gap-3">
+
+          {/* 좌측 — 로고 + 네비 */}
+          <div className="flex items-center gap-6">
             <Link href="/">
-              <img src="/logos/logo_black.svg" alt="cana" className="h-[18px]" />
+              <img src="/logos/logo_black.svg" alt="cana" className="h-[14px]" />
             </Link>
+            <nav className="hidden items-center gap-6 sm:flex">
+              <Link href="/events" className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink">
+                소개팅 일정
+              </Link>
+              <Link href="/faq" className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink">
+                자주 묻는 질문
+              </Link>
+            </nav>
           </div>
 
-          {/* 중앙 네비게이션 */}
-          <nav className="hidden items-center gap-6 sm:flex">
-            <Link href="/events" className="text-sm font-medium text-cana-ink3 transition hover:text-cana-ink">
-              일정
-            </Link>
-            <Link href="/faq" className="text-sm font-medium text-cana-ink3 transition hover:text-cana-ink">
-              FAQ
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2">
+          {/* 우측 — 인증 상태 + 신청 */}
+          <div className="flex items-center gap-4">
             {userEmail ? (
-              /* 로그인 상태 — 이메일 클릭 시 드롭다운 */
-              <div ref={dropdownRef} className="relative">
+              <>
+                <Link
+                  href="/my"
+                  className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink"
+                >
+                  마이페이지
+                </Link>
                 <button
                   type="button"
-                  onClick={() => setDropdownOpen((v) => !v)}
-                  className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-xs font-medium text-gray-500 transition hover:bg-gray-50 active:scale-95"
+                  onClick={() => setShowLogoutModal(true)}
+                  className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink"
                 >
-                  {userEmail}
-                  <svg
-                    className={`h-3 w-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-                    viewBox="0 0 12 12" fill="none"
-                  >
-                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  로그아웃
                 </button>
-
-                {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-full min-w-max overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg">
-                    <Link
-                      href="/my/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
-                    >
-                      <img src="/icons/paper.svg" alt="" className="h-5 w-5 flex-shrink-0" /> 프로필 카드
-                    </Link>
-                    <Link
-                      href="/my/applications"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
-                    >
-                      <img src="/icons/ticket.svg" alt="" className="h-5 w-5 flex-shrink-0" /> 신청 내역
-                    </Link>
-                    <div className="mx-3 border-t border-gray-100" />
-                    <button
-                      type="button"
-                      onClick={() => { setDropdownOpen(false); setShowLogoutModal(true); }}
-                      className="flex w-full items-center gap-2.5 px-4 py-3 text-sm text-red-500 transition hover:bg-red-50"
-                    >
-                      <span className="text-base">🚪</span> 로그아웃
-                    </button>
-                  </div>
-                )}
-              </div>
+              </>
             ) : (
               <Link
                 href="/login?redirectTo=/"
-                className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-medium text-gray-500 transition hover:bg-gray-50 active:scale-95"
+                className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink"
               >
                 로그인
               </Link>
@@ -135,6 +95,7 @@ export default function Nav() {
               신청하기
             </Link>
           </div>
+
         </div>
       </header>
 

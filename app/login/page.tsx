@@ -3,6 +3,8 @@
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Suspense } from 'react';
+import Nav from '@/components/landing/Nav';
+import Footer from '@/components/landing/Footer';
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -20,17 +22,17 @@ function LoginContent() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-cana-cream px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-cana-rule bg-white p-8 shadow-sm">
         {/* 로고 */}
         <div className="mb-8 text-center">
-          <p className="text-2xl font-semibold tracking-tight text-cana">cana</p>
-          <p className="mt-1 text-xs text-gray-400">CHRISTIAN ROTATION DATING</p>
+          <img src="/logos/logo_black.svg" alt="cana" className="mx-auto h-[14px]" />
+          <p className="mt-2 text-xs text-cana-ink3/60">CHRISTIAN ROTATION DATING</p>
         </div>
 
         <div className="mb-6 text-center">
-          <p className="text-sm font-medium text-gray-800">신청을 위해 로그인해주세요</p>
-          <p className="mt-1 text-xs text-gray-400">구글 계정으로 간편하게 시작할 수 있어요</p>
+          <p className="text-sm font-medium text-cana-ink">신청을 위해 로그인해주세요</p>
+          <p className="mt-1 text-xs text-cana-ink3">구글 계정으로 간편하게 시작할 수 있어요</p>
         </div>
 
         {error && (
@@ -41,7 +43,7 @@ function LoginContent() {
 
         <button
           onClick={handleGoogleLogin}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 active:bg-gray-100"
+          className="flex w-full items-center justify-center gap-3 rounded-xl border border-cana-rule bg-white px-4 py-3 text-sm font-medium text-cana-ink transition hover:bg-cana-cream active:bg-cana-cream"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -52,7 +54,7 @@ function LoginContent() {
           Google로 계속하기
         </button>
 
-        <p className="mt-6 text-center text-[11px] leading-relaxed text-gray-400">
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-cana-ink3/60">
           로그인 시 cana의{' '}
           <span className="underline">서비스 이용약관</span> 및{' '}
           <span className="underline">개인정보처리방침</span>에 동의하는 것으로 간주돼요.

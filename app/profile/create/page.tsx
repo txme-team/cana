@@ -27,8 +27,8 @@ function StepPhone() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-gray-800">연락처</h2>
-        <p className="text-sm text-gray-400">매칭 확정 시 상대방에게만 공개돼요.</p>
+        <h2 className="text-lg font-semibold text-cana-ink">연락처</h2>
+        <p className="text-sm text-cana-ink3">매칭 확정 시 상대방에게만 공개돼요.</p>
       </div>
 
       <Controller
@@ -43,7 +43,7 @@ function StepPhone() {
         }}
         render={({ field }) => (
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-500">휴대폰 번호</label>
+            <label className="text-sm font-medium text-cana-ink3">휴대폰 번호</label>
             <input
               type="tel"
               inputMode="tel"
@@ -53,13 +53,13 @@ function StepPhone() {
               className={[
                 'w-full rounded-xl border px-4 py-3 text-base outline-none transition',
                 'focus:border-cana focus:ring-1 focus:ring-cana',
-                errors.phone ? 'border-red-400' : 'border-gray-200',
+                errors.phone ? 'border-red-400' : 'border-cana-rule',
               ].join(' ')}
             />
             {errors.phone && (
               <p className="text-xs text-red-500">{errors.phone.message}</p>
             )}
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-cana-ink3/60">
               🔒 연락처는 안전하게 저장되며, 매칭 완료 전까지 누구에게도 공개되지 않아요.
             </p>
           </div>
@@ -284,12 +284,12 @@ export default function ProfileCreatePage() {
         />
       </div>
 
-      <main className="mx-auto max-w-lg px-5 pb-20 pt-[84px]">
+      <main className="mx-auto max-w-2xl px-5 pb-20 pt-[84px]">
         {/* 안내 배너 */}
         {step === 0 && (
           <div className="mb-4 rounded-2xl bg-cana/5 px-4 py-3.5">
             <p className="text-sm font-medium text-cana">프로필 카드 작성</p>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-cana-ink3 mt-0.5">
               한 번 작성하면 이후 이벤트 신청 시 재사용돼요.
             </p>
           </div>
@@ -306,7 +306,7 @@ export default function ProfileCreatePage() {
                   ? 'bg-cana font-medium text-white'
                   : i < step
                   ? 'bg-cana/10 text-cana'
-                  : 'bg-gray-100 text-gray-400',
+                  : 'bg-cana-rule text-cana-ink3',
               ].join(' ')}
             >
               {i < step ? '✓ ' : ''}{label}
@@ -317,7 +317,7 @@ export default function ProfileCreatePage() {
         {/* 폼 */}
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-cana-rule bg-white p-5 shadow-sm">
               {step === 0 && <Step1 />}
               {step === 1 && <Step2 />}
               {step === 2 && <Step3 />}
@@ -335,7 +335,7 @@ export default function ProfileCreatePage() {
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="flex-shrink-0 rounded-xl border border-gray-200 px-5 py-3 text-base text-gray-600 transition active:bg-gray-50"
+                  className="flex-shrink-0 rounded-xl border border-cana-rule px-5 py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
                 >
                   이전
                 </button>
@@ -366,7 +366,7 @@ export default function ProfileCreatePage() {
                 {isNudge && step < STEPS.length - 1 && (
                   <Link
                     href="/apply"
-                    className="text-center text-sm text-gray-400 underline underline-offset-2"
+                    className="text-center text-sm text-cana-ink3/60 underline underline-offset-2"
                   >
                     나중에 하기
                   </Link>
