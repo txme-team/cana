@@ -197,7 +197,7 @@ export default function FAQ({ preview = false, standalone = false }: Props) {
               'rounded-full px-4 py-1.5 text-sm font-medium transition',
               activeCategory === null
                 ? 'bg-cana text-white'
-                : 'bg-cana-cream text-cana-ink3 hover:bg-cana/10 hover:text-cana',
+                : 'border border-cana bg-white text-cana-ink3 hover:bg-cana/5 hover:text-cana',
             ].join(' ')}
           >
             전체
@@ -211,7 +211,7 @@ export default function FAQ({ preview = false, standalone = false }: Props) {
                 'rounded-full px-4 py-1.5 text-sm font-medium transition',
                 activeCategory === cat
                   ? 'bg-cana text-white'
-                  : 'bg-cana-cream text-cana-ink3 hover:bg-cana/10 hover:text-cana',
+                  : 'border border-cana bg-white text-cana-ink3 hover:bg-cana/5 hover:text-cana',
               ].join(' ')}
             >
               {cat}
