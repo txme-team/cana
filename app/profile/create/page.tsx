@@ -10,6 +10,7 @@ import Step2 from '@/components/apply/Step2';
 import Step3 from '@/components/apply/Step3';
 import Step5 from '@/components/apply/Step5';
 import Nav from '@/components/landing/Nav';
+import BackButton from '@/components/landing/BackButton';
 import { useFormContext, Controller } from 'react-hook-form';
 
 // ─── Phone Step (연락처) ────────────────────────────────────────────────────────
@@ -284,16 +285,9 @@ export default function ProfileCreatePage() {
         />
       </div>
 
-      <main className="mx-auto max-w-2xl px-5 pb-20 pt-[84px]">
-        {/* 안내 배너 */}
-        {step === 0 && (
-          <div className="mb-4 rounded-2xl bg-cana/5 px-4 py-3.5">
-            <p className="text-sm font-medium text-cana">프로필 카드 작성</p>
-            <p className="text-sm text-cana-ink3 mt-0.5">
-              한 번 작성하면 이후 이벤트 신청 시 재사용돼요.
-            </p>
-          </div>
-        )}
+      <main className="mx-auto max-w-2xl px-5 pb-20 pt-24">
+        <BackButton />
+        <h1 className="mb-6 text-xl font-bold text-cana-ink">프로필 카드 작성</h1>
 
         {/* 스텝 레이블 */}
         <div className="mb-6 flex gap-1.5 overflow-x-auto pb-1">

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import type { ApplyFormData } from '@/lib/types';
 import type { Profile } from '@/lib/types';
 import Nav from '@/components/landing/Nav';
+import BackButton from '@/components/landing/BackButton';
 import Step0 from '@/components/apply/Step0';
 
 const STEPS = ['일정', '프로필 확인', '동의'];
@@ -403,7 +404,10 @@ export default function ApplyPage() {
         />
       </div>
 
-      <main className="mx-auto max-w-2xl px-5 pb-20 pt-[84px]">
+      <main className="mx-auto max-w-2xl px-5 pb-20 pt-24">
+        <BackButton />
+        <h1 className="mb-6 text-xl font-bold text-cana-ink">소개팅 신청</h1>
+
         {/* 스텝 레이블 */}
         <div className="mb-6 flex gap-1.5 overflow-x-auto pb-1">
           {STEPS.map((label, i) => (
