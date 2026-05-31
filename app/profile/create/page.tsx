@@ -73,7 +73,7 @@ function StepPhone() {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-const STEPS = ['기본 정보', '사전 정보', '신앙', '인증', '자기소개', '연락처'];
+const STEPS = ['기본 정보', '사전 정보', '신앙', '자기소개', '인증', '연락처'];
 
 const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   [
@@ -91,12 +91,12 @@ const STEP_FIELDS: (keyof ApplyFormData)[][] = [
     'churchCity', 'churchDistrict', 'faithLevel',
     'faithStyle', 'sundayAttendance', 'ministry',
   ],
-  ['photo', 'churchVerification'],
   [
     'prayerRequest', 'bibleVerse', 'ministryNote', 'faithGrowthMoment', 'answeredPrayer', 'communityRole',
     'jobDescription', 'careerGoal', 'coworkerOpinion', 'careerMotivation',
     'relationshipPromise', 'partnerStyle', 'feelingLoved', 'humorStyle', 'weekendStyle', 'spendingHabit', 'conflictApproach',
   ],
+  ['photo', 'churchVerification'],
   ['phone'],
 ];
 
@@ -369,8 +369,8 @@ export default function ProfileCreatePage() {
               {step === 0 && <Step1 />}
               {step === 1 && <Step2 />}
               {step === 2 && <Step3 />}
-              {step === 3 && <Step5 />}
-              {step === 4 && <StepQnA />}
+              {step === 3 && <StepQnA />}
+              {step === 4 && <Step5 />}
               {step === 5 && <StepPhone />}
             </div>
 
