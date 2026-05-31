@@ -73,7 +73,7 @@ function StepPhone() {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-const STEPS = ['기본 정보', '사전 정보', '신앙', '자기소개', '인증', '연락처'];
+const STEPS = ['프로필', '라이프스타일', '신앙', 'Q&A', '인증', '연락처'];
 
 const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   [
