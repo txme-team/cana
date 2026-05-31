@@ -1,5 +1,27 @@
 import type { Profile } from '@/lib/types';
 
+// ─── Q&A 에세이 메타 ───────────────────────────────────────────────────────────
+
+const ESSAY_META: { field: string; label: string }[] = [
+  { field: 'prayerRequest',       label: '요즘 나의 기도제목은요' },
+  { field: 'bibleVerse',          label: '가장 좋아하는 성경 구절과 그 이유는요' },
+  { field: 'ministryNote',        label: '교회에서 섬기고 있는 사역은요' },
+  { field: 'faithGrowthMoment',   label: '나의 신앙이 성장했던 순간은요' },
+  { field: 'answeredPrayer',      label: '가장 크게 응답받았던 기도는요' },
+  { field: 'communityRole',       label: '공동체 안에서 내 모습은요' },
+  { field: 'jobDescription',      label: '이런 일을 하고 있어요' },
+  { field: 'careerGoal',          label: '설레는 커리어 목표가 있어요' },
+  { field: 'coworkerOpinion',     label: "직장 동료들이 평가하는 '나'는요" },
+  { field: 'careerMotivation',    label: '지금의 직업을 선택한 계기는요' },
+  { field: 'relationshipPromise', label: "'이것' 하나만큼은 꼭 약속해 줄 수 있어요" },
+  { field: 'partnerStyle',        label: '이런 남자/여자친구이고 싶어요' },
+  { field: 'feelingLoved',        label: '내가 사랑받고 있다고 느끼는 순간은요' },
+  { field: 'humorStyle',          label: '나의 유머 코드나 웃음 포인트는요' },
+  { field: 'weekendStyle',        label: '주말엔 이렇게 시간 보내는 걸 좋아해요' },
+  { field: 'spendingHabit',       label: '내 소비습관은요' },
+  { field: 'conflictApproach',    label: '갈등이 생기면 이렇게 해결해요' },
+];
+
 // ─── 서브 컴포넌트 ─────────────────────────────────────────────────────────────
 
 function Chk({ label, on }: { label: string; on: boolean }) {
@@ -44,6 +66,9 @@ function FaItems({ options, selected }: { options: string[]; selected?: string }
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 
 export default function ProfileCardTemplate({ profile: p }: { profile: Profile }) {
+  const essays = (p.profile_essays ?? {}) as Record<string, string>;
+  const answeredEssays = ESSAY_META.filter((m) => essays[m.field]?.trim());
+
   const birthYear = p.birth_year < 100 ? 1900 + p.birth_year : p.birth_year;
   const displayYear = `${String(birthYear).slice(2)}년생`;
 
@@ -300,58 +325,28 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
               </table>
             </div>
 
-            {/* 추천 질문 */}
+            {/* Q&A */}
             <div className="section-gap" />
             <div className="panel-title-wrap">
-              <div className="panel-title">추천 질문</div>
+              <div className="panel-title">Q&amp;A</div>
               <div className="q-banner">
-                <div className="q-banner-txt">모든 질문을 다 하실 필요 없어요 — 대화가 잠깐 끊길 때, 아래에서 하나씩 자연스럽게 꺼내보세요.</div>
+                <div className="q-banner-txt">상대방이 직접 작성한 답변을 미리 읽고 대화를 시작해보세요.</div>
               </div>
             </div>
 
-            <div className="q-cols">
-              <div>
-                <div className="q-group">
-                  <div className="q-group-label">처음 만났을 때</div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">오늘 여기 오기 전에 뭐 하셨어요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">여기 자주 오시는 동네예요?</div></div>
-                </div>
-                <div className="q-group">
-                  <div className="q-group-label">일상</div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">퇴근 후에는 주로 뭐하세요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">쉬는 날 주로 어떻게 보내세요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">꾸준히 하는 운동이 있나요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 음식 좋아하세요?</div></div>
-                </div>
-                <div className="q-group">
-                  <div className="q-group-label">신앙</div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떻게 교회를 다니게 됐어요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">예배 끝나면 보통 뭐하세요?</div></div>
-                  <div className="q-row">
-                    <div className="q-dot" />
-                    <div className="q-txt">
-                      신앙 스타일이 어떤 편이에요?
-                      <span className="q-hint">말씀 파 · 예배찬양 파 · 봉사 파</span>
+            <div className="section-qa">
+              {answeredEssays.length === 0 ? (
+                <div className="qa-empty">작성된 Q&amp;A가 없어요</div>
+              ) : (
+                <div className="qa-grid">
+                  {answeredEssays.map((e) => (
+                    <div key={e.field} className="qa-item">
+                      <div className="qa-q">{e.label}</div>
+                      <div className="qa-a">{essays[e.field]}</div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-
-              <div>
-                <div className="q-group">
-                  <div className="q-group-label">연애</div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">연애할 때 어떤 스타일인지 알아요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 사람한테 끌리는 것 같아요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">리드하는 편이에요, 따라가는 편이에요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">데이트할 때 계획 세우는 편, 즉흥적인 편?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 데이트를 좋아하세요?</div></div>
-                  <div className="q-row"><div className="q-dot" /><div className="q-txt">첫 데이트로 가고 싶은 곳 있어요?</div></div>
-                </div>
-                <div className="tip-row">
-                  <span className="tip-icon">✦</span>
-                  <div className="tip-txt">상대방 카드의 사역·신앙 스타일 항목을 먼저 확인하고 이어서 물어보면 훨씬 자연스러운 대화가 돼요.</div>
-                </div>
-              </div>
+              )}
             </div>
 
           </div>

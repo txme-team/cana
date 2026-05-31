@@ -235,10 +235,18 @@ const PRINT_STYLES = `
   .memo-table tr:last-child td { border-bottom: none; }
   .memo-table td.col-num { font-size: 10px; font-weight: 600; color: var(--rose-mid); text-align: center; width: 40px; border-right: 1px solid var(--rule); }
 
-  .section-gap { height: 20px; flex-shrink: 0; }
+  .section-gap { height: 12px; flex-shrink: 0; }
 
   .panel-title-wrap { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
   .panel-title { font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; line-height: 1; word-break: keep-all; }
+
+  /* Q&A */
+  .section-qa { flex: 1; overflow: hidden; }
+  .qa-grid { columns: 2; column-gap: 8px; }
+  .qa-item { break-inside: avoid; margin-bottom: 6px; background: var(--warm); border: 0.5px solid var(--rose-lt); border-radius: 5px; padding: 6px 9px; }
+  .qa-q { font-size: 7.5px; font-weight: 600; color: var(--rose-mid); margin-bottom: 3px; word-break: keep-all; line-height: 1.3; }
+  .qa-a { font-size: 9.5px; color: var(--ink); line-height: 1.55; word-break: keep-all; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .qa-empty { font-size: 11px; color: var(--ink-3); padding: 16px 0; }
 
   /* 인쇄 */
   @page { size: A4 landscape; margin: 0; }

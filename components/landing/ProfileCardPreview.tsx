@@ -87,6 +87,25 @@ export default function ProfileCardPreview() {
         </div>
       </div>
 
+      <div className="mx-5 border-t border-cana-rule" />
+
+      {/* Q&A */}
+      <div className="px-5 py-4">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-cana-ink3">Q&amp;A</p>
+        <div className="flex flex-col gap-2">
+          {[
+            { q: '요즘 나의 기도제목은요', a: '새로운 시작 앞에 하나님의 인도하심을 구하고 있어요. 매일 아침 기도 시간을 챙기려 노력 중이에요.' },
+            { q: '이런 일을 하고 있어요', a: 'UX 디자이너로 일하고 있어요. 사람들이 서비스를 더 쉽고 즐겁게 쓸 수 있도록 고민하는 일이에요.' },
+            { q: "'이것' 하나만큼은 꼭 약속해 줄 수 있어요", a: '힘든 날엔 꼭 먼저 연락할게요. 먼저 물어봐 주는 사람이 되고 싶어요.' },
+          ].map(({ q, a }) => (
+            <div key={q} className="rounded-lg bg-cana/5 px-3 py-2.5">
+              <p className="mb-1 text-[9px] font-semibold text-cana">{q}</p>
+              <p className="text-[10px] leading-relaxed text-cana-ink">{a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 하단 페이드 */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
     </div>
