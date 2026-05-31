@@ -14,7 +14,6 @@ import {
   TextInput,
   SelectInput,
   RadioGroup,
-  SectionHeader,
   QuestionBlock,
   scrollToRef,
 } from './ui';
@@ -56,8 +55,6 @@ export default function Step3() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionHeader>신앙</SectionHeader>
-
       {/* 교단 */}
       <QuestionBlock qRef={refs[0]}>
         <Controller

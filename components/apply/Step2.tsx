@@ -13,7 +13,7 @@ import type {
   PetOption,
   DateStyleOption,
 } from '@/lib/types';
-import { RadioGroup, SectionHeader, QuestionBlock, scrollToRef } from './ui';
+import { RadioGroup, QuestionBlock, scrollToRef } from './ui';
 
 const CONTACT_OPTIONS: ContactFrequencyOption[] = ['자주', '적당히', '필요할 때만'];
 const DATE_FREQ_OPTIONS: DateFrequencyOption[] = ['주 2회+', '주 1회', '격주', '월 1~2회'];
@@ -50,8 +50,6 @@ export default function Step2() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionHeader>사전 정보</SectionHeader>
-
       <QuestionBlock qRef={refs[0]}>
         <Controller
           name="contactFrequency"

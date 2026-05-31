@@ -167,7 +167,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
   return (
     <div className="flex flex-col gap-5 rounded-2xl border border-cana-rule bg-white px-5 py-6">
 
-      <Sec title="기본 정보" />
+      <Sec title="프로필" />
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
         <F label="닉네임"    value={profile.nickname} />
         <F label="성별"      value={profile.gender === 'male' ? '남성' : '여성'} />
@@ -196,7 +196,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
         </div>
       </div>
 
-      <Sec title="사전 정보" />
+      <Sec title="라이프스타일" />
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
         {[
           ['연락 선호도', profile.contact_preference],

@@ -243,7 +243,6 @@ export default function StepQnA() {
     <div className="flex flex-col gap-8">
       {/* 안내 */}
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-cana-ink">자기소개</h2>
         <p className="text-sm text-cana-ink3">
           <span className="font-medium text-cana">필수 3가지</span>에 답하고, 원하는 질문을 추가해 나를 더 잘 표현해보세요.
         </p>

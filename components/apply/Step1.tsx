@@ -16,7 +16,6 @@ import {
   SelectInput,
   RadioGroup,
   ChipGroup,
-  SectionHeader,
   QuestionBlock,
   scrollToRef,
 } from './ui';
@@ -63,8 +62,6 @@ export default function Step1() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionHeader>기본 정보</SectionHeader>
-
       {/* 성별 */}
       <QuestionBlock qRef={refs[0]}>
         <Controller
