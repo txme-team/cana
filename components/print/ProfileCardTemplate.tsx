@@ -298,35 +298,7 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
           {/* ── 오른쪽 ── */}
           <div className="right">
 
-            {/* 미팅 카드 */}
-            <div className="panel-title-wrap">
-              <div className="panel-title">미팅 카드</div>
-              <div className="q-banner">
-                <div className="q-banner-txt">대화가 마무리된 후 상대방을 기억하기 위해 간단히 메모해두세요.</div>
-              </div>
-            </div>
-
-            <div className="memo-section">
-              <table className="memo-table">
-                <thead>
-                  <tr>
-                    <th className="col-num">번호</th>
-                    <th>메모</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <tr key={i + 1}>
-                      <td className="col-num">{i + 1}</td>
-                      <td className="col-memo" />
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
             {/* Q&A */}
-            <div className="section-gap" />
             <div className="panel-title-wrap">
               <div className="panel-title">Q&amp;A</div>
               <div className="q-banner">
@@ -347,6 +319,60 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* 추천 질문 */}
+            <div className="section-gap" />
+            <div className="panel-title-wrap">
+              <div className="panel-title">추천 질문</div>
+              <div className="q-banner">
+                <div className="q-banner-txt">모든 질문을 다 하실 필요 없어요 — 대화가 잠깐 끊길 때, 아래에서 하나씩 자연스럽게 꺼내보세요.</div>
+              </div>
+            </div>
+
+            <div className="q-cols">
+              <div>
+                <div className="q-group">
+                  <div className="q-group-label">처음 만났을 때</div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">오늘 여기 오기 전에 뭐 하셨어요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">여기 자주 오시는 동네예요?</div></div>
+                </div>
+                <div className="q-group">
+                  <div className="q-group-label">일상</div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">퇴근 후에는 주로 뭐하세요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">쉬는 날 주로 어떻게 보내세요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">꾸준히 하는 운동이 있나요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 음식 좋아하세요?</div></div>
+                </div>
+                <div className="q-group">
+                  <div className="q-group-label">신앙</div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떻게 교회를 다니게 됐어요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">예배 끝나면 보통 뭐하세요?</div></div>
+                  <div className="q-row">
+                    <div className="q-dot" />
+                    <div className="q-txt">
+                      신앙 스타일이 어떤 편이에요?
+                      <span className="q-hint">말씀 파 · 예배찬양 파 · 봉사 파</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="q-group">
+                  <div className="q-group-label">연애</div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">연애할 때 어떤 스타일인지 알아요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 사람한테 끌리는 것 같아요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">리드하는 편이에요, 따라가는 편이에요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">데이트할 때 계획 세우는 편, 즉흥적인 편?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 데이트를 좋아하세요?</div></div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">첫 데이트로 가고 싶은 곳 있어요?</div></div>
+                </div>
+                <div className="tip-row">
+                  <span className="tip-icon">✦</span>
+                  <div className="tip-txt">상대방 카드의 사역·신앙 스타일 항목을 먼저 확인하고 이어서 물어보면 훨씬 자연스러운 대화가 돼요.</div>
+                </div>
+              </div>
             </div>
 
           </div>
