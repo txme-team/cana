@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useForm, FormProvider, useFormContext, Controller } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { ApplyFormData } from '@/lib/types';
 import type { Profile } from '@/lib/types';
 import Nav from '@/components/landing/Nav';
 import BackButton from '@/components/landing/BackButton';
 import Step0 from '@/components/apply/Step0';
+import StepPayment from '@/components/apply/StepPayment';
 
-const STEPS = ['일정', '프로필 확인', '동의'];
+const STEPS = ['일정', '프로필 확인', '동의', '결제'];
 
 // ─── Step 1: Profile Review ────────────────────────────────────────────────────
 
@@ -290,15 +290,18 @@ const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   ['eventId'],
   [], // profile review — no form fields to validate
   ['agreePrivacy', 'agreeAttendance'],
+  [], // payment — handled by StepPayment
 ];
 
 export default function ApplyPage() {
-  const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  // 결제 스텝용
+  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [eventTitle, setEventTitle] = useState('cana 소개팅');
 
   useEffect(() => {
     fetch('/api/profile')
@@ -348,6 +351,56 @@ export default function ApplyPage() {
   }, []);
 
   const handleNext = async () => {
+    if (step === 2) {
+      // Step 2 → 3: 약관 검증 후 신청 레코드 생성 (결제대기)
+      const valid = await methods.trigger(STEP_FIELDS[2]);
+      if (!valid) return;
+
+      setSubmitting(true);
+      setServerError(null);
+
+      try {
+        const data = methods.getValues();
+
+        // 선택한 이벤트 제목 조회
+        const evRes = await fetch('/api/events');
+        const evList = await evRes.json() as { id: string; title: string }[];
+        const selectedEv = Array.isArray(evList)
+          ? evList.find((e) => e.id === data.eventId)
+          : null;
+        if (selectedEv) setEventTitle(selectedEv.title);
+
+        // 신청 생성
+        const res = await fetch('/api/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventId:           data.eventId,
+            agreePrivacy:      data.agreePrivacy,
+            agreeAttendance:   data.agreeAttendance,
+            agreeProfileShare: data.agreeProfileShare,
+            agreeInstagram:    data.agreeInstagram,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({})) as { error?: string };
+          throw new Error(err.error ?? '신청에 실패했어요. 다시 시도해주세요.');
+        }
+
+        const result = await res.json() as { id: string };
+        setApplicationId(result.id);
+        setStep(3);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        setServerError(err instanceof Error ? err.message : '오류가 발생했어요.');
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // 기본 이동
     const valid = await methods.trigger(STEP_FIELDS[step]);
     if (valid) {
       setStep((s) => s + 1);
@@ -360,37 +413,8 @@ export default function ApplyPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const onSubmit = async (data: ApplyFormData) => {
-    setSubmitting(true);
-    setServerError(null);
-
-    try {
-      const payload = {
-        eventId:           data.eventId,
-        agreePrivacy:      data.agreePrivacy,
-        agreeAttendance:   data.agreeAttendance,
-        agreeProfileShare: data.agreeProfileShare,
-        agreeInstagram:    data.agreeInstagram,
-      };
-
-      const res = await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error ?? '제출에 실패했어요. 다시 시도해주세요.');
-      }
-
-      router.push('/apply/complete');
-    } catch (err) {
-      setServerError(err instanceof Error ? err.message : '오류가 발생했어요.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  // 폼 submit은 결제 스텝(3)이 자체 버튼으로 처리하므로 기본 방지만
+  const onSubmit = () => {};
 
   return (
     <div className="min-h-screen bg-cana-cream">
@@ -457,6 +481,14 @@ export default function ApplyPage() {
                 />
               )}
               {step === 2 && <StepAgreements />}
+              {step === 3 && applicationId && profile && (
+                <StepPayment
+                  applicationId={applicationId}
+                  eventTitle={eventTitle}
+                  amount={parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '39000', 10)}
+                  customerKey={profile.user_id}
+                />
+              )}
             </div>
 
             {serverError && (
@@ -464,8 +496,9 @@ export default function ApplyPage() {
             )}
 
             {/* 네비게이션 */}
-            {/* Step 1 uses its own inline buttons — hide nav for step 1 */}
-            {step !== 1 && (
+            {/* Step 1: 자체 인라인 버튼 사용 */}
+            {/* Step 3: StepPayment 자체 버튼 사용 — 뒤로가기만 노출 */}
+            {step !== 1 && step !== 3 && (
               <div className="mt-5 flex items-center justify-between gap-3">
                 {step > 0 ? (
                   <button
@@ -479,24 +512,30 @@ export default function ApplyPage() {
                   <div />
                 )}
 
-                {step < STEPS.length - 1 ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={step === 0 && profileLoaded && !profile}
-                    className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
-                  >
-                    다음
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-60"
-                  >
-                    {submitting ? '제출 중...' : '신청 완료'}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={
+                    submitting ||
+                    (step === 0 && profileLoaded && !profile)
+                  }
+                  className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
+                >
+                  {submitting && step === 2 ? '처리 중...' : '다음'}
+                </button>
+              </div>
+            )}
+
+            {/* Step 3: 뒤로가기만 */}
+            {step === 3 && (
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  className="w-full rounded-xl border border-cana-rule py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
+                >
+                  이전
+                </button>
               </div>
             )}
           </form>

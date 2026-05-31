@@ -42,6 +42,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '프로필을 먼저 작성해주세요.' }, { status: 400 });
     }
 
+    // ── 중복 신청 확인 (멱등성: 결제대기 상태라면 기존 ID 재사용) ────────────────
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (supabase as any)
+      .from('applications')
+      .select('id, status')
+      .eq('profile_id', profile.id)
+      .eq('event_id', eventId)
+      .maybeSingle() as { data: { id: string; status: string } | null };
+
+    if (existing) {
+      if (existing.status === '결제대기') {
+        // 결제 재시도 허용 — 기존 ID 반환
+        return NextResponse.json({ id: existing.id }, { status: 200 });
+      }
+      return NextResponse.json({ error: '이미 신청한 이벤트예요.' }, { status: 409 });
+    }
+
     // ── applications insert ────────────────────────────────────────────────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: application, error: appError } = await (supabase as any)
@@ -49,7 +66,7 @@ export async function POST(req: NextRequest) {
       .insert({
         profile_id: profile.id,
         event_id:   eventId,
-        status:     '검토중',
+        status:     '결제대기',
       })
       .select('id')
       .single() as { data: { id: string } | null; error: { message: string } | null };
