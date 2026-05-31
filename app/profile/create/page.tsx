@@ -9,6 +9,7 @@ import Step1 from '@/components/apply/Step1';
 import Step2 from '@/components/apply/Step2';
 import Step3 from '@/components/apply/Step3';
 import Step5 from '@/components/apply/Step5';
+import StepQnA from '@/components/apply/StepQnA';
 import Nav from '@/components/landing/Nav';
 import BackButton from '@/components/landing/BackButton';
 import { useFormContext, Controller } from 'react-hook-form';
@@ -72,7 +73,7 @@ function StepPhone() {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-const STEPS = ['기본 정보', '사전 정보', '신앙', '인증', '연락처'];
+const STEPS = ['기본 정보', '사전 정보', '신앙', '인증', '자기소개', '연락처'];
 
 const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   [
@@ -91,6 +92,11 @@ const STEP_FIELDS: (keyof ApplyFormData)[][] = [
     'faithStyle', 'sundayAttendance', 'ministry',
   ],
   ['photo', 'churchVerification'],
+  [
+    'prayerRequest', 'bibleVerse', 'ministryNote', 'faithGrowthMoment', 'answeredPrayer', 'communityRole',
+    'jobDescription', 'careerGoal', 'coworkerOpinion', 'careerMotivation',
+    'relationshipPromise', 'partnerStyle', 'feelingLoved', 'humorStyle', 'weekendStyle', 'spendingHabit', 'conflictApproach',
+  ],
   ['phone'],
 ];
 
@@ -140,6 +146,18 @@ function prefillFromProfile(
   if (profile.church_name)         setValue('churchName', profile.church_name);
   if (profile.faith_level)         setValue('faithLevel', profile.faith_level);
   if (profile.phone)               setValue('phone', profile.phone);
+  // 자기소개 에세이
+  if (profile.profile_essays) {
+    const e = profile.profile_essays as Record<string, string>;
+    const essayKeys = [
+      'prayerRequest', 'bibleVerse', 'ministryNote', 'faithGrowthMoment', 'answeredPrayer', 'communityRole',
+      'jobDescription', 'careerGoal', 'coworkerOpinion', 'careerMotivation',
+      'relationshipPromise', 'partnerStyle', 'feelingLoved', 'humorStyle', 'weekendStyle', 'spendingHabit', 'conflictApproach',
+    ] as const;
+    for (const k of essayKeys) {
+      if (e[k]) setValue(k as keyof ApplyFormData, e[k]);
+    }
+  }
   // Direct mappings
   if (profile.mbti)                setValue('mbti', profile.mbti);
   if (profile.education)           setValue('education', profile.education);
@@ -173,6 +191,24 @@ export default function ProfileCreatePage() {
       agreeAttendance: false,
       agreeProfileShare: false,
       agreeInstagram: false,
+      // 자기소개
+      prayerRequest: '',
+      bibleVerse: '',
+      ministryNote: '',
+      faithGrowthMoment: '',
+      answeredPrayer: '',
+      communityRole: '',
+      jobDescription: '',
+      careerGoal: '',
+      coworkerOpinion: '',
+      careerMotivation: '',
+      relationshipPromise: '',
+      partnerStyle: '',
+      feelingLoved: '',
+      humorStyle: '',
+      weekendStyle: '',
+      spendingHabit: '',
+      conflictApproach: '',
     },
     mode: 'onTouched',
   });
@@ -255,6 +291,24 @@ export default function ProfileCreatePage() {
         sundayAttendance: data.sundayAttendance,
         ministry:         data.ministry,
         phone:            data.phone,
+        // 자기소개 에세이
+        prayerRequest:       data.prayerRequest,
+        bibleVerse:          data.bibleVerse,
+        ministryNote:        data.ministryNote,
+        faithGrowthMoment:   data.faithGrowthMoment,
+        answeredPrayer:      data.answeredPrayer,
+        communityRole:       data.communityRole,
+        jobDescription:      data.jobDescription,
+        careerGoal:          data.careerGoal,
+        coworkerOpinion:     data.coworkerOpinion,
+        careerMotivation:    data.careerMotivation,
+        relationshipPromise: data.relationshipPromise,
+        partnerStyle:        data.partnerStyle,
+        feelingLoved:        data.feelingLoved,
+        humorStyle:          data.humorStyle,
+        weekendStyle:        data.weekendStyle,
+        spendingHabit:       data.spendingHabit,
+        conflictApproach:    data.conflictApproach,
       };
       fd.append('data', JSON.stringify(payload));
 
@@ -316,7 +370,8 @@ export default function ProfileCreatePage() {
               {step === 1 && <Step2 />}
               {step === 2 && <Step3 />}
               {step === 3 && <Step5 />}
-              {step === 4 && <StepPhone />}
+              {step === 4 && <StepQnA />}
+              {step === 5 && <StepPhone />}
             </div>
 
             {serverError && (

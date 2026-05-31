@@ -101,6 +101,25 @@ export interface ApplyFormData {
   photo: FileList;
   workplaceVerification: FileList | null;
   churchVerification: FileList | null;
+
+  // Step QnA: 자기소개
+  prayerRequest: string;
+  bibleVerse: string;
+  ministryNote: string;
+  faithGrowthMoment: string;
+  answeredPrayer: string;
+  communityRole: string;
+  jobDescription: string;
+  careerGoal: string;
+  coworkerOpinion: string;
+  careerMotivation: string;
+  relationshipPromise: string;
+  partnerStyle: string;
+  feelingLoved: string;
+  humorStyle: string;
+  weekendStyle: string;
+  spendingHabit: string;
+  conflictApproach: string;
 }
 
 // ─── 미팅 ─────────────────────────────────────────────────────────────────────
@@ -168,6 +187,8 @@ export interface Profile {
   photo_urls?: string[];
   job_cert_url?: string;
   bulletin_url?: string;
+  // 자기소개 에세이
+  profile_essays?: Record<string, string>;
   // 연락처 & 동의
   phone?: string;
   agree_privacy?: boolean;

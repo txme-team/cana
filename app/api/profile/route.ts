@@ -95,6 +95,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // 자기소개 필수 3개 (최소 30자)
+    const essayRequired = ['prayerRequest', 'jobDescription', 'relationshipPromise'] as const;
+    for (const key of essayRequired) {
+      const val = String(data[key] ?? '').trim();
+      if (val.length < 30) {
+        return NextResponse.json({ error: `${key} 필드는 30자 이상 입력해주세요.` }, { status: 400 });
+      }
+    }
+
     const birthYear = parseInt(String(data.birthYear).trim(), 10);
     const supabase = createServiceClient();
 
@@ -157,6 +166,25 @@ export async function POST(req: NextRequest) {
           ...(workplaceVerificationUrl !== null && { job_cert_url: workplaceVerificationUrl }),
           ...(churchVerificationUrl !== null && { bulletin_url: churchVerificationUrl }),
           phone:               data.phone,
+          profile_essays: {
+            prayerRequest:       data.prayerRequest       ?? '',
+            bibleVerse:          data.bibleVerse          ?? '',
+            ministryNote:        data.ministryNote        ?? '',
+            faithGrowthMoment:   data.faithGrowthMoment   ?? '',
+            answeredPrayer:      data.answeredPrayer       ?? '',
+            communityRole:       data.communityRole        ?? '',
+            jobDescription:      data.jobDescription       ?? '',
+            careerGoal:          data.careerGoal           ?? '',
+            coworkerOpinion:     data.coworkerOpinion      ?? '',
+            careerMotivation:    data.careerMotivation     ?? '',
+            relationshipPromise: data.relationshipPromise  ?? '',
+            partnerStyle:        data.partnerStyle         ?? '',
+            feelingLoved:        data.feelingLoved         ?? '',
+            humorStyle:          data.humorStyle           ?? '',
+            weekendStyle:        data.weekendStyle         ?? '',
+            spendingHabit:       data.spendingHabit        ?? '',
+            conflictApproach:    data.conflictApproach     ?? '',
+          },
         },
         { onConflict: 'user_id' }
       )
