@@ -54,7 +54,7 @@ export default function Events({ preview = false, standalone = false }: Props) {
     </div>
   ) : (
     <>
-      <div className="flex flex-col gap-4">
+      <div className={standalone ? 'flex flex-col gap-4' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'}>
         {(preview ? events.slice(0, 3) : events).map((event) => {
           const { date, time } = formatEventDate(event.event_date);
           return (
