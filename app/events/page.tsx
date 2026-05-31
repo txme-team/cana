@@ -1,5 +1,5 @@
 import Nav from '@/components/landing/Nav';
-import Events from '@/components/landing/Events';
+import EventsPage from '@/components/landing/EventsPage';
 import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 
@@ -15,7 +15,7 @@ export default function EventsPage() {
         <div className="mx-auto max-w-2xl px-5">
           <BackButton />
           <h1 className="mb-8 text-xl font-bold text-cana-ink">소개팅 일정</h1>
-          <Events standalone />
+          <EventsPage />
         </div>
       </main>
       <Footer />
