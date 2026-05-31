@@ -234,6 +234,8 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
         <div><p className="mb-1.5 text-xs text-cana-ink3">섬기는 사역</p><Pill value={profile.ministry} /></div>
       </div>
 
+      <QnASection essays={profile.profile_essays as Record<string, string> | undefined} />
+
       <div className="pt-2">
         <Link
           href="/profile/create"
@@ -281,6 +283,47 @@ function ApplicationsSection({ applications }: { applications: ApplicationItem[]
         </div>
       ))}
     </div>
+  );
+}
+
+// ─── Q&A 섹션 ─────────────────────────────────────────────────────────────────
+
+const ESSAY_META: { field: string; label: string }[] = [
+  { field: 'prayerRequest',       label: '요즘 나의 기도제목은요' },
+  { field: 'bibleVerse',          label: '가장 좋아하는 성경 구절과 그 이유는요' },
+  { field: 'ministryNote',        label: '교회에서 섬기고 있는 사역은요' },
+  { field: 'faithGrowthMoment',   label: '나의 신앙이 성장했던 순간은요' },
+  { field: 'answeredPrayer',      label: '가장 크게 응답받았던 기도는요' },
+  { field: 'communityRole',       label: '공동체 안에서 내 모습은요' },
+  { field: 'jobDescription',      label: '이런 일을 하고 있어요' },
+  { field: 'careerGoal',          label: '설레는 커리어 목표가 있어요' },
+  { field: 'coworkerOpinion',     label: "직장 동료들이 평가하는 '나'는요" },
+  { field: 'careerMotivation',    label: '지금의 직업을 선택한 계기는요' },
+  { field: 'relationshipPromise', label: "'이것' 하나만큼은 꼭 약속해 줄 수 있어요" },
+  { field: 'partnerStyle',        label: '이런 남자/여자친구이고 싶어요' },
+  { field: 'feelingLoved',        label: '내가 사랑받고 있다고 느끼는 순간은요' },
+  { field: 'humorStyle',          label: '나의 유머 코드나 웃음 포인트는요' },
+  { field: 'weekendStyle',        label: '주말엔 이렇게 시간 보내는 걸 좋아해요' },
+  { field: 'spendingHabit',       label: '내 소비습관은요' },
+  { field: 'conflictApproach',    label: '갈등이 생기면 이렇게 해결해요' },
+];
+
+function QnASection({ essays }: { essays: Record<string, string> | undefined }) {
+  const answered = ESSAY_META.filter((m) => essays?.[m.field]?.trim());
+  if (!answered.length) return null;
+
+  return (
+    <>
+      <Sec title="Q&A" />
+      <div className="flex flex-col gap-3">
+        {answered.map(({ field, label }) => (
+          <div key={field} className="rounded-xl bg-cana/5 px-4 py-3.5">
+            <p className="mb-1.5 text-xs font-semibold text-cana">{label}</p>
+            <p className="text-sm leading-relaxed text-cana-ink">{essays![field]}</p>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 
