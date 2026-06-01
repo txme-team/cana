@@ -490,11 +490,7 @@ export default function ApplyPage() {
                   disabled={submitting || (step === 0 && profileLoaded && !profile)}
                   className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
                 >
-                  {submitting && step === 2
-                    ? '확인 중...'
-                    : step === 1
-                    ? '이 프로필로 진행할게요'
-                    : '다음'}
+                  {submitting && step === 2 ? '확인 중...' : '다음'}
                 </button>
               )}
             </div>
