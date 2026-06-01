@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
-import { notifyError } from '@/lib/slack';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { notifyNewProfile, notifyError } from '@/lib/slack';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,53 +8,108 @@ export async function POST(req: NextRequest) {
       paymentKey: string;
       orderId: string;
       amount: number;
+      eventId: string;
+      agreePrivacy: boolean;
+      agreeAttendance: boolean;
+      agreeProfileShare?: boolean;
+      agreeInstagram?: boolean;
     };
-    const { paymentKey, orderId, amount } = body;
+    const { paymentKey, orderId, amount, eventId,
+            agreePrivacy, agreeAttendance, agreeProfileShare, agreeInstagram } = body;
 
-    if (!paymentKey || !orderId || typeof amount !== 'number') {
+    if (!paymentKey || !orderId || typeof amount !== 'number' || !eventId) {
       return NextResponse.json({ error: '필수 파라미터가 누락됐어요.' }, { status: 400 });
     }
 
-    // ── 금액 검증 (클라이언트 값 절대 신뢰 금지) ──────────────────────────────
+    // ── 금액 검증 ─────────────────────────────────────────────────────────────
     const expectedAmount = parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '39000', 10);
     if (amount !== expectedAmount) {
       return NextResponse.json({ error: '결제 금액이 올바르지 않아요.' }, { status: 400 });
     }
 
-    // ── Toss 승인 API 호출 ────────────────────────────────────────────────────
+    // ── 로그인 확인 ──────────────────────────────────────────────────────────
+    const authClient = createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+    }
+
+    const supabase = createServiceClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supa = supabase as any;
+
+    // ── 프로필 조회 ──────────────────────────────────────────────────────────
+    const { data: profile } = await supa
+      .from('profiles').select('id, nickname')
+      .eq('user_id', user.id).maybeSingle() as
+      { data: { id: string; nickname: string } | null };
+
+    if (!profile) {
+      return NextResponse.json({ error: '프로필을 먼저 작성해주세요.' }, { status: 400 });
+    }
+
+    // ── Toss 결제 승인 ────────────────────────────────────────────────────────
     const secretKey = process.env.TOSS_SECRET_KEY!;
     const token = Buffer.from(`${secretKey}:`).toString('base64');
 
     const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
       method: 'POST',
-      headers: {
-        Authorization: `Basic ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: `Basic ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ paymentKey, orderId, amount }),
       cache: 'no-store',
     });
 
     if (!tossRes.ok) {
       const tossErr = await tossRes.json().catch(() => ({})) as { message?: string; code?: string };
-      const msg = tossErr.message ?? '결제 승인에 실패했어요.';
-      return NextResponse.json({ error: msg, code: tossErr.code }, { status: 400 });
+      return NextResponse.json(
+        { error: tossErr.message ?? '결제 승인에 실패했어요.', code: tossErr.code },
+        { status: 400 }
+      );
     }
 
-    // ── 신청 상태 업데이트 (orderId === applicationId) ─────────────────────────
-    const supabase = createServiceClient();
-    const { error: updateError } = await supabase
-      .from('applications')
-      .update({ status: '검토중' })
-      .eq('id', orderId);
+    // ── 중복 신청 최종 검사 ───────────────────────────────────────────────────
+    const { data: existing } = await supa
+      .from('applications').select('id, status')
+      .eq('profile_id', profile.id).eq('event_id', eventId).maybeSingle() as
+      { data: { id: string; status: string } | null };
 
-    if (updateError) {
-      // 결제는 완료됐으므로 에러를 로그만 하고 성공 응답
+    if (existing && existing.status !== '취소') {
+      // 결제는 됐지만 중복 — 운영팀에 알림 후 완료 처리
       await notifyError(
-        `결제 완료 후 상태 업데이트 실패 — orderId: ${orderId}, ${updateError.message}`,
+        `중복 결제 발생 — profile: ${profile.id}, event: ${eventId}, orderId: ${orderId}`,
         'POST /api/payment/confirm'
       ).catch(() => {});
+      // 이미 검토중·확정인 경우 → 완료 페이지로 보내되 추가 레코드는 생성하지 않음
+      return NextResponse.json({ ok: true });
     }
+
+    // ── 신청 레코드 생성 (또는 취소 → 검토중으로 업데이트) ─────────────────────
+    let applicationId: string;
+
+    if (existing && existing.status === '취소') {
+      // 취소 후 재신청 — UNIQUE 제약으로 insert 불가, 기존 행 업데이트
+      await supa.from('applications').update({ status: '검토중' }).eq('id', existing.id);
+      applicationId = existing.id;
+    } else {
+      const { data: application, error: appError } = await supa
+        .from('applications')
+        .insert({ profile_id: profile.id, event_id: eventId, status: '검토중' })
+        .select('id').single() as { data: { id: string } | null; error: { message: string } | null };
+
+      if (appError) throw new Error(`신청 저장 실패: ${appError.message}`);
+      applicationId = application!.id;
+    }
+
+    // ── 약관 동의 저장 ────────────────────────────────────────────────────────
+    await supa.from('profiles').update({
+      agree_privacy:       agreePrivacy ?? false,
+      agree_attendance:    agreeAttendance ?? false,
+      agree_profile_share: agreeProfileShare ?? false,
+      agree_instagram:     agreeInstagram ?? false,
+    }).eq('id', profile.id);
+
+    // ── 슬랙 알림 ─────────────────────────────────────────────────────────────
+    await notifyNewProfile(profile.nickname, applicationId).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -14,16 +14,8 @@ const STEPS = ['일정', '프로필 확인', '동의', '결제'];
 
 // ─── Step 1: Profile Review ────────────────────────────────────────────────────
 
-interface StepProfileReviewProps {
-  profile: Profile | null;
-  onProceed: () => void;
-}
-
-function StepProfileReview({ profile, onProceed }: StepProfileReviewProps) {
-  const { setValue } = useFormContext<ApplyFormData>();
-
+function StepProfileReview({ profile }: { profile: Profile | null }) {
   const handleEdit = () => {
-    // Save current eventId to sessionStorage so we can restore after returning
     const methods = (window as unknown as { __applyFormMethods?: { getValues: () => ApplyFormData } }).__applyFormMethods;
     if (methods) {
       const eventId = methods.getValues().eventId;
@@ -82,22 +74,14 @@ function StepProfileReview({ profile, onProceed }: StepProfileReviewProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={onProceed}
-          className="w-full rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark"
-        >
-          이 프로필로 진행할게요
-        </button>
-        <button
-          type="button"
-          onClick={handleEdit}
-          className="w-full rounded-xl border border-cana-rule py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
-        >
-          수정하고 올게요
-        </button>
-      </div>
+      {/* 수정 링크만 카드 안에 */}
+      <button
+        type="button"
+        onClick={handleEdit}
+        className="self-center text-sm text-cana-ink3 underline underline-offset-2 transition hover:text-cana-ink"
+      >
+        프로필 수정하러 가기
+      </button>
     </div>
   );
 }
@@ -299,8 +283,6 @@ export default function ApplyPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  // 결제 스텝용
-  const [applicationId, setApplicationId] = useState<string | null>(null);
   const [eventTitle, setEventTitle] = useState('cana 소개팅');
 
   useEffect(() => {
@@ -365,7 +347,7 @@ export default function ApplyPage() {
 
   const handleNext = async () => {
     if (step === 2) {
-      // Step 2 → 3: 약관 검증 후 신청 레코드 생성 (결제대기)
+      // Step 2 → 3: 약관 검증 후 서버 적격 검사 (레코드 생성 없음)
       const valid = await methods.trigger(STEP_FIELDS[2]);
       if (!valid) return;
 
@@ -373,36 +355,21 @@ export default function ApplyPage() {
       setServerError(null);
 
       try {
-        const data = methods.getValues();
+        const eventId = methods.getValues().eventId;
 
-        // 선택한 이벤트 제목 조회
-        const evRes = await fetch('/api/events');
-        const evList = await evRes.json() as { id: string; title: string }[];
-        const selectedEv = Array.isArray(evList)
-          ? evList.find((e) => e.id === data.eventId)
-          : null;
-        if (selectedEv) setEventTitle(selectedEv.title);
-
-        // 신청 생성
-        const res = await fetch('/api/apply', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            eventId:           data.eventId,
-            agreePrivacy:      data.agreePrivacy,
-            agreeAttendance:   data.agreeAttendance,
-            agreeProfileShare: data.agreeProfileShare,
-            agreeInstagram:    data.agreeInstagram,
-          }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({})) as { error?: string };
-          throw new Error(err.error ?? '신청에 실패했어요. 다시 시도해주세요.');
+        // 적격 검사 (중복 신청 등)
+        const checkRes = await fetch(`/api/apply?eventId=${eventId}`);
+        if (!checkRes.ok) {
+          const err = await checkRes.json().catch(() => ({})) as { error?: string };
+          throw new Error(err.error ?? '신청 자격 확인에 실패했어요.');
         }
 
-        const result = await res.json() as { id: string };
-        setApplicationId(result.id);
+        // 이벤트 제목 조회
+        const evRes = await fetch('/api/events');
+        const evList = await evRes.json() as { id: string; title: string }[];
+        const selectedEv = Array.isArray(evList) ? evList.find((e) => e.id === eventId) : null;
+        if (selectedEv) setEventTitle(selectedEv.title);
+
         setStep(3);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
@@ -484,22 +451,18 @@ export default function ApplyPage() {
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <div className="rounded-2xl border border-cana-rule bg-white p-5 shadow-sm">
               {step === 0 && <Step0 />}
-              {step === 1 && (
-                <StepProfileReview
-                  profile={profile}
-                  onProceed={() => {
-                    setStep(2);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                />
-              )}
+              {step === 1 && <StepProfileReview profile={profile} />}
               {step === 2 && <StepAgreements />}
-              {step === 3 && applicationId && profile && (
+              {step === 3 && profile && (
                 <StepPayment
-                  applicationId={applicationId}
+                  eventId={methods.getValues().eventId}
                   eventTitle={eventTitle}
                   amount={parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '39000', 10)}
                   customerKey={profile.user_id}
+                  agreePrivacy={methods.getValues().agreePrivacy ?? false}
+                  agreeAttendance={methods.getValues().agreeAttendance ?? false}
+                  agreeProfileShare={methods.getValues().agreeProfileShare ?? false}
+                  agreeInstagram={methods.getValues().agreeInstagram ?? false}
                 />
               )}
             </div>
@@ -508,48 +471,33 @@ export default function ApplyPage() {
               <p className="mt-4 text-center text-sm text-red-500">{serverError}</p>
             )}
 
-            {/* 네비게이션 */}
-            {/* Step 0·2: 이전(있으면) + 다음 */}
-            {step !== 1 && step !== 3 && (
-              <div className="mt-5 flex items-center justify-between gap-3">
-                {step > 0 ? (
-                  <button
-                    type="button"
-                    onClick={handlePrev}
-                    className="flex-shrink-0 rounded-xl border border-cana-rule px-5 py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
-                  >
-                    이전
-                  </button>
-                ) : (
-                  <div />
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={
-                    submitting ||
-                    (step === 0 && profileLoaded && !profile)
-                  }
-                  className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
-                >
-                  {submitting && step === 2 ? '처리 중...' : '다음'}
-                </button>
-              </div>
-            )}
-
-            {/* Step 1·3: 이전만 (다음은 각 컴포넌트 내부 버튼) */}
-            {(step === 1 || step === 3) && (
-              <div className="mt-5">
+            {/* 네비게이션 — 모든 스텝 동일 구조 */}
+            <div className="mt-5 flex items-center gap-3">
+              {step > 0 && (
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="w-full rounded-xl border border-cana-rule py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
+                  className="flex-shrink-0 rounded-xl border border-cana-rule px-5 py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
                 >
                   이전
                 </button>
-              </div>
-            )}
+              )}
+              {/* step 3: StepPayment 내부에 결제 버튼이 있으므로 다음 버튼 없음 */}
+              {step < 3 && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={submitting || (step === 0 && profileLoaded && !profile)}
+                  className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
+                >
+                  {submitting && step === 2
+                    ? '확인 중...'
+                    : step === 1
+                    ? '이 프로필로 진행할게요'
+                    : '다음'}
+                </button>
+              )}
+            </div>
           </form>
         </FormProvider>
       </main>

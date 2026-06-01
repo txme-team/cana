@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import type { PendingPayload } from '@/components/apply/StepPayment';
+import { PAYMENT_PENDING_KEY } from '@/components/apply/StepPayment';
 
 export default function SuccessHandler() {
   const searchParams = useSearchParams();
@@ -9,20 +11,34 @@ export default function SuccessHandler() {
   const calledRef = useRef(false);
 
   useEffect(() => {
-    // StrictMode 이중 호출 방지
     if (calledRef.current) return;
     calledRef.current = true;
 
     const paymentKey = searchParams.get('paymentKey');
-    const orderId = searchParams.get('orderId');
-    const amount = searchParams.get('amount');
+    const orderId    = searchParams.get('orderId');
+    const amount     = searchParams.get('amount');
 
     if (!paymentKey || !orderId || !amount) {
-      router.replace(
-        '/apply/fail?message=' + encodeURIComponent('결제 정보가 올바르지 않아요.')
-      );
+      router.replace('/apply/fail?message=' + encodeURIComponent('결제 정보가 올바르지 않아요.'));
       return;
     }
+
+    // 결제 전 저장해 둔 신청 데이터 복원
+    const raw = sessionStorage.getItem(PAYMENT_PENDING_KEY);
+    if (!raw) {
+      router.replace('/apply/fail?message=' + encodeURIComponent('신청 정보를 찾을 수 없어요. 처음부터 다시 시도해주세요.'));
+      return;
+    }
+
+    let pending: PendingPayload;
+    try {
+      pending = JSON.parse(raw) as PendingPayload;
+    } catch {
+      router.replace('/apply/fail?message=' + encodeURIComponent('신청 정보가 올바르지 않아요.'));
+      return;
+    }
+
+    sessionStorage.removeItem(PAYMENT_PENDING_KEY);
 
     fetch('/api/payment/confirm', {
       method: 'POST',
@@ -31,6 +47,11 @@ export default function SuccessHandler() {
         paymentKey,
         orderId,
         amount: Number(amount),
+        eventId:           pending.eventId,
+        agreePrivacy:      pending.agreePrivacy,
+        agreeAttendance:   pending.agreeAttendance,
+        agreeProfileShare: pending.agreeProfileShare,
+        agreeInstagram:    pending.agreeInstagram,
       }),
     })
       .then(async (res) => {
@@ -41,11 +62,8 @@ export default function SuccessHandler() {
         router.replace('/apply/complete');
       })
       .catch((err: unknown) => {
-        const msg =
-          err instanceof Error ? err.message : '오류가 발생했어요.';
-        router.replace(
-          '/apply/fail?message=' + encodeURIComponent(msg)
-        );
+        const msg = err instanceof Error ? err.message : '오류가 발생했어요.';
+        router.replace('/apply/fail?message=' + encodeURIComponent(msg));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

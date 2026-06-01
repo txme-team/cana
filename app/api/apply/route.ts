@@ -2,6 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { notifyNewProfile, notifyError } from '@/lib/slack';
 
+// ─── GET: 결제 전 적격 검사 (레코드 생성 없음) ──────────────────────────────────
+export async function GET(req: NextRequest) {
+  const eventId = new URL(req.url).searchParams.get('eventId');
+  if (!eventId) return NextResponse.json({ error: 'eventId가 필요해요.' }, { status: 400 });
+
+  const authClient = createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+
+  const supabase = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supa = supabase as any;
+
+  const { data: profile } = await supa
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle() as
+    { data: { id: string } | null };
+  if (!profile) return NextResponse.json({ error: '프로필을 먼저 작성해주세요.' }, { status: 400 });
+
+  const { data: existing } = await supa
+    .from('applications').select('status')
+    .eq('profile_id', profile.id).eq('event_id', eventId).maybeSingle() as
+    { data: { status: string } | null };
+
+  if (existing && !['취소'].includes(existing.status)) {
+    return NextResponse.json({ error: '이미 신청한 이벤트예요.' }, { status: 409 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json() as {
