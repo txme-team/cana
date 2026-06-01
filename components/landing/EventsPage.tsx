@@ -117,14 +117,14 @@ export default function EventsPage() {
 
               {isFull ? (
                 <Link
-                  href="/apply"
+                  href={`/apply?eventId=${event.id}`}
                   className="flex-shrink-0 rounded-xl border border-cana px-4 py-2 text-sm font-semibold text-cana transition hover:bg-cana/5 active:scale-95"
                 >
                   대기 신청
                 </Link>
               ) : (
                 <Link
-                  href="/apply"
+                  href={`/apply?eventId=${event.id}`}
                   className="flex-shrink-0 rounded-xl bg-cana px-4 py-2 text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
                 >
                   신청하기

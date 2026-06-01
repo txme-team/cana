@@ -117,14 +117,14 @@ export default function Events({ preview = false }: Props) {
               {/* 버튼 — 하단 풀 너비 */}
               {isFull ? (
                 <Link
-                  href="/apply"
+                  href={`/apply?eventId=${event.id}`}
                   className="block w-full rounded-xl border border-cana py-2.5 text-center text-sm font-semibold text-cana transition hover:bg-cana/5 active:scale-95"
                 >
                   대기 신청
                 </Link>
               ) : (
                 <Link
-                  href="/apply"
+                  href={`/apply?eventId=${event.id}`}
                   className="block w-full rounded-xl bg-cana py-2.5 text-center text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
                 >
                   신청하기

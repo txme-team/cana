@@ -53,7 +53,17 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       if (existing.status === '결제대기') {
-        // 결제 재시도 허용 — 기존 ID 반환
+        // 결제 재시도 — 기존 ID 반환
+        return NextResponse.json({ id: existing.id }, { status: 200 });
+      }
+      if (existing.status === '취소') {
+        // 취소 후 재신청 — UNIQUE 제약으로 insert 불가, 기존 행 업데이트
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: reapplyErr } = await (supabase as any)
+          .from('applications')
+          .update({ status: '결제대기' })
+          .eq('id', existing.id);
+        if (reapplyErr) throw new Error(`재신청 처리 실패: ${reapplyErr.message}`);
         return NextResponse.json({ id: existing.id }, { status: 200 });
       }
       return NextResponse.json({ error: '이미 신청한 이벤트예요.' }, { status: 409 });

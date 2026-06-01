@@ -40,10 +40,11 @@ export default function Step0() {
       fetch('/api/my-applications').then((r) => r.json()),
     ]).then(([eventsData, appliedData]) => {
       setEvents(Array.isArray(eventsData) ? eventsData : []);
-      // 결제대기는 재시도 허용 — 그 외(검토중·확정·반려 등)만 disabled
+      // 결제대기·취소는 재신청 허용 — 그 외(검토중·확정·반려 등)만 disabled
+      const REAPPLY_STATUSES = ['결제대기', '취소'];
       const applied = Array.isArray(appliedData)
         ? (appliedData as { event_id: string; status: string }[])
-            .filter((a) => a.status !== '결제대기')
+            .filter((a) => !REAPPLY_STATUSES.includes(a.status))
             .map((a) => a.event_id)
         : [];
       setAppliedEventIds(applied);

@@ -338,17 +338,30 @@ export default function ApplyPage() {
     };
   }, [methods]);
 
-  // Restore eventId from sessionStorage after returning from profile/create
+  // sessionStorage 복원 (profile/create 에서 돌아온 경우)
   useEffect(() => {
     const savedEventId = sessionStorage.getItem('cana_apply_eventId');
     if (savedEventId) {
       methods.setValue('eventId', savedEventId);
       sessionStorage.removeItem('cana_apply_eventId');
-      // Jump directly to step 1 (profile review) since they already picked an event
       setStep(1);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // URL ?eventId= 파라미터로 진입 시 일정 선택 스킵 (프로필 있을 때만)
+  useEffect(() => {
+    if (!profileLoaded) return;
+    const params = new URLSearchParams(window.location.search);
+    const eventId = params.get('eventId');
+    if (!eventId) return;
+    // URL 정리
+    window.history.replaceState({}, '', '/apply');
+    methods.setValue('eventId', eventId);
+    // 프로필이 있어야 step 1로 이동, 없으면 step 0에서 배너 표시
+    if (profile) setStep(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileLoaded]);
 
   const handleNext = async () => {
     if (step === 2) {
@@ -496,8 +509,7 @@ export default function ApplyPage() {
             )}
 
             {/* 네비게이션 */}
-            {/* Step 1: 자체 인라인 버튼 사용 */}
-            {/* Step 3: StepPayment 자체 버튼 사용 — 뒤로가기만 노출 */}
+            {/* Step 0·2: 이전(있으면) + 다음 */}
             {step !== 1 && step !== 3 && (
               <div className="mt-5 flex items-center justify-between gap-3">
                 {step > 0 ? (
@@ -526,8 +538,8 @@ export default function ApplyPage() {
               </div>
             )}
 
-            {/* Step 3: 뒤로가기만 */}
-            {step === 3 && (
+            {/* Step 1·3: 이전만 (다음은 각 컴포넌트 내부 버튼) */}
+            {(step === 1 || step === 3) && (
               <div className="mt-5">
                 <button
                   type="button"
