@@ -40,7 +40,13 @@ export default function Step0() {
       fetch('/api/my-applications').then((r) => r.json()),
     ]).then(([eventsData, appliedData]) => {
       setEvents(Array.isArray(eventsData) ? eventsData : []);
-      setAppliedEventIds(Array.isArray(appliedData) ? appliedData : []);
+      // 결제대기는 재시도 허용 — 그 외(검토중·확정·반려 등)만 disabled
+      const applied = Array.isArray(appliedData)
+        ? (appliedData as { event_id: string; status: string }[])
+            .filter((a) => a.status !== '결제대기')
+            .map((a) => a.event_id)
+        : [];
+      setAppliedEventIds(applied);
     }).finally(() => setLoading(false));
   }, []);
 
