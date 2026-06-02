@@ -11,24 +11,6 @@ import Nav from '@/components/landing/Nav';
 import BackButton from '@/components/landing/BackButton';
 import Step0 from '@/components/apply/Step0';
 
-// ─── Toss Payments V2 Standard 타입 선언 ──────────────────────────────────────
-
-declare global {
-  interface Window {
-    TossPayments?: (clientKey: string) => {
-      payment: (options: { customerKey: string }) => {
-        requestPayment: (options: {
-          method: string;
-          amount: { value: number; currency: string };
-          orderId: string;
-          orderName: string;
-          successUrl: string;
-          failUrl: string;
-        }) => Promise<void>;
-      };
-    };
-  }
-}
 
 const STEPS = ['일정', '프로필 확인', '동의'];
 

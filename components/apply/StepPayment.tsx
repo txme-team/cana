@@ -21,6 +21,16 @@ declare global {
   interface Window {
     TossPayments?: (clientKey: string) => {
       widgets: (options: { customerKey: string }) => TossWidgets;
+      payment: (options: { customerKey: string }) => {
+        requestPayment: (options: {
+          method: string;
+          amount: { value: number; currency: string };
+          orderId: string;
+          orderName: string;
+          successUrl: string;
+          failUrl: string;
+        }) => Promise<void>;
+      };
     };
   }
 }
