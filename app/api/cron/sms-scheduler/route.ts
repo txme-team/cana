@@ -44,7 +44,16 @@ async function fetchConfirmedParticipants(supa: any, eventId: string) {
 
 export async function GET(req: NextRequest) {
   if (!verifyCron(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const incoming = req.headers.get('authorization') ?? '(없음)';
+    const secret = process.env.CRON_SECRET ?? '(미설정)';
+    return NextResponse.json({
+      error: 'Unauthorized',
+      debug: {
+        incoming_header: incoming,
+        expected: `Bearer ${secret.slice(0, 4)}...`,
+        secret_set: !!process.env.CRON_SECRET,
+      },
+    }, { status: 401 });
   }
 
   const kst     = nowKST();
