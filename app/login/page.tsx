@@ -20,17 +20,11 @@ function LoginContent() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-cana-cream px-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-cana-cream px-8">
       <div className="w-full max-w-sm">
-        {/* 로고 */}
-        <div className="mb-10">
-          <img src="/logos/logo_black.svg" alt="cana" className="h-[14px]" />
-          <p className="mt-2 text-xs text-cana-ink3/60">CHRISTIAN ROTATION DATING</p>
-        </div>
-
         {/* 타이틀 */}
-        <div className="mb-8">
-          <p className="text-[18px] font-semibold text-cana-ink">카나 로그인</p>
+        <div className="mb-8 text-center">
+          <p className="text-[28px] font-semibold text-cana-ink">카나 로그인</p>
           <p className="mt-1.5 text-[16px] text-cana-ink3">구글 계정으로 간편하게 시작할 수 있어요</p>
         </div>
 
@@ -53,7 +47,7 @@ function LoginContent() {
           Google로 계속하기
         </button>
 
-        <p className="mt-6 text-[11px] leading-relaxed text-cana-ink3/60">
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-cana-ink3/60">
           로그인 시 cana의{' '}
           <span className="underline">서비스 이용약관</span> 및{' '}
           <span className="underline">개인정보처리방침</span>에 동의하는 것으로 간주돼요.
