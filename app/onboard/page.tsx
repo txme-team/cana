@@ -113,45 +113,46 @@ function StepProfileIntro() {
           프로필 카드가 뭔가요?
         </p>
         <p className="text-sm leading-relaxed text-cana-ink3">
-          소개팅 전 상대방이 미리 확인하는<br />
-          나만의 소개 카드예요. 신앙, 가치관,<br />
-          라이프스타일을 솔직하게 담아요.
+          소개팅 전 상대방이 미리 확인하는 나만의 소개 카드예요.<br />
+          신앙, 가치관, 라이프스타일을 솔직하게 담아요.
         </p>
       </div>
 
       {/* 안내 카드 */}
-      <div className="rounded-2xl bg-[#fdf6f0] px-5 py-6 flex flex-col gap-5">
-        <p className="text-sm font-semibold text-cana-ink">프로필 카드 작성 전 확인해주세요</p>
+      <div className="rounded-2xl bg-cana/5 px-5 py-5">
+        <p className="mb-4 text-base font-semibold text-cana">프로필 카드 작성 전 확인해주세요</p>
+        <div className="flex flex-col gap-4">
 
-        {/* 시간 */}
-        <div className="flex items-start gap-3">
-          <span className="text-xl leading-none">🕐</span>
-          <div>
-            <p className="text-sm font-semibold text-cana-ink">약 10분 소요돼요</p>
-            <p className="text-xs text-cana-ink3 mt-0.5">신앙, 가치관, 라이프스타일에 관한 질문들이 있어요</p>
-          </div>
-        </div>
-
-        {/* 서류 */}
-        <div className="flex items-start gap-3">
-          <span className="text-xl leading-none">📋</span>
-          <div className="flex flex-col gap-2">
+          {/* 시간 */}
+          <div className="flex items-start gap-3">
+            <img src="/icons/clock.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-cana-ink">마지막 단계에서 서류 인증이 필요해요</p>
-              <p className="text-xs text-cana-ink3 mt-0.5">아래 서류를 미리 준비해주세요</p>
+              <p className="text-base font-medium text-cana-ink">약 10분 소요돼요</p>
+              <p className="text-sm text-cana-ink3">신앙, 가치관, 라이프스타일에 관한 질문들이 있어요</p>
             </div>
-            <ul className="flex flex-col gap-1.5 pl-1">
-              <li className="flex items-center gap-2 text-xs text-cana-ink3">
-                <span>👤</span>프로필 사진 (본인이 잘 나온 사진)
-              </li>
-              <li className="flex items-center gap-2 text-xs text-cana-ink3">
-                <span>💼</span>직장 인증서류 — 명함, 사원증, 재직증명서, 4대보험 가입내역 중 하나
-              </li>
-              <li className="flex items-center gap-2 text-xs text-cana-ink3">
-                <span>✝️</span>교인 인증서류 — 최근 3개월 내 주보 또는 교인증명서
-              </li>
-            </ul>
           </div>
+
+          {/* 서류 */}
+          <div className="flex items-start gap-3">
+            <img src="/icons/docs.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+            <div>
+              <p className="text-base font-medium text-cana-ink">마지막 단계에서 서류 인증이 필요해요</p>
+              <p className="mb-3 text-sm text-cana-ink3">아래 서류를 미리 준비해주세요</p>
+              <div className="flex flex-col gap-2">
+                {[
+                  { icon: '/icons/profile.svg',  text: '프로필 사진 (본인이 잘 나온 사진)' },
+                  { icon: '/icons/job.svg',       text: '직장 인증서류 — 명함, 사원증, 재직증명서, 4대보험 가입내역 중 하나' },
+                  { icon: '/icons/christian.svg', text: '교인 인증서류 — 최근 3개월 내 주보 또는 교인증명서' },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="flex items-start gap-2">
+                    <img src={icon} alt="" className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                    <p className="text-sm text-cana-ink3">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
