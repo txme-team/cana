@@ -28,7 +28,11 @@ function formatEventDate(dateStr: string) {
 }
 
 
-export default function Step0() {
+interface Step0Props {
+  onWaitlist?: (event: { id: string; title: string }) => void;
+}
+
+export default function Step0({ onWaitlist }: Step0Props) {
   const { control, formState: { errors } } = useFormContext<ApplyFormData>();
   const [events, setEvents] = useState<EventOption[]>([]);
   const [appliedEventIds, setAppliedEventIds] = useState<string[]>([]);
@@ -82,14 +86,14 @@ export default function Step0() {
                   const isFull   = event.confirmed_count >= event.capacity;
 
                   return (
+                    <div key={event.id} className="flex flex-col gap-1.5">
                     <button
-                      key={event.id}
                       type="button"
-                      disabled={applied}
-                      onClick={() => !applied && field.onChange(event.id)}
+                      disabled={applied || isFull}
+                      onClick={() => !applied && !isFull && field.onChange(event.id)}
                       className={[
-                        'flex items-start gap-3.5 rounded-2xl border px-4 py-4 text-left transition',
-                        applied
+                        'flex w-full items-start gap-3.5 rounded-2xl border px-4 py-4 text-left transition',
+                        applied || isFull
                           ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-60'
                           : selected
                           ? 'border-cana bg-cana/5'
@@ -160,6 +164,18 @@ export default function Step0() {
 
                       </div>
                     </button>
+
+                    {/* 마감 이벤트 — 대기 신청 버튼 */}
+                    {isFull && !applied && (
+                      <button
+                        type="button"
+                        onClick={() => onWaitlist?.({ id: event.id, title: event.title })}
+                        className="w-full rounded-xl border border-cana-rule bg-white py-2.5 text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:bg-cana-cream"
+                      >
+                        대기 신청하기
+                      </button>
+                    )}
+                    </div>
                   );
                 })}
 

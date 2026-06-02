@@ -300,7 +300,7 @@ export default function ApplyPage() {
   // ── 대기 신청 모달 상태 ──────────────────────────────────────────────────────
   const [waitlistModal, setWaitlistModal] = useState<{
     open: boolean;
-    event: EventOption | null;
+    event: { id: string; title: string } | null;
     loading: boolean;
     done: boolean;
     error: string | null;
@@ -422,22 +422,6 @@ export default function ApplyPage() {
     const valid = await methods.trigger(STEP_FIELDS[step]);
     if (!valid) return;
 
-    // step 0: 선택한 이벤트가 마감인지 확인
-    if (step === 0) {
-      const eventId = methods.getValues().eventId;
-      try {
-        const eventsData = await fetch('/api/events').then((r) => r.json()) as EventOption[];
-        const selected = eventsData.find((e) => e.id === eventId);
-        if (selected && selected.confirmed_count >= selected.capacity) {
-          // 마감된 이벤트 → 대기 신청 모달 표시
-          setWaitlistModal({ open: true, event: selected, loading: false, done: false, error: null });
-          return;
-        }
-      } catch {
-        // 체크 실패 시 그냥 다음 단계로
-      }
-    }
-
     setStep((s) => s + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -522,7 +506,13 @@ export default function ApplyPage() {
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <div className="rounded-2xl border border-cana-rule bg-white p-5 shadow-sm">
-              {step === 0 && <Step0 />}
+              {step === 0 && (
+                <Step0
+                  onWaitlist={(event) =>
+                    setWaitlistModal({ open: true, event, loading: false, done: false, error: null })
+                  }
+                />
+              )}
               {step === 1 && <StepProfileReview profile={profile} />}
               {step === 2 && <StepAgreements />}
             </div>
