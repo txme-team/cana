@@ -49,18 +49,7 @@ async function fetchConfirmedParticipants(supa: any, eventId: string) {
 
 export async function GET(req: NextRequest) {
   if (!verifyCron(req)) {
-    const envSecret = process.env.CRON_SECRET ?? '';
-    const querySecret = req.nextUrl.searchParams.get('secret') ?? '';
-    return NextResponse.json({
-      error: 'Unauthorized',
-      debug: {
-        secret_set: !!process.env.CRON_SECRET,
-        secret_len: envSecret.trim().length,
-        query_received: !!querySecret,
-        query_len: querySecret.trim().length,
-        match: envSecret.trim() === querySecret.trim(),
-      },
-    }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const kst     = nowKST();
