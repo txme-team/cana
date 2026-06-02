@@ -1,15 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LogoutButton() {
-  const router = useRouter();
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.replace('/admin/login');
+    // 하드 리다이렉트로 서버 레이아웃이 세션 만료를 정확히 읽도록
+    window.location.href = '/admin/login';
   };
 
   return (
