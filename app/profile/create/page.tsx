@@ -210,7 +210,6 @@ function ProfileCreateContent() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
-  const [savedAt, setSavedAt] = useState<Date | null>(null);
 
   const methods = useForm<ApplyFormData>({
     defaultValues: {
@@ -295,7 +294,6 @@ function ProfileCreateContent() {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         saveDraft(values as Partial<ApplyFormData>, step);
-        setSavedAt(new Date());
       }, 2000);
     });
     return () => { clearTimeout(timeout); unsubscribe(); };
@@ -315,7 +313,6 @@ function ProfileCreateContent() {
     if (valid) {
       const nextStep = step + 1;
       saveDraft(methods.getValues(), nextStep);
-      setSavedAt(new Date());
       setStep(nextStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -453,15 +450,8 @@ function ProfileCreateContent() {
         )}
 
         {/* 스텝 인디케이터 */}
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <StepIndicator steps={STEPS} current={step} />
-          </div>
-          {savedAt && (
-            <p className="flex-shrink-0 text-xs text-cana-ink3/50">
-              임시저장 {savedAt.getHours().toString().padStart(2, '0')}:{savedAt.getMinutes().toString().padStart(2, '0')}
-            </p>
-          )}
+        <div className="mb-8">
+          <StepIndicator steps={STEPS} current={step} />
         </div>
 
         {/* 폼 */}
