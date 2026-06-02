@@ -3,8 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Suspense } from 'react';
-import Nav from '@/components/landing/Nav';
-import Footer from '@/components/landing/Footer';
 
 function LoginContent() {
   const searchParams = useSearchParams();
