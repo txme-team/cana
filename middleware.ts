@@ -32,12 +32,9 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set('redirectTo', pathname);
       return NextResponse.redirect(url);
     }
-    // 어드민 이메일 화이트리스트 검사
-    const adminEmails = (process.env.ADMIN_EMAILS ?? '')
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    const isAdmin = adminEmails.length === 0 || adminEmails.includes((user.email ?? '').toLowerCase());
+    // app_metadata.role === 'admin' 인 계정만 허용
+    // (일반 회원은 절대 이 값을 가질 수 없음 — 서비스 롤 키로만 설정 가능)
+    const isAdmin = user.app_metadata?.role === 'admin';
     if (!isAdmin) {
       return NextResponse.redirect(new URL('/', request.url));
     }
