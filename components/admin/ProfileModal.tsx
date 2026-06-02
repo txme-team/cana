@@ -34,7 +34,6 @@ function formatEventDate(dateStr: string) {
 
 export default function ProfileModal({ profile, onClose, onStatusChange, onUpdate }: ProfileModalProps) {
   const pr = profile.profiles;
-  if (!pr) return null;
 
   const [status, setStatus]               = useState<ProfileStatus>(profile.status ?? '검토중');
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -65,6 +64,8 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
         setEvents(Array.isArray(data) ? data.filter((e) => e.id !== profile.event_id) : []);
       });
   }, [requestAction, profile.event_id]);
+
+  if (!pr) return null;
 
   const handleStatusChange = async (next: ProfileStatus) => {
     setUpdatingStatus(true);
