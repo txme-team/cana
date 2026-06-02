@@ -25,10 +25,22 @@ export async function middleware(request: NextRequest) {
   const isAdminPath = pathname.startsWith('/admin');
   const isAdminLogin = pathname === '/admin/login';
 
-  if (isAdminPath && !isAdminLogin && !user) {
-    const url = new URL('/admin/login', request.url);
-    url.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(url);
+  if (isAdminPath && !isAdminLogin) {
+    // 미인증
+    if (!user) {
+      const url = new URL('/admin/login', request.url);
+      url.searchParams.set('redirectTo', pathname);
+      return NextResponse.redirect(url);
+    }
+    // 어드민 이메일 화이트리스트 검사
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = adminEmails.length === 0 || adminEmails.includes((user.email ?? '').toLowerCase());
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
   }
 
   // ── /apply 보호 ─────────────────────────────────────────────────────────────
