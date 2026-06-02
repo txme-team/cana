@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
           .maybeSingle() as { data: { id: string } | null };
 
         if (!profile) {
-          // No profile yet — nudge user to create one
-          const nudgeResponse = NextResponse.redirect(`${origin}/profile/create?nudge=true`);
+          // No profile yet — start onboarding flow
+          const nudgeResponse = NextResponse.redirect(`${origin}/onboard`);
           // Copy session cookies to the new response
           response.cookies.getAll().forEach(({ name, value, ...opts }) => {
             nudgeResponse.cookies.set(name, value, opts);

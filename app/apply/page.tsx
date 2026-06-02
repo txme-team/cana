@@ -10,6 +10,7 @@ import { PAYMENT_PENDING_KEY, type PendingPayload } from '@/lib/payment';
 import Nav from '@/components/landing/Nav';
 import BackButton from '@/components/landing/BackButton';
 import Step0 from '@/components/apply/Step0';
+import StepIndicator from '@/components/common/StepIndicator';
 
 
 const STEPS = ['일정', '프로필 확인', '동의'];
@@ -497,23 +498,9 @@ export default function ApplyPage() {
         <BackButton />
         <h1 className="mb-6 text-xl font-bold text-cana-ink">소개팅 신청</h1>
 
-        {/* 스텝 레이블 */}
-        <div className="mb-6 flex gap-1.5 overflow-x-auto pb-1">
-          {STEPS.map((label, i) => (
-            <span
-              key={label}
-              className={[
-                'flex-shrink-0 rounded-full px-3 py-1 text-sm transition',
-                i === step
-                  ? 'bg-cana font-medium text-white'
-                  : i < step
-                  ? 'bg-cana/10 text-cana'
-                  : 'bg-cana-rule text-cana-ink3',
-              ].join(' ')}
-            >
-              {i < step ? '✓ ' : ''}{label}
-            </span>
-          ))}
+        {/* 스텝 인디케이터 */}
+        <div className="mb-8">
+          <StepIndicator steps={STEPS} current={step} />
         </div>
 
         {/* 프로필 없음 배너 (Step 0, 프로필 로드 완료 후) */}
