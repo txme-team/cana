@@ -4,71 +4,54 @@ interface Props {
 }
 
 export default function StepIndicator({ steps, current }: Props) {
+  // 0 ~ 1 사이 진행률 (마지막 스텝 완료 = 1)
+  const fraction = steps.length > 1 ? current / (steps.length - 1) : 0;
+
   return (
-    <div
-      className="grid w-full"
-      style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}
-    >
-      {steps.map((label, i) => {
-        const done   = i < current;
-        const active = i === current;
+    <div className="relative w-full">
+      {/* 배경선 — 첫 원 중앙(14px)부터 마지막 원 중앙(14px from right)까지 */}
+      <div className="absolute left-3.5 right-3.5 top-3.5 h-px bg-cana-rule" />
 
-        // 연결선 색상
-        // 왼쪽 연결선 (i-1 → i): i-1이 완료됐으면 채움
-        const leftFilled  = i > 0 && i <= current;
-        // 오른쪽 연결선 (i → i+1): i가 완료됐으면 채움
-        const rightFilled = i < steps.length - 1 && i < current;
+      {/* 완료선 — scaleX로 진행도만큼 채움 */}
+      <div
+        className="absolute left-3.5 right-3.5 top-3.5 h-px origin-left bg-cana transition-transform duration-500"
+        style={{ transform: `scaleX(${fraction})` }}
+      />
 
-        return (
-          <div key={label} className="relative flex flex-col items-center">
-            {/* 왼쪽 연결선 절반 */}
-            {i > 0 && (
+      {/* 서클 + 라벨 — 첫/마지막이 양 끝에 정확히 붙도록 justify-between */}
+      <div className="relative flex justify-between">
+        {steps.map((label, i) => {
+          const done   = i < current;
+          const active = i === current;
+
+          return (
+            <div key={label} className="relative z-10 flex flex-col items-center gap-1.5">
               <div
                 className={[
-                  'absolute top-3.5 left-0 right-1/2 h-px transition-colors',
-                  leftFilled ? 'bg-cana' : 'bg-cana-rule',
+                  'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
+                  done
+                    ? 'bg-cana text-white'
+                    : active
+                    ? 'bg-cana text-white ring-[3px] ring-cana/20'
+                    : 'border-2 border-cana-rule bg-white text-cana-ink3',
                 ].join(' ')}
-              />
-            )}
-
-            {/* 오른쪽 연결선 절반 */}
-            {i < steps.length - 1 && (
-              <div
+              >
+                {done ? '✓' : i + 1}
+              </div>
+              <span
                 className={[
-                  'absolute top-3.5 left-1/2 right-0 h-px transition-colors',
-                  rightFilled ? 'bg-cana' : 'bg-cana-rule',
+                  'text-xs text-center leading-tight',
+                  active ? 'font-semibold text-cana'
+                  : done  ? 'text-cana/70'
+                  :         'text-cana-ink3',
                 ].join(' ')}
-              />
-            )}
-
-            {/* 서클 */}
-            <div
-              className={[
-                'relative z-10 flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
-                done
-                  ? 'bg-cana text-white'
-                  : active
-                  ? 'bg-cana text-white ring-[3px] ring-cana/20'
-                  : 'border-2 border-cana-rule bg-white text-cana-ink3',
-              ].join(' ')}
-            >
-              {done ? '✓' : i + 1}
+              >
+                {label}
+              </span>
             </div>
-
-            {/* 라벨 */}
-            <span
-              className={[
-                'mt-1.5 text-xs text-center leading-tight',
-                active ? 'font-semibold text-cana'
-                : done  ? 'text-cana/70'
-                :         'text-cana-ink3',
-              ].join(' ')}
-            >
-              {label}
-            </span>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
