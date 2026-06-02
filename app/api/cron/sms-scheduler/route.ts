@@ -13,9 +13,10 @@ import { sendPersonalizedSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
 
 function verifyCron(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET;
+  const secret = process.env.CRON_SECRET?.trim();
   if (!secret) return true;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
+  const incoming = (req.headers.get('authorization') ?? '').trim();
+  return incoming === `Bearer ${secret}`;
 }
 
 function nowKST(): Date {
@@ -44,13 +45,15 @@ async function fetchConfirmedParticipants(supa: any, eventId: string) {
 
 export async function GET(req: NextRequest) {
   if (!verifyCron(req)) {
-    const incoming = req.headers.get('authorization') ?? '(없음)';
-    const secret = process.env.CRON_SECRET ?? '(미설정)';
+    const raw = req.headers.get('authorization') ?? '';
+    const secret = process.env.CRON_SECRET ?? '';
     return NextResponse.json({
       error: 'Unauthorized',
       debug: {
-        incoming_header: incoming,
-        expected: `Bearer ${secret.slice(0, 4)}...`,
+        incoming: raw,
+        incoming_length: raw.length,
+        expected: `Bearer ${secret.trim()}`,
+        expected_length: `Bearer ${secret.trim()}`.length,
         secret_set: !!process.env.CRON_SECRET,
       },
     }, { status: 401 });
