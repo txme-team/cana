@@ -182,7 +182,7 @@ export default function OnboardPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-cana-cream">
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-16">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-16">
         {/* 로고 */}
         <div className="mb-10 flex items-center gap-2">
           <Image src="/logos/logo_black.svg" alt="cana" width={48} height={14} />
