@@ -176,7 +176,7 @@ interface Props {
 }
 
 export default function FAQ({ preview = false, standalone = false }: Props) {
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category | null>('신청·참여');
 
   const displayed = preview
     ? FAQS.slice(0, 3)
@@ -190,18 +190,6 @@ export default function FAQ({ preview = false, standalone = false }: Props) {
       {/* 카테고리 필터 — standalone 전용 */}
       {standalone && (
         <div className="mb-5 flex flex-wrap gap-1.5">
-          <button
-            type="button"
-            onClick={() => setActiveCategory(null)}
-            className={[
-              'rounded-full px-4 py-1.5 text-sm font-medium transition',
-              activeCategory === null
-                ? 'bg-cana text-white'
-                : 'border border-cana/30 bg-white text-cana-ink3 hover:border-cana/50 hover:text-cana',
-            ].join(' ')}
-          >
-            전체
-          </button>
           {CATEGORIES.map((cat) => (
             <button
               key={cat}

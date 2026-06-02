@@ -22,7 +22,7 @@ export default function Footer() {
           {/* 링크 */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <a
-              href="https://instagram.com/cana_official"
+              href="https://instagram.com/cana_for_love"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-cana-ink3 transition hover:text-cana"
@@ -31,7 +31,7 @@ export default function Footer() {
             </a>
             <span className="text-xs text-cana-rule">|</span>
             <a
-              href="mailto:hello@cana.kr"
+              href="mailto:ask@teambuildercorp.com"
               className="text-xs text-cana-ink3 transition hover:text-cana"
             >
               문의하기

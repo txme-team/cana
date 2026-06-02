@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { PendingPayload } from '@/components/apply/StepPayment';
-import { PAYMENT_PENDING_KEY } from '@/components/apply/StepPayment';
+import type { PendingPayload } from '@/lib/payment';
+import { PAYMENT_PENDING_KEY } from '@/lib/payment';
 
 export default function SuccessHandler() {
   const searchParams = useSearchParams();

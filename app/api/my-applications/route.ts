@@ -22,7 +22,7 @@ export async function GET() {
   // 신청 내역 + 이벤트 정보 조인
   const { data, error } = await supa
     .from('applications')
-    .select('id, event_id, status, created_at, events(title, event_date, location)')
+    .select('id, event_id, status, created_at, order_id, payment_key, paid_at, amount, pay_method, events(title, event_date, location)')
     .eq('profile_id', profile.id)
     .order('created_at', { ascending: false });
 
@@ -37,6 +37,11 @@ export async function GET() {
     event_title: row.events?.title ?? '',
     event_date: row.events?.event_date ?? '',
     event_location: row.events?.location ?? '',
+    // 결제 정보
+    order_id:    row.order_id    ?? null,
+    paid_at:     row.paid_at     ?? null,
+    amount:      row.amount      ?? null,
+    pay_method:  row.pay_method  ?? null,
   }));
 
   return NextResponse.json(result);

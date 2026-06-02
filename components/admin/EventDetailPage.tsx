@@ -189,6 +189,11 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   const [venueEditing, setVenueEditing] = useState(false);
   const [savingVenue, setSavingVenue] = useState(false);
 
+  // 장소 확정 문자 발송 모달
+  const [venueNotifyModal, setVenueNotifyModal] = useState(false);
+  const [sendingNotify, setSendingNotify] = useState(false);
+  const [notifyResult, setNotifyResult] = useState<{ sent: number } | null>(null);
+
   // 이벤트 수정 모달
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -275,6 +280,21 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
       load();
     } finally {
       setSavingVenue(false);
+    }
+  };
+
+  const handleSendVenueNotify = async () => {
+    setSendingNotify(true);
+    try {
+      const res = await fetch(`/api/admin/events/${eventId}/notify-venue`, { method: 'POST' });
+      const json = await res.json() as { ok?: boolean; sent?: number; error?: string };
+      if (!res.ok) throw new Error(json.error ?? '발송 실패');
+      setNotifyResult({ sent: json.sent ?? 0 });
+    } catch (err) {
+      alert((err as Error).message);
+      setVenueNotifyModal(false);
+    } finally {
+      setSendingNotify(false);
     }
   };
 
@@ -497,6 +517,21 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                     {!data.event.venue_name && !data.event.venue_url && (
                       <p className="text-sm text-gray-400">아직 입력된 장소 정보가 없어요.</p>
                     )}
+
+                    {/* 장소 확정 문자 발송 버튼 */}
+                    {data.event.venue_name && (
+                      <div className="pt-2">
+                        <button
+                          onClick={() => { setNotifyResult(null); setVenueNotifyModal(true); }}
+                          className="flex items-center gap-1.5 rounded-xl border border-cana/30 bg-cana/5 px-3 py-2 text-sm font-medium text-cana transition hover:bg-cana/10"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                          </svg>
+                          장소 확정 문자 발송
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -611,6 +646,89 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
             load();
           }}
         />
+      )}
+
+      {/* ── 장소 확정 문자 발송 확인 모달 ── */}
+      {venueNotifyModal && data && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => { if (!sendingNotify) setVenueNotifyModal(false); }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {notifyResult ? (
+              /* 발송 완료 */
+              <div className="flex flex-col items-center gap-4 py-2 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cana/10">
+                  <svg className="h-6 w-6 text-cana" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-gray-800">발송 완료</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    확정 참여자 <span className="font-medium text-gray-700">{notifyResult.sent}명</span>에게 장소 확정 문자를 발송했어요.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setVenueNotifyModal(false)}
+                  className="w-full rounded-xl bg-cana py-2.5 text-base font-medium text-white transition hover:bg-cana-dark"
+                >
+                  확인
+                </button>
+              </div>
+            ) : (
+              /* 발송 전 확인 */
+              <>
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50">
+                    <svg className="h-5 w-5 text-amber-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-800">장소 확정 문자 발송</h3>
+                </div>
+
+                <p className="mb-4 text-sm text-gray-500">
+                  확정 참여자 전원({data.participants.length}명)에게 아래 내용으로 문자를 발송해요.
+                  <br />한 번 발송하면 취소할 수 없어요.
+                </p>
+
+                {/* 미리보기 */}
+                <div className="mb-5 rounded-xl bg-gray-50 px-4 py-3 text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+                  {[
+                    `[카나] 홍길동님 ${formatDate(data.event.event_date).split(' ').slice(0, 2).join(' ')} 소개팅 장소가 확정되었습니다.`,
+                    '',
+                    `- 장소: ${data.event.venue_name ?? ''}`,
+                    `- 주소: ${data.event.venue_detail ?? data.event.location ?? ''}`,
+                    data.event.venue_url ? `- 오시는 길: ${data.event.venue_url}` : '',
+                    '',
+                    '신분증을 반드시 지참해 주세요.',
+                  ].filter(Boolean).join('\n')}
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setVenueNotifyModal(false)}
+                    disabled={sendingNotify}
+                    className="flex-1 rounded-xl border border-gray-200 py-2.5 text-base text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleSendVenueNotify}
+                    disabled={sendingNotify}
+                    className="flex-1 rounded-xl bg-cana py-2.5 text-base font-medium text-white transition hover:bg-cana-dark disabled:opacity-50"
+                  >
+                    {sendingNotify ? '발송 중...' : '발송'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── 이벤트 수정 모달 ── */}

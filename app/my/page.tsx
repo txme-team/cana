@@ -17,6 +17,11 @@ interface ApplicationItem {
   event_title: string;
   event_date: string;
   event_location: string;
+  // 결제 정보
+  order_id:   string | null;
+  paid_at:    string | null;
+  amount:     number | null;
+  pay_method: string | null;
 }
 
 type Tab = '내 정보' | '프로필 카드' | '신청 내역';
@@ -225,7 +230,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
       {profile.faith_level && (
         <div>
           <p className="mb-1.5 text-xs text-cana-ink3">신앙 단계</p>
-          <p className="text-sm text-cana-ink">{profile.faith_level}</p>
+          <p className="text-sm font-medium text-cana-ink">{profile.faith_level}</p>
         </div>
       )}
       <div className="flex flex-wrap gap-3">
@@ -267,21 +272,49 @@ function ApplicationsSection({ applications }: { applications: ApplicationItem[]
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {applications.map((app) => (
-        <div
-          key={app.id}
-          className="flex items-center justify-between rounded-2xl border border-cana-rule bg-white px-5 py-4"
-        >
-          <div className="flex flex-col gap-1">
-            <p className="text-base font-semibold text-cana-ink">{app.event_title || '—'}</p>
-            <p className="text-sm text-cana-ink3">
-              {formatDate(app.event_date)}{app.event_location ? ` · ${app.event_location}` : ''}
-            </p>
-          </div>
-          <StatusBadge status={app.status} />
-        </div>
-      ))}
+    <div className="overflow-hidden rounded-2xl border border-cana-rule bg-white">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-cana-rule bg-cana-cream">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-cana-ink3">일정</th>
+            <th className="px-4 py-3 text-left text-xs font-semibold text-cana-ink3">결제일</th>
+            <th className="px-4 py-3 text-right text-xs font-semibold text-cana-ink3">금액</th>
+            <th className="px-4 py-3 text-right text-xs font-semibold text-cana-ink3">상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          {applications.map((app, i) => (
+            <tr
+              key={app.id}
+              className={i !== applications.length - 1 ? 'border-b border-cana-rule' : ''}
+            >
+              {/* 일정 */}
+              <td className="px-4 py-4">
+                <p className="font-medium text-cana-ink">{app.event_title || '—'}</p>
+                <p className="mt-0.5 text-xs text-cana-ink3">
+                  {formatDate(app.event_date)}{app.event_location ? ` · ${app.event_location}` : ''}
+                </p>
+              </td>
+              {/* 결제일 */}
+              <td className="px-4 py-4 text-cana-ink3">
+                {app.paid_at
+                  ? new Date(app.paid_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })
+                  : '—'}
+              </td>
+              {/* 금액 */}
+              <td className="px-4 py-4 text-right">
+                {app.amount != null
+                  ? <span className="font-medium text-cana-ink">{app.amount.toLocaleString('ko-KR')}원</span>
+                  : <span className="text-cana-ink3">—</span>}
+              </td>
+              {/* 상태 */}
+              <td className="px-4 py-4 text-right">
+                <StatusBadge status={app.status} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -319,7 +352,7 @@ function QnASection({ essays }: { essays: Record<string, string> | undefined }) 
         {answered.map(({ field, label }) => (
           <div key={field} className="rounded-xl bg-cana/5 px-4 py-3.5">
             <p className="mb-1.5 text-xs font-semibold text-cana">{label}</p>
-            <p className="text-sm leading-relaxed text-cana-ink">{essays![field]}</p>
+            <p className="text-base leading-relaxed text-cana-ink">{essays![field]}</p>
           </div>
         ))}
       </div>

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { notifyNewProfile, notifyError } from '@/lib/slack';
+import { sendSMS } from '@/lib/sms';
+import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
+
+async function fetchTemplateContent(supa: any, key: string): Promise<string> { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const { data } = await supa.from('sms_templates').select('content').eq('key', key).maybeSingle() as { data: { content: string } | null };
+  return data?.content ?? DEFAULT_TEMPLATES.find((t) => t.key === key)?.content ?? '';
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,9 +47,9 @@ export async function POST(req: NextRequest) {
 
     // ── 프로필 조회 ──────────────────────────────────────────────────────────
     const { data: profile } = await supa
-      .from('profiles').select('id, nickname')
+      .from('profiles').select('id, nickname, name, phone')
       .eq('user_id', user.id).maybeSingle() as
-      { data: { id: string; nickname: string } | null };
+      { data: { id: string; nickname: string; name: string | null; phone: string | null } | null };
 
     if (!profile) {
       return NextResponse.json({ error: '프로필을 먼저 작성해주세요.' }, { status: 400 });
@@ -67,6 +74,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Toss 응답에서 결제 상세 정보 추출
+    const tossPayment = await tossRes.json().catch(() => ({})) as {
+      approvedAt?: string;
+      method?: string;
+      totalAmount?: number;
+    };
+
     // ── 중복 신청 최종 검사 ───────────────────────────────────────────────────
     const { data: existing } = await supa
       .from('applications').select('id, status')
@@ -86,14 +100,22 @@ export async function POST(req: NextRequest) {
     // ── 신청 레코드 생성 (또는 취소 → 검토중으로 업데이트) ─────────────────────
     let applicationId: string;
 
+    const paymentFields = {
+      order_id:    orderId,
+      payment_key: paymentKey,
+      paid_at:     tossPayment.approvedAt ?? new Date().toISOString(),
+      amount:      tossPayment.totalAmount ?? amount,
+      pay_method:  tossPayment.method ?? null,
+    };
+
     if (existing && existing.status === '취소') {
       // 취소 후 재신청 — UNIQUE 제약으로 insert 불가, 기존 행 업데이트
-      await supa.from('applications').update({ status: '검토중' }).eq('id', existing.id);
+      await supa.from('applications').update({ status: '검토중', ...paymentFields }).eq('id', existing.id);
       applicationId = existing.id;
     } else {
       const { data: application, error: appError } = await supa
         .from('applications')
-        .insert({ profile_id: profile.id, event_id: eventId, status: '검토중' })
+        .insert({ profile_id: profile.id, event_id: eventId, status: '검토중', ...paymentFields })
         .select('id').single() as { data: { id: string } | null; error: { message: string } | null };
 
       if (appError) throw new Error(`신청 저장 실패: ${appError.message}`);
@@ -107,6 +129,55 @@ export async function POST(req: NextRequest) {
       agree_profile_share: agreeProfileShare ?? false,
       agree_instagram:     agreeInstagram ?? false,
     }).eq('id', profile.id);
+
+    // ── 약관 동의 저장 ────────────────────────────────────────────────────────
+    // (이미 위에서 처리됨)
+
+    // ── waitlist '연락됨' 복원 ────────────────────────────────────────────────
+    // 이 결제로 해당 성별 자리가 찼으면 '연락됨' 대기자들을 다시 '대기중'으로
+    try {
+      const { data: pProfile } = await supa
+        .from('profiles').select('gender').eq('id', profile.id).maybeSingle() as
+        { data: { gender: string | null } | null };
+
+      const { count: activeCount } = await supa
+        .from('applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+        .in('status', ['검토중', '대기', '확정']) as { count: number | null };
+
+      const { data: eventData } = await supa
+        .from('events').select('capacity').eq('id', eventId).maybeSingle() as
+        { data: { capacity: number } | null };
+
+      if (pProfile?.gender && eventData && (activeCount ?? 0) >= eventData.capacity) {
+        // 자리가 다 찼으므로 같은 성별 '연락됨' → 다시 '대기중'으로 복원
+        await supa
+          .from('waitlist')
+          .update({ status: '대기중', notified_at: null })
+          .eq('event_id', eventId)
+          .eq('gender', pProfile.gender)
+          .eq('status', '연락됨');
+      }
+    } catch (waitErr) {
+      console.error('[waitlist restore error]', waitErr);
+    }
+
+    // ── 신청 완료 SMS ─────────────────────────────────────────────────────────
+    try {
+      const { data: evtData } = await supa
+        .from('events').select('event_date').eq('id', eventId).maybeSingle() as
+        { data: { event_date: string } | null };
+
+      if (profile.phone && evtData?.event_date) {
+        const displayName = profile.name ?? profile.nickname;
+        const content = await fetchTemplateContent(supa, 'application_complete');
+        const text = substituteVars(content, { name: displayName, ...buildEventVars(evtData) });
+        await sendSMS([profile.phone], text);
+      }
+    } catch (smsErr) {
+      console.error('[신청완료 SMS error]', smsErr);
+    }
 
     // ── 슬랙 알림 ─────────────────────────────────────────────────────────────
     await notifyNewProfile(profile.nickname, applicationId).catch(() => {});

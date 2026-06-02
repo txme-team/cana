@@ -2,15 +2,42 @@
 
 import { useState, useEffect } from 'react';
 import { useForm, FormProvider, useFormContext, Controller } from 'react-hook-form';
+import Script from 'next/script';
 import Link from 'next/link';
 import type { ApplyFormData } from '@/lib/types';
 import type { Profile } from '@/lib/types';
+import { PAYMENT_PENDING_KEY, type PendingPayload } from '@/lib/payment';
 import Nav from '@/components/landing/Nav';
 import BackButton from '@/components/landing/BackButton';
 import Step0 from '@/components/apply/Step0';
-import StepPayment from '@/components/apply/StepPayment';
 
-const STEPS = ['일정', '프로필 확인', '동의', '결제'];
+// ─── Toss Payments V2 Standard 타입 선언 ──────────────────────────────────────
+
+declare global {
+  interface Window {
+    TossPayments?: (clientKey: string) => {
+      payment: (options: { customerKey: string }) => {
+        requestPayment: (options: {
+          method: string;
+          amount: { value: number; currency: string };
+          orderId: string;
+          orderName: string;
+          successUrl: string;
+          failUrl: string;
+        }) => Promise<void>;
+      };
+    };
+  }
+}
+
+const STEPS = ['일정', '프로필 확인', '동의'];
+
+interface EventOption {
+  id: string;
+  title: string;
+  capacity: number;
+  confirmed_count: number;
+}
 
 // ─── Step 1: Profile Review ────────────────────────────────────────────────────
 
@@ -74,7 +101,7 @@ function StepProfileReview({ profile }: { profile: Profile | null }) {
         </div>
       </div>
 
-      {/* 수정 링크만 카드 안에 */}
+      {/* 수정 링크 */}
       <button
         type="button"
         onClick={handleEdit}
@@ -272,10 +299,12 @@ function StepAgreements() {
 
 const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   ['eventId'],
-  [], // profile review — no form fields to validate
+  [], // 프로필 확인 — 폼 필드 없음
   ['agreePrivacy', 'agreeAttendance'],
-  [], // payment — handled by StepPayment
 ];
+
+const TOSS_AMOUNT = parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '50000', 10);
+const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
 export default function ApplyPage() {
   const [step, setStep] = useState(0);
@@ -283,7 +312,16 @@ export default function ApplyPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const [eventTitle, setEventTitle] = useState('cana 소개팅');
+  const [tossReady, setTossReady] = useState(false);
+
+  // ── 대기 신청 모달 상태 ──────────────────────────────────────────────────────
+  const [waitlistModal, setWaitlistModal] = useState<{
+    open: boolean;
+    event: EventOption | null;
+    loading: boolean;
+    done: boolean;
+    error: string | null;
+  }>({ open: false, event: null, loading: false, done: false, error: null });
 
   useEffect(() => {
     fetch('/api/profile')
@@ -310,7 +348,7 @@ export default function ApplyPage() {
     mode: 'onTouched',
   });
 
-  // Expose getValues to window so StepProfileReview can save eventId before navigation
+  // StepProfileReview에서 프로필 수정 전 eventId 보존용
   useEffect(() => {
     (window as unknown as { __applyFormMethods?: unknown }).__applyFormMethods = {
       getValues: methods.getValues,
@@ -320,7 +358,7 @@ export default function ApplyPage() {
     };
   }, [methods]);
 
-  // sessionStorage 복원 (profile/create 에서 돌아온 경우)
+  // profile/create 에서 돌아온 경우 eventId 복원
   useEffect(() => {
     const savedEventId = sessionStorage.getItem('cana_apply_eventId');
     if (savedEventId) {
@@ -337,17 +375,15 @@ export default function ApplyPage() {
     const params = new URLSearchParams(window.location.search);
     const eventId = params.get('eventId');
     if (!eventId) return;
-    // URL 정리
     window.history.replaceState({}, '', '/apply');
     methods.setValue('eventId', eventId);
-    // 프로필이 있어야 step 1로 이동, 없으면 step 0에서 배너 표시
     if (profile) setStep(1);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileLoaded]);
 
   const handleNext = async () => {
     if (step === 2) {
-      // Step 2 → 3: 약관 검증 후 서버 적격 검사 (레코드 생성 없음)
+      // 약관 검증
       const valid = await methods.trigger(STEP_FIELDS[2]);
       if (!valid) return;
 
@@ -355,36 +391,95 @@ export default function ApplyPage() {
       setServerError(null);
 
       try {
-        const eventId = methods.getValues().eventId;
+        const values = methods.getValues();
+        const { eventId } = values;
 
-        // 적격 검사 (중복 신청 등)
+        // 적격 검사 (중복 신청 등 — 레코드 생성 없음)
         const checkRes = await fetch(`/api/apply?eventId=${eventId}`);
         if (!checkRes.ok) {
           const err = await checkRes.json().catch(() => ({})) as { error?: string };
           throw new Error(err.error ?? '신청 자격 확인에 실패했어요.');
         }
 
-        // 이벤트 제목 조회
-        const evRes = await fetch('/api/events');
-        const evList = await evRes.json() as { id: string; title: string }[];
-        const selectedEv = Array.isArray(evList) ? evList.find((e) => e.id === eventId) : null;
-        if (selectedEv) setEventTitle(selectedEv.title);
+        // orderId 생성
+        const orderId = crypto.randomUUID();
 
-        setStep(3);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Toss 리다이렉트 후 /apply/success 에서 읽을 데이터 저장
+        const pending: PendingPayload = {
+          orderId,
+          eventId,
+          agreePrivacy:      values.agreePrivacy      ?? false,
+          agreeAttendance:   values.agreeAttendance   ?? false,
+          agreeProfileShare: values.agreeProfileShare ?? false,
+          agreeInstagram:    values.agreeInstagram    ?? false,
+        };
+        sessionStorage.setItem(PAYMENT_PENDING_KEY, JSON.stringify(pending));
+
+        // Toss Standard Payment Window 호출 — 성공 시 successUrl 로 리다이렉트
+        const tossPayments = window.TossPayments!(TOSS_CLIENT_KEY);
+        await tossPayments.payment({ customerKey: profile!.user_id })
+          .requestPayment({
+            method: 'CARD',
+            amount: { value: TOSS_AMOUNT, currency: 'KRW' },
+            orderId,
+            orderName: 'cana 소개팅 참여비',
+            successUrl: `${window.location.origin}/apply/success`,
+            failUrl:    `${window.location.origin}/apply/fail`,
+          });
+        // 리다이렉트 발생 — 아래 코드는 실행 안 됨
       } catch (err) {
+        sessionStorage.removeItem(PAYMENT_PENDING_KEY);
         setServerError(err instanceof Error ? err.message : '오류가 발생했어요.');
-      } finally {
         setSubmitting(false);
       }
       return;
     }
 
-    // 기본 이동
+    // step 0, 1: 기본 이동
     const valid = await methods.trigger(STEP_FIELDS[step]);
-    if (valid) {
-      setStep((s) => s + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!valid) return;
+
+    // step 0: 선택한 이벤트가 마감인지 확인
+    if (step === 0) {
+      const eventId = methods.getValues().eventId;
+      try {
+        const eventsData = await fetch('/api/events').then((r) => r.json()) as EventOption[];
+        const selected = eventsData.find((e) => e.id === eventId);
+        if (selected && selected.confirmed_count >= selected.capacity) {
+          // 마감된 이벤트 → 대기 신청 모달 표시
+          setWaitlistModal({ open: true, event: selected, loading: false, done: false, error: null });
+          return;
+        }
+      } catch {
+        // 체크 실패 시 그냥 다음 단계로
+      }
+    }
+
+    setStep((s) => s + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ── 대기 신청 확정 ───────────────────────────────────────────────────────────
+  const handleWaitlistConfirm = async () => {
+    if (!waitlistModal.event) return;
+    setWaitlistModal((m) => ({ ...m, loading: true, error: null }));
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: waitlistModal.event.id }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(err.error ?? '대기 신청에 실패했어요.');
+      }
+      setWaitlistModal((m) => ({ ...m, loading: false, done: true }));
+    } catch (e) {
+      setWaitlistModal((m) => ({
+        ...m,
+        loading: false,
+        error: e instanceof Error ? e.message : '오류가 발생했어요.',
+      }));
     }
   };
 
@@ -393,14 +488,22 @@ export default function ApplyPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 폼 submit은 결제 스텝(3)이 자체 버튼으로 처리하므로 기본 방지만
   const onSubmit = () => {};
+
+  const formattedAmount = TOSS_AMOUNT.toLocaleString('ko-KR');
 
   return (
     <div className="min-h-screen bg-cana-cream">
+      {/* Toss Payments V2 Standard SDK */}
+      <Script
+        src="https://js.tosspayments.com/v2/standard"
+        strategy="afterInteractive"
+        onReady={() => setTossReady(true)}
+      />
+
       <Nav />
 
-      {/* 진행 바 — Nav 아래 고정 */}
+      {/* 진행 바 */}
       <div className="fixed left-0 right-0 top-[68px] z-40 h-0.5 bg-cana-rule">
         <div
           className="h-full bg-cana transition-all duration-500"
@@ -431,7 +534,7 @@ export default function ApplyPage() {
           ))}
         </div>
 
-        {/* 프로필 없음 배너 (Step 0에서만, 프로필 로드 완료 후) */}
+        {/* 프로필 없음 배너 (Step 0, 프로필 로드 완료 후) */}
         {step === 0 && profileLoaded && !profile && (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
             <p className="text-sm font-medium text-amber-800">
@@ -453,50 +556,115 @@ export default function ApplyPage() {
               {step === 0 && <Step0 />}
               {step === 1 && <StepProfileReview profile={profile} />}
               {step === 2 && <StepAgreements />}
-              {step === 3 && profile && (
-                <StepPayment
-                  eventId={methods.getValues().eventId}
-                  eventTitle={eventTitle}
-                  amount={parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '39000', 10)}
-                  customerKey={profile.user_id}
-                  agreePrivacy={methods.getValues().agreePrivacy ?? false}
-                  agreeAttendance={methods.getValues().agreeAttendance ?? false}
-                  agreeProfileShare={methods.getValues().agreeProfileShare ?? false}
-                  agreeInstagram={methods.getValues().agreeInstagram ?? false}
-                />
-              )}
             </div>
 
             {serverError && (
               <p className="mt-4 text-center text-sm text-red-500">{serverError}</p>
             )}
 
-            {/* 네비게이션 — 모든 스텝 동일 구조 */}
+            {/* 네비게이션 */}
             <div className="mt-5 flex items-center gap-3">
               {step > 0 && (
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="flex-shrink-0 rounded-xl border border-cana-rule px-5 py-3 text-base text-cana-ink3 transition active:bg-cana-cream"
+                  disabled={submitting}
+                  className="flex-shrink-0 rounded-xl border border-cana-rule px-5 py-3 text-base text-cana-ink3 transition active:bg-cana-cream disabled:opacity-40"
                 >
                   이전
                 </button>
               )}
-              {/* step 3: StepPayment 내부에 결제 버튼이 있으므로 다음 버튼 없음 */}
-              {step < 3 && (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={submitting || (step === 0 && profileLoaded && !profile)}
-                  className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
-                >
-                  {submitting && step === 2 ? '확인 중...' : '다음'}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={
+                  submitting ||
+                  (step === 0 && profileLoaded && !profile) ||
+                  (step === 2 && !tossReady)
+                }
+                className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
+              >
+                {step === 2
+                  ? submitting
+                    ? '결제 중...'
+                    : !tossReady
+                    ? '결제 준비 중...'
+                    : `${formattedAmount}원 결제하기`
+                  : '다음'}
+              </button>
             </div>
           </form>
         </FormProvider>
       </main>
+
+      {/* ── 대기 신청 확인 모달 ──────────────────────────────────────────────── */}
+      {waitlistModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5"
+          onClick={() => !waitlistModal.loading && setWaitlistModal((m) => ({ ...m, open: false }))}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {waitlistModal.done ? (
+              /* 완료 상태 */
+              <div className="flex flex-col items-center gap-3 py-2 text-center">
+                <span className="text-3xl">🎉</span>
+                <p className="text-base font-semibold text-cana-ink">대기 신청 완료!</p>
+                <p className="text-sm text-cana-ink3 leading-relaxed">
+                  빈자리가 생기면 문자로 알려드릴게요.<br />
+                  마이페이지에서 대기 현황을 확인할 수 있어요.
+                </p>
+                <button
+                  onClick={() => setWaitlistModal((m) => ({ ...m, open: false }))}
+                  className="mt-2 w-full rounded-xl bg-cana py-3 text-sm font-medium text-white transition active:bg-cana-dark"
+                >
+                  확인
+                </button>
+              </div>
+            ) : (
+              /* 확인 요청 상태 */
+              <>
+                <p className="mb-1 text-center text-base font-semibold text-cana-ink">
+                  대기 신청할까요?
+                </p>
+                <p className="mb-1 text-center text-sm font-medium text-cana">
+                  {waitlistModal.event?.title}
+                </p>
+                <p className="mb-5 text-center text-sm leading-relaxed text-cana-ink3">
+                  현재 정원이 마감됐어요.<br />
+                  빈자리가 생기면 문자로 알려드리고,<br />
+                  가장 먼저 결제하신 분이 자리를 확보해요.
+                </p>
+
+                {waitlistModal.error && (
+                  <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-center text-xs text-red-500">
+                    {waitlistModal.error}
+                  </p>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setWaitlistModal((m) => ({ ...m, open: false }))}
+                    disabled={waitlistModal.loading}
+                    className="flex-1 rounded-xl border border-cana-rule py-3 text-sm text-cana-ink3 transition hover:bg-cana-cream disabled:opacity-40"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleWaitlistConfirm}
+                    disabled={waitlistModal.loading}
+                    className="flex-1 rounded-xl bg-cana py-3 text-sm font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
+                  >
+                    {waitlistModal.loading ? '신청 중...' : '대기 신청'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
