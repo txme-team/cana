@@ -20,28 +20,29 @@ function LoginContent() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-cana-cream px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-cana-rule bg-white p-8 shadow-sm">
+    <div className="flex min-h-screen flex-col justify-center bg-cana-cream px-8">
+      <div className="w-full max-w-sm">
         {/* 로고 */}
-        <div className="mb-8 text-center">
-          <img src="/logos/logo_black.svg" alt="cana" className="mx-auto h-[14px]" />
+        <div className="mb-10">
+          <img src="/logos/logo_black.svg" alt="cana" className="h-[14px]" />
           <p className="mt-2 text-xs text-cana-ink3/60">CHRISTIAN ROTATION DATING</p>
         </div>
 
-        <div className="mb-6 text-center">
-          <p className="text-sm font-medium text-cana-ink">신청을 위해 로그인해주세요</p>
-          <p className="mt-1 text-xs text-cana-ink3">구글 계정으로 간편하게 시작할 수 있어요</p>
+        {/* 타이틀 */}
+        <div className="mb-8">
+          <p className="text-[18px] font-semibold text-cana-ink">카나 로그인</p>
+          <p className="mt-1.5 text-[16px] text-cana-ink3">구글 계정으로 간편하게 시작할 수 있어요</p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-xs text-red-500">
+          <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-500">
             로그인 중 오류가 발생했어요. 다시 시도해주세요.
           </div>
         )}
 
         <button
           onClick={handleGoogleLogin}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-cana-rule bg-white px-4 py-3 text-sm font-medium text-cana-ink transition hover:bg-cana-cream active:bg-cana-cream"
+          className="flex w-full items-center justify-center gap-3 rounded-xl border border-cana-rule bg-white px-4 py-3.5 text-base font-medium text-cana-ink transition hover:bg-cana-cream active:bg-cana-cream"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -52,7 +53,7 @@ function LoginContent() {
           Google로 계속하기
         </button>
 
-        <p className="mt-6 text-center text-[11px] leading-relaxed text-cana-ink3/60">
+        <p className="mt-6 text-[11px] leading-relaxed text-cana-ink3/60">
           로그인 시 cana의{' '}
           <span className="underline">서비스 이용약관</span> 및{' '}
           <span className="underline">개인정보처리방침</span>에 동의하는 것으로 간주돼요.
