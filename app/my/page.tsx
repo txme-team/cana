@@ -253,7 +253,15 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
   );
 }
 
-function ApplicationsSection({ applications }: { applications: ApplicationItem[] | 'loading' }) {
+const CANCELLABLE_STATUSES = ['검토중', '대기'];
+
+function ApplicationsSection({
+  applications,
+  onCancelRequest,
+}: {
+  applications: ApplicationItem[] | 'loading';
+  onCancelRequest: (app: ApplicationItem) => void;
+}) {
   if (applications === 'loading') return <Spinner />;
 
   if (!applications.length) {
@@ -307,9 +315,20 @@ function ApplicationsSection({ applications }: { applications: ApplicationItem[]
                   ? <span className="font-medium text-cana-ink">{app.amount.toLocaleString('ko-KR')}원</span>
                   : <span className="text-cana-ink3">—</span>}
               </td>
-              {/* 상태 */}
+              {/* 상태 + 취소 */}
               <td className="px-4 py-4 text-right">
-                <StatusBadge status={app.status} />
+                <div className="flex flex-col items-end gap-1.5">
+                  <StatusBadge status={app.status} />
+                  {CANCELLABLE_STATUSES.includes(app.status) && (
+                    <button
+                      type="button"
+                      onClick={() => onCancelRequest(app)}
+                      className="text-xs text-cana-ink3/50 underline underline-offset-2 transition hover:text-red-400"
+                    >
+                      취소
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
@@ -452,17 +471,45 @@ export default function MyPage() {
   const [profile, setProfile] = useState<Profile | null | 'loading'>('loading');
   const [applications, setApplications] = useState<ApplicationItem[] | 'loading'>('loading');
 
+  // ── 취소 모달 ──────────────────────────────────────────────────────────────
+  const [cancelTarget, setCancelTarget] = useState<ApplicationItem | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const loadApplications = () => {
+    fetch('/api/my-applications')
+      .then((r) => r.json())
+      .then((data) => setApplications(Array.isArray(data) ? data : []))
+      .catch(() => setApplications([]));
+  };
+
   useEffect(() => {
     fetch('/api/profile')
       .then((r) => r.json())
       .then((data) => setProfile(data && !data.error ? (data as Profile) : null))
       .catch(() => setProfile(null));
 
-    fetch('/api/my-applications')
-      .then((r) => r.json())
-      .then((data) => setApplications(Array.isArray(data) ? data : []))
-      .catch(() => setApplications([]));
+    loadApplications();
   }, []);
+
+  const handleCancelConfirm = async () => {
+    if (!cancelTarget) return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      const res = await fetch(`/api/my-applications/${cancelTarget.id}/cancel`, { method: 'POST' });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(error ?? '취소에 실패했어요.');
+      }
+      setCancelTarget(null);
+      loadApplications();
+    } catch (e) {
+      setCancelError(e instanceof Error ? e.message : '오류가 발생했어요.');
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   return (
     <>
@@ -496,10 +543,60 @@ export default function MyPage() {
           {/* 탭 콘텐츠 */}
           {tab === '내 정보'    && <InfoSection       profile={profile} />}
           {tab === '프로필 카드' && <ProfileCardSection profile={profile} />}
-          {tab === '신청 내역'  && <ApplicationsSection applications={applications} />}
+          {tab === '신청 내역'  && (
+            <ApplicationsSection
+              applications={applications}
+              onCancelRequest={(app) => { setCancelTarget(app); setCancelError(null); }}
+            />
+          )}
 
         </div>
       </main>
+      {/* 취소 확인 모달 */}
+      {cancelTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6"
+          onClick={() => !cancelling && setCancelTarget(null)}
+        >
+          <div
+            className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-[18px] font-semibold text-gray-800">신청을 취소할까요?</p>
+            <p className="text-[15px] text-gray-500">{cancelTarget.event_title}</p>
+
+            {cancelTarget.amount != null ? (
+              <p className="mt-2 text-[15px] text-gray-500">
+                결제하신 <span className="font-medium text-cana-ink">{cancelTarget.amount.toLocaleString('ko-KR')}원</span>이 전액 환불돼요.
+              </p>
+            ) : (
+              <p className="mt-2 text-[15px] text-gray-500">취소 후 되돌릴 수 없어요.</p>
+            )}
+
+            {cancelError && (
+              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-500">{cancelError}</p>
+            )}
+
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setCancelTarget(null)}
+                disabled={cancelling}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
+              >
+                닫기
+              </button>
+              <button
+                onClick={handleCancelConfirm}
+                disabled={cancelling}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-40"
+              >
+                {cancelling ? '처리 중...' : '취소하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );
