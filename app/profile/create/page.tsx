@@ -72,6 +72,35 @@ function StepPhone() {
   );
 }
 
+// ─── 임시저장 헬퍼 ────────────────────────────────────────────────────────────
+
+const DRAFT_KEY = 'cana_profile_draft';
+
+type DraftPayload = {
+  fields: Partial<Omit<ApplyFormData, 'photo' | 'workplaceVerification' | 'churchVerification'>>;
+  step: number;
+};
+
+function saveDraft(values: Partial<ApplyFormData>, step: number) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { photo: _p, workplaceVerification: _w, churchVerification: _c, ...saveable } = values as ApplyFormData;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ fields: saveable, step } satisfies DraftPayload));
+  } catch { /* ignore */ }
+}
+
+function loadDraft(): DraftPayload | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as DraftPayload;
+  } catch { return null; }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 const STEPS = ['프로필', '라이프스타일', '신앙', 'Q&A', '인증', '연락처'];
@@ -180,6 +209,8 @@ function ProfileCreateContent() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
 
   const methods = useForm<ApplyFormData>({
     defaultValues: {
@@ -222,9 +253,30 @@ function ProfileCreateContent() {
       .then((profile) => {
         if (profile && !profile.error) {
           prefillFromProfile(profile, methods.setValue);
+        } else {
+          // 신규 사용자 → localStorage 임시저장 복원
+          const draft = loadDraft();
+          if (draft) {
+            Object.entries(draft.fields).forEach(([k, v]) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              methods.setValue(k as keyof ApplyFormData, v as any);
+            });
+            setStep(draft.step);
+            setDraftRestored(true);
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        const draft = loadDraft();
+        if (draft) {
+          Object.entries(draft.fields).forEach(([k, v]) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            methods.setValue(k as keyof ApplyFormData, v as any);
+          });
+          setStep(draft.step);
+          setDraftRestored(true);
+        }
+      });
 
     // 2) 온보딩에서 저장한 전화번호 (user_metadata) pre-fill
     import('@/lib/supabase/client').then(({ createClient }) => {
@@ -236,16 +288,43 @@ function ProfileCreateContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 입력 변경 시 자동저장 (2초 debounce)
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const { unsubscribe } = methods.watch((values) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        saveDraft(values as Partial<ApplyFormData>, step);
+        setSavedAt(new Date());
+      }, 2000);
+    });
+    return () => { clearTimeout(timeout); unsubscribe(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  // 페이지 이탈 시 저장
+  useEffect(() => {
+    const onUnload = () => saveDraft(methods.getValues(), step);
+    window.addEventListener('beforeunload', onUnload);
+    return () => window.removeEventListener('beforeunload', onUnload);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
   const handleNext = async () => {
     const valid = await methods.trigger(STEP_FIELDS[step]);
     if (valid) {
-      setStep((s) => s + 1);
+      const nextStep = step + 1;
+      saveDraft(methods.getValues(), nextStep);
+      setSavedAt(new Date());
+      setStep(nextStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrev = () => {
-    setStep((s) => s - 1);
+    const prevStep = step - 1;
+    saveDraft(methods.getValues(), prevStep);
+    setStep(prevStep);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -329,6 +408,7 @@ function ProfileCreateContent() {
         throw new Error(err.error ?? '저장에 실패했어요. 다시 시도해주세요.');
       }
 
+      clearDraft();
       router.push(returnTo);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : '오류가 발생했어요.');
@@ -353,9 +433,35 @@ function ProfileCreateContent() {
         <BackButton />
         <h1 className="mb-6 text-xl font-bold text-cana-ink">프로필 카드 작성</h1>
 
+        {/* 임시저장 복원 배너 */}
+        {draftRestored && (
+          <div className="mb-4 flex items-center justify-between rounded-xl bg-cana/5 px-4 py-3">
+            <p className="text-sm text-cana">이전에 작성하던 내용을 불러왔어요 ✓</p>
+            <button
+              type="button"
+              onClick={() => {
+                clearDraft();
+                methods.reset();
+                setStep(0);
+                setDraftRestored(false);
+              }}
+              className="text-xs text-cana-ink3/60 underline underline-offset-2"
+            >
+              초기화
+            </button>
+          </div>
+        )}
+
         {/* 스텝 인디케이터 */}
-        <div className="mb-8">
-          <StepIndicator steps={STEPS} current={step} />
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <StepIndicator steps={STEPS} current={step} />
+          </div>
+          {savedAt && (
+            <p className="flex-shrink-0 text-xs text-cana-ink3/50">
+              임시저장 {savedAt.getHours().toString().padStart(2, '0')}:{savedAt.getMinutes().toString().padStart(2, '0')}
+            </p>
+          )}
         </div>
 
         {/* 폼 */}
