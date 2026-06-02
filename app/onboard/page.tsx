@@ -56,8 +56,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         </p>
         <p className="text-sm leading-relaxed text-cana-ink3">
           cana에 오신 걸 환영해요.<br />
-          소개팅 매칭 알림을 받기 위해<br />
-          연락처를 먼저 등록해주세요.
+          소개팅 매칭 알림을 받기 위해 연락처를 먼저 등록해주세요.
         </p>
       </div>
 
@@ -85,7 +84,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
           <p className="text-xs text-red-500">{error}</p>
         ) : (
           <p className="text-xs text-cana-ink3/60">
-            🔒 연락처는 매칭 확정 시 상대방에게만 공개돼요.
+            🔒 연락처는 운영자만 확인할 수 있어요.
           </p>
         )}
       </div>

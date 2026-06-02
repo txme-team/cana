@@ -214,8 +214,9 @@ function ProfileCreateContent() {
     mode: 'onTouched',
   });
 
-  // Pre-fill if existing profile
+  // Pre-fill from existing profile or onboarding user_metadata
   useEffect(() => {
+    // 1) 기존 프로필 데이터로 pre-fill
     fetch('/api/profile')
       .then((r) => r.json())
       .then((profile) => {
@@ -224,6 +225,14 @@ function ProfileCreateContent() {
         }
       })
       .catch(() => {});
+
+    // 2) 온보딩에서 저장한 전화번호 (user_metadata) pre-fill
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      createClient().auth.getUser().then(({ data }) => {
+        const metaPhone = data?.user?.user_metadata?.phone as string | undefined;
+        if (metaPhone) methods.setValue('phone', metaPhone);
+      }).catch(() => {});
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

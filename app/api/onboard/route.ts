@@ -1,6 +1,7 @@
 /**
  * POST /api/onboard
- * 온보딩 1단계: 연락처 저장 (프로필 레코드 upsert — phone + nickname)
+ * 온보딩 1단계: 연락처를 user_metadata에 저장
+ * (profiles 테이블은 NOT NULL 제약이 많아 전화번호만 INSERT 불가 → auth metadata 활용)
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
@@ -19,20 +20,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '올바른 연락처 형식이 아닙니다.' }, { status: 400 });
     }
 
-    const nickname =
-      (user.user_metadata?.full_name as string | undefined) ??
-      (user.user_metadata?.name    as string | undefined) ??
-      '';
-
+    // user_metadata에 전화번호 저장 (profiles 스키마 제약 없음)
     const supabase = createServiceClient();
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from('profiles')
-      .upsert(
-        { user_id: user.id, phone: phone.trim(), nickname },
-        { onConflict: 'user_id', ignoreDuplicates: false }
-      );
+    const { error } = await (supabase as any).auth.admin.updateUserById(user.id, {
+      user_metadata: {
+        ...user.user_metadata,
+        phone: phone.trim(),
+      },
+    });
 
     if (error) throw new Error(error.message);
 
