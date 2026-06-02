@@ -15,8 +15,12 @@ import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-tem
 function verifyCron(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET?.trim();
   if (!secret) return true;
-  const incoming = (req.headers.get('authorization') ?? '').trim();
-  return incoming === `Bearer ${secret}`;
+  // 헤더 방식
+  const headerAuth = (req.headers.get('authorization') ?? '').trim();
+  if (headerAuth === `Bearer ${secret}`) return true;
+  // 쿼리 파라미터 방식 (?secret=xxx)
+  const querySecret = req.nextUrl.searchParams.get('secret')?.trim() ?? '';
+  return querySecret === secret;
 }
 
 function nowKST(): Date {
@@ -45,18 +49,7 @@ async function fetchConfirmedParticipants(supa: any, eventId: string) {
 
 export async function GET(req: NextRequest) {
   if (!verifyCron(req)) {
-    const raw = req.headers.get('authorization') ?? '';
-    const secret = process.env.CRON_SECRET ?? '';
-    return NextResponse.json({
-      error: 'Unauthorized',
-      debug: {
-        incoming: raw,
-        incoming_length: raw.length,
-        expected: `Bearer ${secret.trim()}`,
-        expected_length: `Bearer ${secret.trim()}`.length,
-        secret_set: !!process.env.CRON_SECRET,
-      },
-    }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const kst     = nowKST();
