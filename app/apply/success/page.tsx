@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Nav from '@/components/landing/Nav';
 import SuccessHandler from './SuccessHandler';
 
+export const dynamic = 'force-dynamic';
 export const metadata = { title: '결제 확인 중 | cana' };
 
 export default function PaymentSuccessPage() {

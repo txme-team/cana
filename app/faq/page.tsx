@@ -3,6 +3,8 @@ import FAQ from '@/components/landing/FAQ';
 import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: '자주 묻는 질문 | cana',
 };

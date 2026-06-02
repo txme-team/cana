@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -170,7 +170,7 @@ function prefillFromProfile(
   // Photos/certs cannot be pre-filled as FileList — skip
 }
 
-export default function ProfileCreatePage() {
+function ProfileCreateContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNudge = searchParams.get('nudge') === 'true';
@@ -426,5 +426,13 @@ export default function ProfileCreatePage() {
         </FormProvider>
       </main>
     </div>
+  );
+}
+
+export default function ProfileCreatePage() {
+  return (
+    <Suspense>
+      <ProfileCreateContent />
+    </Suspense>
   );
 }

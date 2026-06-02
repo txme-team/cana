@@ -8,6 +8,8 @@ import Events from '@/components/landing/Events';
 import FAQ from '@/components/landing/FAQ';
 import Footer from '@/components/landing/Footer';
 
+export const dynamic = 'force-dynamic';
+
 export default function LandingPage() {
   return (
     <>

@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Nav from '@/components/landing/Nav';
 import Footer from '@/components/landing/Footer';
 
+export const dynamic = 'force-dynamic';
+
 export default function CompletePage() {
   return (
     <>

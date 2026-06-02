@@ -1,3 +1,5 @@
+import ProfileCardPreview from './ProfileCardPreview';
+
 const POINTS = [
   {
     emoji: '👀',
@@ -20,8 +22,6 @@ const POINTS = [
     description: '프로필 카드 속 다양한 소재 뿐만 아니라 추천 질문 리스트도 드려요.',
   },
 ];
-
-import ProfileCardPreview from './ProfileCardPreview';
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 

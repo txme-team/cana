@@ -3,6 +3,8 @@ import EventsList from '@/components/landing/EventsPage';
 import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: '소개팅 일정 | cana',
 };
