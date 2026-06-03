@@ -285,8 +285,8 @@ function ApplicationsSection({
         <thead>
           <tr className="border-b border-cana-rule bg-cana-cream">
             <th className="px-4 py-3 text-left text-xs font-semibold text-cana-ink3">일정</th>
-            <th className="w-16 px-2 py-3 text-left text-xs font-semibold text-cana-ink3">결제일</th>
-            <th className="w-20 px-2 py-3 text-right text-xs font-semibold text-cana-ink3">금액</th>
+            <th className="w-20 whitespace-nowrap px-3 py-3 text-left text-xs font-semibold text-cana-ink3">결제일</th>
+            <th className="w-28 whitespace-nowrap px-3 py-3 text-right text-xs font-semibold text-cana-ink3">금액</th>
             <th className="px-4 py-3 text-right text-xs font-semibold text-cana-ink3">상태</th>
           </tr>
         </thead>
@@ -304,13 +304,13 @@ function ApplicationsSection({
                 </p>
               </td>
               {/* 결제일 */}
-              <td className="w-16 px-2 py-4 text-sm text-cana-ink3">
+              <td className="w-20 whitespace-nowrap px-3 py-4 text-base text-cana-ink">
                 {app.paid_at
                   ? new Date(app.paid_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })
                   : '—'}
               </td>
               {/* 금액 */}
-              <td className="w-20 px-2 py-4 text-right">
+              <td className="w-28 whitespace-nowrap px-3 py-4 text-right">
                 {app.amount != null
                   ? <span className="font-medium text-cana-ink">{app.amount.toLocaleString('ko-KR')}원</span>
                   : <span className="text-cana-ink3">—</span>}
