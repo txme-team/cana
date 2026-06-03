@@ -71,17 +71,6 @@ function Sec({ title }: { title: string }) {
   );
 }
 
-function FileStatus({ url, label }: { url?: string; label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className={`h-2 w-2 rounded-full ${url ? 'bg-green-400' : 'bg-gray-200'}`} />
-      <span className={`text-sm ${url ? 'text-cana-ink' : 'text-cana-ink3/50'}`}>
-        {label} {url ? '업로드됨' : '미업로드'}
-      </span>
-    </div>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     검토중: 'bg-yellow-50 text-yellow-700',
@@ -475,21 +464,6 @@ function Spinner() {
   return (
     <div className="flex items-center justify-center py-20">
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-cana border-t-transparent" />
-    </div>
-  );
-}
-
-function NoProfile() {
-  return (
-    <div className="rounded-2xl border border-dashed border-cana-rule bg-white px-6 py-12 text-center">
-      <p className="mb-1 text-base font-medium text-cana-ink">아직 프로필이 없어요</p>
-      <p className="mb-6 text-sm text-cana-ink3">프로필을 작성하면 이벤트에 신청할 수 있어요.</p>
-      <Link
-        href="/profile/create"
-        className="inline-block rounded-xl bg-cana px-6 py-3 text-sm font-medium text-white transition hover:bg-cana-dark"
-      >
-        프로필 작성하기
-      </Link>
     </div>
   );
 }

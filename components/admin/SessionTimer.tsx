@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SessionTimer() {
   const [remaining, setRemaining] = useState<number | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
