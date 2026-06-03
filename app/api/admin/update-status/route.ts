@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import type { ProfileStatus } from '@/lib/types';
+import { logAdminAction } from '@/lib/admin-logger';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
 
@@ -39,6 +40,16 @@ export async function PATCH(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  // 활동 로그 기록
+  logAdminAction({
+    adminId:    user.id,
+    adminEmail: user.email ?? '',
+    action:     'APPLICATION_STATUS_CHANGED',
+    targetType: 'application',
+    targetId:   body.id,
+    detail:     { status: body.status },
+  }).catch(() => {});
 
   // 확정 처리 시, 해당 이벤트의 정원이 다 찼으면 자동 마감
   if (body.status === '확정') {
