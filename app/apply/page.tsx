@@ -15,12 +15,6 @@ import StepIndicator from '@/components/common/StepIndicator';
 
 const STEPS = ['일정', '프로필 확인', '동의'];
 
-interface EventOption {
-  id: string;
-  title: string;
-  capacity: number;
-  confirmed_count: number;
-}
 
 // ─── Step 1: Profile Review ────────────────────────────────────────────────────
 
