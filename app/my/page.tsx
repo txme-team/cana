@@ -6,6 +6,7 @@ import Nav from '@/components/landing/Nav';
 import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 import type { Profile } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -105,58 +106,147 @@ function formatDate(dateStr: string) {
 
 // ─── 탭별 섹션 ────────────────────────────────────────────────────────────────
 
-function InfoSection({ profile }: { profile: Profile | null | 'loading' }) {
-  if (profile === 'loading') return <Spinner />;
-  if (!profile) return <NoProfile />;
+interface UserInfo {
+  email: string;
+  createdAt: string;
+}
 
-  const photoUrl = profile.photo_urls?.[0];
+function SectionLabel({ title }: { title: string }) {
+  return (
+    <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-cana-ink3">
+      {title}
+    </p>
+  );
+}
+
+function CertRow({ label, url }: { label: string; url?: string | null }) {
+  const ok = !!url;
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-base text-cana-ink">{label}</p>
+      <span className={`flex items-center gap-1.5 text-sm font-medium ${ok ? 'text-green-500' : 'text-cana-ink3/40'}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${ok ? 'bg-green-400' : 'bg-gray-200'}`} />
+        {ok ? '완료' : '미완료'}
+      </span>
+    </div>
+  );
+}
+
+function InfoSection({
+  profile,
+  userInfo,
+}: {
+  profile: Profile | null | 'loading';
+  userInfo: UserInfo | null;
+}) {
+  if (profile === 'loading') return <Spinner />;
+
+  const photoUrl = profile?.photo_urls?.[0];
+
+  const joinDate = userInfo?.createdAt
+    ? new Date(userInfo.createdAt).toLocaleDateString('ko-KR', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      })
+    : '—';
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
+
+      {/* ── 계정 ── */}
       <div className="rounded-2xl border border-cana-rule bg-white px-5 py-6">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-cana-ink3">
-          프로필 사진
-        </p>
-        {photoUrl ? (
-          <img
-            src={photoUrl}
-            alt="프로필 사진"
-            className="h-24 w-24 rounded-2xl object-cover"
-          />
-        ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-cana-cream text-cana-ink3/40">
-            <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        <SectionLabel title="계정" />
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-100">
+            <svg viewBox="0 0 24 24" className="h-4 w-4">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-base font-medium text-cana-ink">
+              {userInfo?.email ?? '—'}
+            </p>
+            <p className="text-xs text-cana-ink3">Google 계정 · 가입일 {joinDate}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 프로필 ── */}
+      <div className="rounded-2xl border border-cana-rule bg-white px-5 py-6">
+        <SectionLabel title="프로필" />
+        {!profile ? (
+          <p className="text-sm text-cana-ink3">프로필을 아직 작성하지 않았어요.</p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {/* 사진 + 이름 */}
+            <div className="flex items-center gap-4">
+              {photoUrl ? (
+                <img src={photoUrl} alt="프로필" className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover" />
+              ) : (
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-cana-cream">
+                  <svg className="h-7 w-7 text-cana-ink3/30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                </div>
+              )}
+              <div>
+                <p className="text-lg font-semibold text-cana-ink">{profile.nickname ?? '—'}</p>
+                <p className="text-sm text-cana-ink3">{profile.phone ?? '연락처 없음'}</p>
+              </div>
+            </div>
+            {/* 상세 */}
+            <div className="flex flex-col gap-2.5 border-t border-cana-rule pt-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-cana-ink3">연락처</p>
+                <p className="text-base font-medium text-cana-ink">{profile.phone ?? '—'}</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-cana-ink3">가입일</p>
+                <p className="text-base font-medium text-cana-ink">{joinDate}</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
+      {/* ── 인증 ── */}
       <div className="rounded-2xl border border-cana-rule bg-white px-5 py-6">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-cana-ink3">
-          연락처
-        </p>
-        <p className="text-base font-medium text-cana-ink">{profile.phone ?? '—'}</p>
-        <p className="mt-1 text-xs text-cana-ink3">다른 참가자에게 공개되지 않아요</p>
+        <SectionLabel title="인증" />
+        {!profile ? (
+          <p className="text-sm text-cana-ink3">프로필을 아직 작성하지 않았어요.</p>
+        ) : (
+          <div className="flex flex-col divide-y divide-cana-rule">
+            <div className="py-3 first:pt-0 last:pb-0">
+              <CertRow label="사진 인증"  url={profile.photo_urls?.[0]} />
+            </div>
+            <div className="py-3 first:pt-0 last:pb-0">
+              <CertRow label="교회 인증"  url={profile.bulletin_url} />
+            </div>
+            <div className="py-3 first:pt-0 last:pb-0">
+              <CertRow label="직장 인증"  url={profile.job_cert_url} />
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="rounded-2xl border border-cana-rule bg-white px-5 py-6">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-cana-ink3">
-          인증 서류
-        </p>
-        <div className="flex flex-col gap-2">
-          <FileStatus url={profile.photo_urls?.[0]} label="프로필 사진" />
-          <FileStatus url={profile.job_cert_url}    label="직장 인증" />
-          <FileStatus url={profile.bulletin_url}    label="교인 인증" />
-        </div>
-      </div>
-
-      <Link
-        href="/profile/create"
-        className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
-      >
-        프로필 수정하기
-      </Link>
+      {profile && (
+        <Link
+          href="/profile/create"
+          className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
+        >
+          프로필 수정하기
+        </Link>
+      )}
+      {!profile && (
+        <Link
+          href="/profile/create"
+          className="block w-full rounded-xl bg-cana py-3 text-center text-sm font-medium text-white transition hover:bg-cana-dark"
+        >
+          프로필 작성하기
+        </Link>
+      )}
     </div>
   );
 }
@@ -470,6 +560,7 @@ export default function MyPage() {
   const [tab, setTab] = useState<Tab>('내 정보');
   const [profile, setProfile] = useState<Profile | null | 'loading'>('loading');
   const [applications, setApplications] = useState<ApplicationItem[] | 'loading'>('loading');
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   // ── 취소 모달 ──────────────────────────────────────────────────────────────
   const [cancelTarget, setCancelTarget] = useState<ApplicationItem | null>(null);
@@ -490,6 +581,14 @@ export default function MyPage() {
       .catch(() => setProfile(null));
 
     loadApplications();
+
+    // 계정 정보 (이메일, 가입일)
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserInfo({ email: user.email ?? '', createdAt: user.created_at ?? '' });
+      }
+    });
   }, []);
 
   const handleCancelConfirm = async () => {
@@ -541,7 +640,7 @@ export default function MyPage() {
           </div>
 
           {/* 탭 콘텐츠 */}
-          {tab === '내 정보'    && <InfoSection       profile={profile} />}
+          {tab === '내 정보'    && <InfoSection       profile={profile} userInfo={userInfo} />}
           {tab === '프로필 카드' && <ProfileCardSection profile={profile} />}
           {tab === '신청 내역'  && (
             <ApplicationsSection
