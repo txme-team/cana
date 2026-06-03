@@ -32,26 +32,26 @@ function F({ label, value }: { label: string; value?: string | number | null }) 
   return (
     <div>
       <p className="mb-0.5 text-xs text-cana-ink3">{label}</p>
-      <p className="text-sm font-medium text-cana-ink">{value ?? '—'}</p>
+      <p className="text-base font-medium text-cana-ink">{value ?? '—'}</p>
     </div>
   );
 }
 
 function Pill({ value }: { value?: string | null }) {
-  if (!value) return <span className="text-sm text-cana-ink3/40">—</span>;
+  if (!value) return <span className="text-base text-cana-ink3/40">—</span>;
   return (
-    <span className="inline-block rounded-lg bg-cana-cream px-2.5 py-1 text-sm text-cana-ink2">
+    <span className="inline-block rounded-lg bg-cana-cream px-2.5 py-1 text-base text-cana-ink2">
       {value}
     </span>
   );
 }
 
 function Chips({ items }: { items?: string[] }) {
-  if (!items?.length) return <span className="text-sm text-cana-ink3/40">—</span>;
+  if (!items?.length) return <span className="text-base text-cana-ink3/40">—</span>;
   return (
     <div className="flex flex-wrap gap-1.5">
       {items.map((i) => (
-        <span key={i} className="rounded-full bg-cana/10 px-3 py-1 text-sm text-cana">
+        <span key={i} className="rounded-full bg-cana/10 px-3 py-1 text-base text-cana">
           {i}
         </span>
       ))}
@@ -230,7 +230,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
       {profile.faith_level && (
         <div>
           <p className="mb-1.5 text-xs text-cana-ink3">신앙 단계</p>
-          <p className="text-sm font-medium text-cana-ink">{profile.faith_level}</p>
+          <p className="text-base font-medium text-cana-ink">{profile.faith_level}</p>
         </div>
       )}
       <div className="flex flex-wrap gap-3">
@@ -281,7 +281,7 @@ function ApplicationsSection({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-cana-rule bg-white">
-      <table className="w-full text-sm">
+      <table className="w-full text-base">
         <thead>
           <tr className="border-b border-cana-rule bg-cana-cream">
             <th className="px-4 py-3 text-left text-xs font-semibold text-cana-ink3">일정</th>
@@ -304,7 +304,7 @@ function ApplicationsSection({
                 </p>
               </td>
               {/* 결제일 */}
-              <td className="w-16 px-2 py-4 text-xs text-cana-ink3">
+              <td className="w-16 px-2 py-4 text-sm text-cana-ink3">
                 {app.paid_at
                   ? new Date(app.paid_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })
                   : '—'}
