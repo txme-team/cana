@@ -2,22 +2,22 @@ import ProfileCardPreview from './ProfileCardPreview';
 
 const POINTS = [
   {
-    emoji: '🤩',
+    icon: '/icons/type=shining profile.svg',
     title: '상대를 미리 파악해요',
     description: '소개팅 전날, 참가자 전원의 프로필 카드가 공유됩니다.',
   },
   {
-    emoji: '😊',
+    icon: '/icons/type=bubble smile 2.svg',
     title: '깊은 대화로 바로 시작해요',
     description: '아이스브레이킹 없이, 10분을 온전히 대화에 씁니다.',
   },
   {
-    emoji: '🌸',
+    icon: '/icons/type=flower.svg',
     title: '내 매력도 먼저 어필해요',
     description: '카드를 통해 내 가치관과 이야기를 만남 전에 전달할 수 있어요.',
   },
   {
-    emoji: '🙏',
+    icon: '/icons/type=praying.svg',
     title: '대화 주제 고민할 필요 없어요',
     description: '프로필 카드 속 다양한 소재 뿐만 아니라 추천 질문 리스트도 드려요.',
   },
@@ -54,8 +54,8 @@ export default function WhyCana() {
                 key={pt.title}
                 className="flex items-start gap-4 rounded-2xl border border-cana-rule bg-white px-5 py-5 shadow-sm shadow-cana/5"
               >
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-cana/8 text-xl">
-                  {pt.emoji}
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-cana/8">
+                  <img src={pt.icon} alt="" className="h-6 w-6" />
                 </span>
                 <div>
                   <p className="text-lg font-semibold text-cana-ink">{pt.title}</p>

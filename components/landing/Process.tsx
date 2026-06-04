@@ -4,21 +4,21 @@ const STEPS = [
     when: '전날',
     title: '프로필 카드 수령',
     desc: '참가자 전원의 프로필 카드를 미리 전달받아요.\n이름·연락처·직장은 포함되지 않습니다.',
-    emoji: '🧑‍💼',
+    icon: '/icons/type=business user curriculum.svg',
   },
   {
     num: '02',
     when: '당일',
     title: '현장 로테이션 소개팅',
     desc: '1:1로 10분씩 대화해요. 마음에 드시면\n쪽지에 연락처를 적어 봉투에 넣습니다.',
-    emoji: '🎉',
+    icon: '/icons/type=party popper.svg',
   },
   {
     num: '03',
     when: '이후',
     title: '귀가 후 쪽지 확인',
     desc: '집에서 봉투 속 쪽지를 열어보세요.\n연락처가 있다면 자유롭게 연락하시면 됩니다.',
-    emoji: '💌',
+    icon: '/icons/type=mail love.svg',
   },
 ];
 
@@ -47,7 +47,7 @@ export default function Process() {
             <div key={step.num} className="flex flex-col items-center text-center">
               {/* 아이콘 */}
               <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-xl border border-cana-rule bg-cana-muted text-cana shadow-sm shadow-cana/10">
-                <span className="text-3xl">{step.emoji}</span>
+                <img src={step.icon} alt="" className="h-8 w-8" />
                 <span className="absolute -right-2 -top-2 rounded-full bg-cana px-2 py-0.5 text-[10px] font-bold text-white">
                   {step.when}
                 </span>
