@@ -2,22 +2,22 @@ import ProfileCardPreview from './ProfileCardPreview';
 
 const POINTS = [
   {
-    emoji: '👀',
+    emoji: '🤩',
     title: '상대를 미리 파악해요',
     description: '소개팅 전날, 참가자 전원의 프로필 카드가 공유됩니다.',
   },
   {
-    emoji: '💬',
+    emoji: '😊',
     title: '깊은 대화로 바로 시작해요',
     description: '아이스브레이킹 없이, 10분을 온전히 대화에 씁니다.',
   },
   {
-    emoji: '✨',
+    emoji: '🌸',
     title: '내 매력도 먼저 어필해요',
     description: '카드를 통해 내 가치관과 이야기를 만남 전에 전달할 수 있어요.',
   },
   {
-    emoji: '🗣️',
+    emoji: '🙏',
     title: '대화 주제 고민할 필요 없어요',
     description: '프로필 카드 속 다양한 소재 뿐만 아니라 추천 질문 리스트도 드려요.',
   },
