@@ -153,12 +153,6 @@ function InfoSection({
 
   const photoUrl = profile?.photo_urls?.[0];
 
-  const joinDate = userInfo?.createdAt
-    ? new Date(userInfo.createdAt).toLocaleDateString('ko-KR', {
-        year: 'numeric', month: 'long', day: 'numeric',
-      })
-    : '—';
-
   return (
     <div className="flex flex-col gap-4">
 
