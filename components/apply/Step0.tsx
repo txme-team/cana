@@ -85,41 +85,31 @@ export default function Step0({ onWaitlist }: Step0Props) {
                   const applied  = appliedEventIds.includes(event.id);
                   const isFull   = event.confirmed_count >= event.capacity;
 
-                  return (
-                    <div key={event.id} className="flex flex-col gap-1.5">
-                    <button
-                      type="button"
-                      disabled={applied || isFull}
-                      onClick={() => !applied && !isFull && field.onChange(event.id)}
-                      className={[
-                        'flex w-full items-start gap-3.5 rounded-2xl border px-4 py-4 text-left transition',
-                        applied || isFull
-                          ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-60'
-                          : selected
-                          ? 'border-cana bg-cana/5'
-                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50',
-                      ].join(' ')}
-                    >
+                  /* 마감/신청완료 이벤트는 div, 선택 가능한 이벤트는 button */
+                  const cardInner = (
+                    <>
                       {/* 라디오 원 */}
-                      <span
-                        className={[
-                          'mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition',
-                          applied
-                            ? 'border-gray-200 bg-gray-100'
-                            : selected
-                            ? 'border-cana bg-cana'
-                            : 'border-gray-300 bg-white',
-                        ].join(' ')}
-                      >
-                        {selected && !applied && <span className="h-2 w-2 rounded-full bg-white" />}
-                      </span>
+                      {!isFull && (
+                        <span
+                          className={[
+                            'mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition',
+                            applied
+                              ? 'border-gray-200 bg-gray-100'
+                              : selected
+                              ? 'border-cana bg-cana'
+                              : 'border-gray-300 bg-white',
+                          ].join(' ')}
+                        >
+                          {selected && !applied && <span className="h-2 w-2 rounded-full bg-white" />}
+                        </span>
+                      )}
 
                       {/* 이벤트 정보 */}
                       <div className="flex min-w-0 flex-1 flex-col gap-2">
 
                         {/* 제목 + 상태 뱃지 */}
                         <div className="flex items-center gap-2">
-                          <p className={`text-base font-semibold ${applied ? 'text-gray-400' : selected ? 'text-cana' : 'text-gray-800'}`}>
+                          <p className={`text-base font-semibold ${applied || isFull ? 'text-gray-400' : selected ? 'text-cana' : 'text-gray-800'}`}>
                             {event.title}
                           </p>
                           {applied ? (
@@ -162,19 +152,41 @@ export default function Step0({ onWaitlist }: Step0Props) {
                           </span>
                         </div>
 
-                      </div>
-                    </button>
+                        {/* 마감 — 대기 신청 링크 (카드 내부 하단) */}
+                        {isFull && !applied && (
+                          <button
+                            type="button"
+                            onClick={() => onWaitlist?.({ id: event.id, title: event.title })}
+                            className="self-start text-xs text-gray-400 underline underline-offset-2 transition hover:text-cana"
+                          >
+                            대기 신청하기
+                          </button>
+                        )}
 
-                    {/* 마감 이벤트 — 대기 신청 버튼 */}
-                    {isFull && !applied && (
-                      <button
-                        type="button"
-                        onClick={() => onWaitlist?.({ id: event.id, title: event.title })}
-                        className="w-full rounded-xl border border-cana-rule bg-white py-2.5 text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:bg-cana-cream"
-                      >
-                        대기 신청하기
-                      </button>
-                    )}
+                      </div>
+                    </>
+                  );
+
+                  return (
+                    <div key={event.id}>
+                      {isFull || applied ? (
+                        <div className="flex w-full items-start gap-3.5 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 opacity-60">
+                          {cardInner}
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => field.onChange(event.id)}
+                          className={[
+                            'flex w-full items-start gap-3.5 rounded-2xl border px-4 py-4 text-left transition',
+                            selected
+                              ? 'border-cana bg-cana/5'
+                              : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50',
+                          ].join(' ')}
+                        >
+                          {cardInner}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
