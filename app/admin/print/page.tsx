@@ -8,16 +8,16 @@ export const dynamic = 'force-dynamic';
 
 const PRINT_STYLES = `
   :root {
-    --rose:     #b5436a;
-    --rose-lt:  #edc8d4;
-    --rose-bg:  #fdf3f6;
-    --rose-mid: #d4849f;
-    --ink:      #1e1218;
-    --ink-2:    #5c3a47;
-    --ink-3:    #a07080;
-    --cream:    #fffaf8;
-    --warm:     #f7ede8;
-    --rule:     #e8d5dc;
+    --rose:     #e05c52;
+    --rose-lt:  #f2c4c0;
+    --rose-bg:  #faf8f5;
+    --rose-mid: #ee9088;
+    --ink:      #1c1410;
+    --ink-2:    #4a3328;
+    --ink-3:    #a08878;
+    --cream:    #f4f0ec;
+    --warm:     #ede8e2;
+    --rule:     #ddd4c8;
   }
 
   .card-wrap {

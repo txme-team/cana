@@ -10,12 +10,12 @@ export default function Hero() {
         <div className="absolute -right-32 -top-32 h-[480px] w-[480px] rounded-xl bg-cana/6" />
         <div className="absolute -bottom-24 -left-24 h-[360px] w-[360px] rounded-xl bg-cana/4" />
         <svg className="absolute right-10 top-32 opacity-[0.06] sm:right-24 sm:top-24" width="120" height="120" viewBox="0 0 40 40" fill="none">
-          <rect x="17" y="2" width="6" height="36" rx="3" fill="#b5436a" />
-          <rect x="2" y="13" width="36" height="6" rx="3" fill="#b5436a" />
+          <rect x="17" y="2" width="6" height="36" rx="3" fill="#e05c52" />
+          <rect x="2" y="13" width="36" height="6" rx="3" fill="#e05c52" />
         </svg>
         <svg className="absolute bottom-28 left-8 opacity-[0.05] sm:left-20" width="72" height="72" viewBox="0 0 40 40" fill="none">
-          <rect x="17" y="2" width="6" height="36" rx="3" fill="#b5436a" />
-          <rect x="2" y="13" width="36" height="6" rx="3" fill="#b5436a" />
+          <rect x="17" y="2" width="6" height="36" rx="3" fill="#e05c52" />
+          <rect x="2" y="13" width="36" height="6" rx="3" fill="#e05c52" />
         </svg>
       </div>
 
