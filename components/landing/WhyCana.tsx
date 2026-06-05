@@ -54,8 +54,8 @@ export default function WhyCana() {
                 key={pt.title}
                 className="flex items-start gap-4 rounded-2xl border border-cana-rule bg-white px-5 py-5 shadow-sm shadow-cana/5"
               >
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-cana/8">
-                  <img src={pt.icon} alt="" className="h-6 w-6" />
+                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-cana/8">
+                  <img src={pt.icon} alt="" className="h-9 w-9" />
                 </span>
                 <div>
                   <p className="text-lg font-semibold text-cana-ink">{pt.title}</p>
