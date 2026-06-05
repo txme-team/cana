@@ -108,6 +108,27 @@ function SectionLabel({ title }: { title: string }) {
   );
 }
 
+function PhotoAvatar({ url }: { url?: string | null }) {
+  const [err, setErr] = useState(false);
+  if (url && !err) {
+    return (
+      <img
+        src={url}
+        alt=""
+        className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover"
+        onError={() => setErr(true)}
+      />
+    );
+  }
+  return (
+    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-cana-cream">
+      <svg className="h-7 w-7 text-cana-ink3/30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+      </svg>
+    </div>
+  );
+}
+
 function CertRow({ label, url }: { label: string; url?: string | null }) {
   const ok = !!url;
   return (
@@ -157,7 +178,6 @@ function InfoSection({
             <p className="truncate text-base font-medium text-cana-ink">
               {userInfo?.email ?? '—'}
             </p>
-            <p className="text-xs text-cana-ink3">Google 계정 · 가입일 {joinDate}</p>
           </div>
         </div>
       </div>
@@ -168,33 +188,11 @@ function InfoSection({
         {!profile ? (
           <p className="text-sm text-cana-ink3">프로필을 아직 작성하지 않았어요.</p>
         ) : (
-          <div className="flex flex-col gap-4">
-            {/* 사진 + 이름 */}
-            <div className="flex items-center gap-4">
-              {photoUrl ? (
-                <img src={photoUrl} alt="프로필" className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover" />
-              ) : (
-                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-cana-cream">
-                  <svg className="h-7 w-7 text-cana-ink3/30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                </div>
-              )}
-              <div>
-                <p className="text-lg font-semibold text-cana-ink">{profile.nickname ?? '—'}</p>
-                <p className="text-sm text-cana-ink3">{profile.phone ?? '연락처 없음'}</p>
-              </div>
-            </div>
-            {/* 상세 */}
-            <div className="flex flex-col gap-2.5 border-t border-cana-rule pt-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-cana-ink3">연락처</p>
-                <p className="text-base font-medium text-cana-ink">{profile.phone ?? '—'}</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-cana-ink3">가입일</p>
-                <p className="text-base font-medium text-cana-ink">{joinDate}</p>
-              </div>
+          <div className="flex items-center gap-4">
+            <PhotoAvatar url={photoUrl} />
+            <div>
+              <p className="text-lg font-semibold text-cana-ink">{profile.nickname ?? '—'}</p>
+              <p className="text-sm text-cana-ink3">{profile.phone ?? '연락처 없음'}</p>
             </div>
           </div>
         )}
