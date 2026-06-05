@@ -21,10 +21,7 @@ export default function Hero() {
 
       {/* ── 모바일: 중앙 정렬 ── */}
       <div className="relative z-10 flex flex-col items-center gap-8 px-5 lg:hidden">
-        <div className="flex items-center gap-2">
-          <img src="/icons/christian.svg" alt="" className="h-5 w-5" />
-          <span className="text-sm font-medium tracking-wide text-cana-ink2">크리스천 직장인 로테이션 소개팅</span>
-        </div>
+        <span className="text-sm font-medium tracking-wide text-cana-ink2">크리스천 직장인 로테이션 소개팅</span>
         <h1 className="text-center text-3xl font-bold leading-tight tracking-tight text-cana-ink sm:text-4xl sm:leading-tight">
           자기소개만 반복하다<br />
           <span className="text-cana">끝나는 소개팅</span>은 이제 그만
@@ -50,10 +47,7 @@ export default function Hero() {
           className="flex w-[55%] flex-shrink-0 flex-col items-start gap-6 pr-16 text-left"
           style={{ paddingLeft: 'max(20px, calc((100vw - 1024px) / 2 + 20px))' }}
         >
-          <div className="flex items-center gap-2">
-            <img src="/icons/christian.svg" alt="" className="h-5 w-5" />
-            <span className="text-sm font-medium tracking-wide text-cana-ink2">크리스천 직장인 로테이션 소개팅</span>
-          </div>
+          <span className="text-sm font-medium tracking-wide text-cana-ink2">크리스천 직장인 로테이션 소개팅</span>
 
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-cana-ink xl:text-5xl xl:leading-tight">
             자기소개만 반복하다<br />
