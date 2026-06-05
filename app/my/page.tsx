@@ -627,15 +627,15 @@ export default function MyPage() {
             className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="mb-1 text-[18px] font-semibold text-gray-800">신청을 취소할까요?</p>
-            <p className="text-[15px] text-gray-500">{cancelTarget.event_title}</p>
+            <p className="mb-1 text-base font-semibold text-cana-ink">신청을 취소할까요?</p>
+            <p className="text-sm text-cana-ink3">{cancelTarget.event_title}</p>
 
             {cancelTarget.amount != null ? (
-              <p className="mt-2 text-[15px] text-gray-500">
+              <p className="mt-2 text-sm text-cana-ink3">
                 결제하신 <span className="font-medium text-cana-ink">{cancelTarget.amount.toLocaleString('ko-KR')}원</span>이 전액 환불돼요.
               </p>
             ) : (
-              <p className="mt-2 text-[15px] text-gray-500">취소 후 되돌릴 수 없어요.</p>
+              <p className="mt-2 text-sm text-cana-ink3">취소 후 되돌릴 수 없어요.</p>
             )}
 
             {cancelError && (
@@ -646,7 +646,7 @@ export default function MyPage() {
               <button
                 onClick={() => setCancelTarget(null)}
                 disabled={cancelling}
-                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
+                className="flex-1 rounded-xl border border-cana-rule py-2.5 text-sm text-cana-ink3 transition hover:bg-cana-warm disabled:opacity-40"
               >
                 닫기
               </button>

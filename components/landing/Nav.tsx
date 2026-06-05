@@ -109,13 +109,13 @@ export default function Nav() {
             className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="mb-1 text-center text-sm font-semibold text-gray-800">로그아웃</p>
-            <p className="mb-5 text-center text-xs text-gray-400">정말 로그아웃 하시겠어요?</p>
+            <p className="mb-1 text-base font-semibold text-cana-ink">로그아웃</p>
+            <p className="mb-5 text-sm text-cana-ink3">정말 로그아웃 하시겠어요?</p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50"
+                className="flex-1 rounded-xl border border-cana-rule py-2.5 text-sm text-cana-ink3 transition hover:bg-cana-warm"
               >
                 취소
               </button>

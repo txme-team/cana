@@ -557,21 +557,20 @@ export default function ApplyPage() {
           onClick={() => !waitlistModal.loading && setWaitlistModal((m) => ({ ...m, open: false }))}
         >
           <div
-            className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl"
+            className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {waitlistModal.done ? (
               /* 완료 상태 */
-              <div className="flex flex-col items-center gap-3 py-2 text-center">
-                <span className="text-3xl">🎉</span>
-                <p className="text-base font-semibold text-cana-ink">대기 신청 완료!</p>
-                <p className="text-sm text-cana-ink3 leading-relaxed">
+              <div className="flex flex-col gap-2">
+                <p className="text-base font-semibold text-cana-ink">대기 신청 완료! 🎉</p>
+                <p className="mb-4 text-sm leading-relaxed text-cana-ink3">
                   빈자리가 생기면 문자로 알려드릴게요.<br />
                   마이페이지에서 대기 현황을 확인할 수 있어요.
                 </p>
                 <button
                   onClick={() => setWaitlistModal((m) => ({ ...m, open: false }))}
-                  className="mt-2 w-full rounded-xl bg-cana py-3 text-sm font-medium text-white transition active:bg-cana-dark"
+                  className="w-full rounded-xl bg-cana py-2.5 text-sm font-medium text-white transition active:bg-cana-dark"
                 >
                   확인
                 </button>
@@ -579,20 +578,16 @@ export default function ApplyPage() {
             ) : (
               /* 확인 요청 상태 */
               <>
-                <p className="mb-1 text-center text-base font-semibold text-cana-ink">
-                  대기 신청할까요?
-                </p>
-                <p className="mb-1 text-center text-sm font-medium text-cana">
-                  {waitlistModal.event?.title}
-                </p>
-                <p className="mb-5 text-center text-sm leading-relaxed text-cana-ink3">
+                <p className="mb-1 text-base font-semibold text-cana-ink">대기 신청할까요?</p>
+                <p className="mb-1 text-sm font-medium text-cana">{waitlistModal.event?.title}</p>
+                <p className="mb-5 text-sm leading-relaxed text-cana-ink3">
                   현재 정원이 마감됐어요.<br />
                   빈자리가 생기면 문자로 알려드리고,<br />
                   가장 먼저 결제하신 분이 자리를 확보해요.
                 </p>
 
                 {waitlistModal.error && (
-                  <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-center text-xs text-red-500">
+                  <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-500">
                     {waitlistModal.error}
                   </p>
                 )}
@@ -601,14 +596,14 @@ export default function ApplyPage() {
                   <button
                     onClick={() => setWaitlistModal((m) => ({ ...m, open: false }))}
                     disabled={waitlistModal.loading}
-                    className="flex-1 rounded-xl border border-cana-rule py-3 text-sm text-cana-ink3 transition hover:bg-cana-cream disabled:opacity-40"
+                    className="flex-1 rounded-xl border border-cana-rule py-2.5 text-sm text-cana-ink3 transition hover:bg-cana-warm disabled:opacity-40"
                   >
                     취소
                   </button>
                   <button
                     onClick={handleWaitlistConfirm}
                     disabled={waitlistModal.loading}
-                    className="flex-1 rounded-xl bg-cana py-3 text-sm font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
+                    className="flex-1 rounded-xl bg-cana py-2.5 text-sm font-medium text-white transition active:bg-cana-dark disabled:opacity-40"
                   >
                     {waitlistModal.loading ? '신청 중...' : '대기 신청'}
                   </button>

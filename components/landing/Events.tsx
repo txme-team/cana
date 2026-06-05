@@ -187,36 +187,35 @@ export default function Events({ preview = false }: Props) {
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5"
         onClick={() => !wl.loading && closeWaitlist()}
       >
-        <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
           {wl.done ? (
-            <div className="flex flex-col items-center gap-3 py-2 text-center">
-              <span className="text-3xl">🎉</span>
-              <p className="text-base font-semibold text-cana-ink">대기 신청 완료!</p>
-              <p className="text-sm leading-relaxed text-cana-ink3">
+            <div className="flex flex-col gap-2">
+              <p className="text-base font-semibold text-cana-ink">대기 신청 완료! 🎉</p>
+              <p className="mb-4 text-sm leading-relaxed text-cana-ink3">
                 빈자리가 생기면 문자로 알려드릴게요.<br />
                 마이페이지에서 대기 현황을 확인할 수 있어요.
               </p>
-              <button onClick={closeWaitlist} className="mt-2 w-full rounded-xl bg-cana py-3 text-sm font-medium text-white transition active:bg-cana-dark">
+              <button onClick={closeWaitlist} className="w-full rounded-xl bg-cana py-2.5 text-sm font-medium text-white transition active:bg-cana-dark">
                 확인
               </button>
             </div>
           ) : (
             <>
-              <p className="mb-1 text-center text-base font-semibold text-cana-ink">대기 신청할까요?</p>
-              <p className="mb-1 text-center text-sm font-medium text-cana">{wl.event?.title}</p>
-              <p className="mb-5 text-center text-sm leading-relaxed text-cana-ink3">
+              <p className="mb-1 text-base font-semibold text-cana-ink">대기 신청할까요?</p>
+              <p className="mb-1 text-sm font-medium text-cana">{wl.event?.title}</p>
+              <p className="mb-5 text-sm leading-relaxed text-cana-ink3">
                 현재 정원이 마감됐어요.<br />
                 빈자리가 생기면 문자로 알려드리고,<br />
                 가장 먼저 결제하신 분이 자리를 확보해요.
               </p>
               {wl.error && (
-                <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-center text-xs text-red-500">{wl.error}</p>
+                <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-500">{wl.error}</p>
               )}
               <div className="flex gap-2">
-                <button onClick={closeWaitlist} disabled={wl.loading} className="flex-1 rounded-xl border border-cana-rule py-3 text-sm text-cana-ink3 transition hover:bg-cana-cream disabled:opacity-40">
+                <button onClick={closeWaitlist} disabled={wl.loading} className="flex-1 rounded-xl border border-cana-rule py-2.5 text-sm text-cana-ink3 transition hover:bg-cana-warm disabled:opacity-40">
                   취소
                 </button>
-                <button onClick={handleWaitlistConfirm} disabled={wl.loading} className="flex-1 rounded-xl bg-cana py-3 text-sm font-medium text-white transition active:bg-cana-dark disabled:opacity-40">
+                <button onClick={handleWaitlistConfirm} disabled={wl.loading} className="flex-1 rounded-xl bg-cana py-2.5 text-sm font-medium text-white transition active:bg-cana-dark disabled:opacity-40">
                   {wl.loading ? '신청 중...' : '대기 신청'}
                 </button>
               </div>
