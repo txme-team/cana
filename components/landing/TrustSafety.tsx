@@ -62,9 +62,6 @@ export default function TrustSafety() {
 
         {/* 헤더 */}
         <div className="mb-12 text-center">
-          <span className="mb-3 inline-block rounded-xl border border-cana-rule bg-cana-cream px-3 py-1 text-[11px] font-semibold tracking-widest text-cana">
-            TRUST & SAFETY
-          </span>
           <h2 className="mb-4 text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
             기대해도 좋은 사람들이,<br />안심할 수 있는 자리에서
           </h2>

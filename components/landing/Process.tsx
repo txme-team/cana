@@ -29,9 +29,6 @@ export default function Process() {
 
         {/* 섹션 라벨 */}
         <div className="mb-12 text-center">
-          <span className="mb-3 inline-block rounded-xl border border-cana-rule bg-cana-muted px-3 py-1 text-[11px] font-semibold tracking-widest text-cana">
-            HOW IT WORKS
-          </span>
           <h2 className="mb-3 text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
             이렇게 진행돼요
           </h2>

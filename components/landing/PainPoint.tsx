@@ -23,9 +23,6 @@ export default function PainPoint() {
 
         {/* 섹션 라벨 */}
         <div className="mb-12 text-center">
-          <span className="mb-3 inline-block rounded-xl border border-cana-rule bg-cana-cream px-3 py-1 text-[11px] font-semibold tracking-widest text-cana">
-            PAIN POINT
-          </span>
           <h2 className="text-2xl font-bold leading-snug tracking-tight text-cana-ink sm:text-3xl">
             로테이션 소개팅에서<br />인연 찾기 왜 힘들까?
           </h2>

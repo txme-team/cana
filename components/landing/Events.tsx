@@ -227,9 +227,6 @@ export default function Events({ preview = false }: Props) {
     <section id="events" className="bg-cana-cream px-5 py-20 sm:py-28">
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center">
-          <span className="mb-3 inline-block rounded-xl border border-cana-rule bg-white px-3 py-1 text-[11px] font-semibold tracking-widest text-cana">
-            UPCOMING EVENTS
-          </span>
           <h2 className="text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
             모집 중인 일정
           </h2>

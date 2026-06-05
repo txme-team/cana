@@ -32,9 +32,6 @@ export default function WhyCana() {
 
         {/* 섹션 라벨 + 타이틀 */}
         <div className="mb-12 text-center">
-          <span className="mb-3 inline-block rounded-xl border border-cana-rule bg-white px-3 py-1 text-[11px] font-semibold tracking-widest text-cana">
-            WHY CANA
-          </span>
           <h2 className="mb-4 text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
             카나에선 만나기 전에 미리 알아봐요
           </h2>
