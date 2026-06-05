@@ -29,6 +29,34 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '이미 신청한 이벤트예요.' }, { status: 409 });
   }
 
+  // 마감 이벤트는 waitlist '연락됨' 상태인 사람만 신청 가능
+  const { data: eventData } = await supa
+    .from('events').select('capacity, is_active').eq('id', eventId).maybeSingle() as
+    { data: { capacity: number; is_active: boolean } | null };
+
+  const { count: confirmedCount } = await supa
+    .from('applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('event_id', eventId)
+    .in('status', ['검토중', '대기', '확정']) as { count: number | null };
+
+  const isFull = eventData && (confirmedCount ?? 0) >= eventData.capacity;
+
+  if (isFull) {
+    const { data: waitEntry } = await supa
+      .from('waitlist').select('status')
+      .eq('profile_id', profile.id).eq('event_id', eventId)
+      .eq('status', '연락됨').maybeSingle() as
+      { data: { status: string } | null };
+
+    if (!waitEntry) {
+      return NextResponse.json(
+        { error: '현재 정원이 마감됐어요. 대기 신청 후 빈자리 알림을 받아주세요.' },
+        { status: 403 }
+      );
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
 

@@ -94,6 +94,61 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  // ── 취소 처리 시 waitlist SMS ────────────────────────────────────────────
+  if (body.status === '취소') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const supa = serviceClient as any;
+      const { data: cancelledApp } = await supa
+        .from('applications')
+        .select('event_id, profiles ( gender ), events ( title )')
+        .eq('id', body.id)
+        .single() as {
+          data: {
+            event_id: string;
+            profiles: { gender: string } | null;
+            events: { title: string } | null;
+          } | null;
+        };
+
+      const gender = cancelledApp?.profiles?.gender;
+      const eventId = cancelledApp?.event_id;
+      const eventTitle = cancelledApp?.events?.title ?? '이벤트';
+
+      if (gender && eventId) {
+        const { data: waitlistEntries } = await supa
+          .from('waitlist')
+          .select('id, profiles ( phone )')
+          .eq('event_id', eventId)
+          .eq('gender', gender)
+          .eq('status', '대기중') as {
+            data: { id: string; profiles: { phone: string | null } | null }[] | null;
+          };
+
+        if (waitlistEntries && waitlistEntries.length > 0) {
+          const phones = waitlistEntries
+            .map((e: { id: string; profiles: { phone: string | null } | null }) => e.profiles?.phone)
+            .filter((p: string | null | undefined): p is string => !!p);
+
+          if (phones.length > 0) {
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cana.im';
+            await sendSMS(
+              phones,
+              `[cana] ${eventTitle} 빈자리가 생겼어요! 지금 신청 후 결제하시면 자리를 확보할 수 있어요.\n${appUrl}/apply?eventId=${eventId}`,
+            );
+          }
+
+          await supa
+            .from('waitlist')
+            .update({ status: '연락됨', notified_at: new Date().toISOString() })
+            .in('id', waitlistEntries.map((e: { id: string }) => e.id));
+        }
+      }
+    } catch (smsErr) {
+      console.error('[waitlist SMS error — admin cancel]', smsErr);
+    }
+  }
+
   // ── 확정 / 반려 SMS ───────────────────────────────────────────────────────
   if (body.status === '확정' || body.status === '반려') {
     try {

@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { sendSMS } from '@/lib/sms';
 
 const CANCELLABLE_STATUSES = ['검토중', '대기'];
 
@@ -72,7 +73,58 @@ export async function POST(
     }
 
     // 상태 → 취소
+    const { data: cancelledApp } = await supa
+      .from('applications')
+      .select('event_id, profiles ( gender ), events ( title )')
+      .eq('id', params.id)
+      .single() as {
+        data: {
+          event_id: string;
+          profiles: { gender: string } | null;
+          events: { title: string } | null;
+        } | null;
+      };
+
     await supa.from('applications').update({ status: '취소' }).eq('id', params.id);
+
+    // waitlist SMS 트리거 (취소로 빈자리 발생 시)
+    try {
+      const gender = cancelledApp?.profiles?.gender;
+      const eventId = cancelledApp?.event_id;
+      const eventTitle = cancelledApp?.events?.title ?? '이벤트';
+
+      if (gender && eventId) {
+        const { data: waitlistEntries } = await supa
+          .from('waitlist')
+          .select('id, profiles ( phone )')
+          .eq('event_id', eventId)
+          .eq('gender', gender)
+          .eq('status', '대기중') as {
+            data: { id: string; profiles: { phone: string | null } | null }[] | null;
+          };
+
+        if (waitlistEntries && waitlistEntries.length > 0) {
+          const phones = waitlistEntries
+            .map((e) => e.profiles?.phone)
+            .filter((p): p is string => !!p);
+
+          if (phones.length > 0) {
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cana.im';
+            await sendSMS(
+              phones,
+              `[cana] ${eventTitle} 빈자리가 생겼어요! 지금 신청 후 결제하시면 자리를 확보할 수 있어요.\n${appUrl}/apply?eventId=${eventId}`,
+            );
+          }
+
+          await supa
+            .from('waitlist')
+            .update({ status: '연락됨', notified_at: new Date().toISOString() })
+            .in('id', waitlistEntries.map((e) => e.id));
+        }
+      }
+    } catch (smsErr) {
+      console.error('[waitlist SMS error — user cancel]', smsErr);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
