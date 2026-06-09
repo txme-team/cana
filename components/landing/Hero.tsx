@@ -30,7 +30,7 @@ export default function Hero() {
           만나기 전에 서로를 먼저 알고,<br />당일엔 진짜 대화를 시작하세요.
         </p>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <Link href="/apply" className="rounded-xl bg-cana px-8 py-3.5 text-base font-semibold text-white transition hover:bg-cana-dark active:scale-95">
+          <Link href="/rotation/apply" className="rounded-xl bg-cana px-8 py-3.5 text-base font-semibold text-white transition hover:bg-cana-dark active:scale-95">
             지금 신청하기
           </Link>
           <a href="#how" className="rounded-xl border border-cana-rule px-8 py-3.5 text-base font-medium text-cana-ink2 transition hover:border-cana/40 hover:bg-white">
@@ -60,7 +60,7 @@ export default function Hero() {
           </p>
 
           <div className="flex items-center gap-3">
-            <Link href="/apply" className="rounded-xl bg-cana px-8 py-3.5 text-base font-semibold text-white transition hover:bg-cana-dark active:scale-95">
+            <Link href="/rotation/apply" className="rounded-xl bg-cana px-8 py-3.5 text-base font-semibold text-white transition hover:bg-cana-dark active:scale-95">
               지금 신청하기
             </Link>
             <a href="#how" className="rounded-xl border border-cana-rule px-8 py-3.5 text-base font-medium text-cana-ink2 transition hover:border-cana/40 hover:bg-white">

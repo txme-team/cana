@@ -488,7 +488,7 @@ export default function ApplyPage() {
               작성된 프로필카드가 없어요. 참여하기 위해서는 프로필 카드 작성이 필요해요.
             </p>
             <Link
-              href="/profile/create?return=/apply"
+              href="/rotation/profile/create?return=/apply"
               className="mt-2 inline-block text-sm font-medium text-cana underline underline-offset-2"
             >
               지금 작성하기

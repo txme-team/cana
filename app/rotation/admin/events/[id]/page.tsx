@@ -11,7 +11,7 @@ export default async function AdminEventDetailPage({
 }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/admin/login');
+  if (!user) redirect('/rotation/admin/login');
 
   return <EventDetailPage eventId={params.id} />;
 }

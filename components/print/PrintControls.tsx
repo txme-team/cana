@@ -21,7 +21,7 @@ export default function PrintControls({ total, currentStatus }: PrintControlsPro
   return (
     <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-3 shadow-sm">
       <div className="flex items-center gap-4">
-        <Link href="/admin" className="text-xs text-gray-400 hover:text-gray-600">
+        <Link href="/rotation/admin" className="text-xs text-gray-400 hover:text-gray-600">
           ← 명단으로
         </Link>
         <div className="h-4 w-px bg-gray-200" />

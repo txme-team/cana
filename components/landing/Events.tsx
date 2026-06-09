@@ -171,7 +171,7 @@ export default function Events({ preview = false }: Props) {
 
       {preview && events.length > 3 && (
         <div className="mt-8 flex justify-center">
-          <Link href="/events" className="text-sm font-medium text-cana transition hover:opacity-70">
+          <Link href="/rotation/events" className="text-sm font-medium text-cana transition hover:opacity-70">
             일정 전체 보기 →
           </Link>
         </div>

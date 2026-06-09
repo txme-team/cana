@@ -214,7 +214,7 @@ function InfoSection({
 
       {profile && (
         <Link
-          href="/profile/create"
+          href="/rotation/profile/create"
           className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
         >
           프로필 수정하기
@@ -222,7 +222,7 @@ function InfoSection({
       )}
       {!profile && (
         <Link
-          href="/profile/create"
+          href="/rotation/profile/create"
           className="block w-full rounded-xl bg-cana py-3 text-center text-sm font-medium text-white transition hover:bg-cana-dark"
         >
           프로필 작성하기
@@ -314,7 +314,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
 
       <div className="pt-2">
         <Link
-          href="/profile/create"
+          href="/rotation/profile/create"
           className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
         >
           프로필 수정하기
@@ -341,7 +341,7 @@ function ApplicationsSection({
         <p className="mb-1 text-base font-medium text-cana-ink">아직 신청 내역이 없어요</p>
         <p className="mb-6 text-sm text-cana-ink3">소개팅 일정을 확인하고 신청해보세요.</p>
         <Link
-          href="/events"
+          href="/rotation/events"
           className="inline-block rounded-xl bg-cana px-6 py-3 text-sm font-medium text-white transition hover:bg-cana-dark"
         >
           일정 보기
@@ -507,7 +507,7 @@ function NoProfileCard() {
         <p className="mb-1 text-base font-medium text-cana-ink">아직 프로필이 없어요</p>
         <p className="mb-6 text-sm text-cana-ink3">프로필을 작성하면 이벤트에 신청할 수 있어요.</p>
         <Link
-          href="/profile/create"
+          href="/rotation/profile/create"
           className="inline-block rounded-xl bg-cana px-6 py-3 text-sm font-medium text-white transition hover:bg-cana-dark"
         >
           프로필 작성하기

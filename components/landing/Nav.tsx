@@ -53,10 +53,10 @@ export default function Nav() {
               <img src="/logos/logo_black.svg" alt="cana" className="h-[14px]" />
             </Link>
             <nav className="hidden items-center gap-6 sm:flex">
-              <Link href="/events" className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink">
+              <Link href="/rotation/events" className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink">
                 소개팅 일정
               </Link>
-              <Link href="/faq" className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink">
+              <Link href="/rotation/faq" className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink">
                 자주 묻는 질문
               </Link>
             </nav>
@@ -67,7 +67,7 @@ export default function Nav() {
             {userEmail ? (
               <>
                 <Link
-                  href="/my"
+                  href="/rotation/my"
                   className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink"
                 >
                   마이페이지
@@ -82,14 +82,14 @@ export default function Nav() {
               </>
             ) : (
               <Link
-                href="/login?redirectTo=/"
+                href="/rotation/login?redirectTo=/"
                 className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink"
               >
                 로그인
               </Link>
             )}
             <Link
-              href="/apply"
+              href="/rotation/apply"
               className="rounded-xl bg-cana px-5 py-2 text-xs font-semibold text-white transition hover:bg-cana-dark active:scale-95"
             >
               신청하기

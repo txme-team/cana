@@ -47,7 +47,7 @@ export default async function PaymentFailPage({
 
           <div className="flex flex-col gap-2">
             <Link
-              href="/apply"
+              href="/rotation/apply"
               className="block w-full rounded-xl bg-cana py-3 text-center text-base font-medium text-white transition active:bg-cana-dark"
             >
               다시 시도하기

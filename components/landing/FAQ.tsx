@@ -216,7 +216,7 @@ export default function FAQ({ preview = false, standalone = false }: Props) {
 
       {preview && (
         <div className="mt-6 flex justify-center">
-          <Link href="/faq" className="text-sm font-medium text-cana transition hover:opacity-70">
+          <Link href="/rotation/faq" className="text-sm font-medium text-cana transition hover:opacity-70">
             질문 더 보기 →
           </Link>
         </div>

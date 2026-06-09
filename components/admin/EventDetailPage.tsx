@@ -328,7 +328,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <Link
-            href="/admin/events"
+            href="/rotation/admin/events"
             className="flex flex-shrink-0 items-center gap-1.5 text-base text-gray-400 transition hover:text-gray-600"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

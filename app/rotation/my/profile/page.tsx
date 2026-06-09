@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function MyProfileRedirect() {
-  redirect('/my');
+  redirect('/rotation/my');
 }

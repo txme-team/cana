@@ -271,7 +271,7 @@ interface PageProps {
 export default async function PrintPage({ searchParams }: PageProps) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/admin/login');
+  if (!user) redirect('/rotation/admin/login');
 
   const rawStatus = searchParams.status;
   const statusFilter: ProfileStatus | null =

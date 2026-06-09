@@ -506,7 +506,7 @@ function ProfileCreateContent() {
                 {/* 나중에 하기 — nudge 모드에서만 표시, 마지막 스텝 제외 */}
                 {isNudge && step < STEPS.length - 1 && (
                   <Link
-                    href="/apply"
+                    href="/rotation/apply"
                     className="text-center text-sm text-cana-ink3/60 underline underline-offset-2"
                   >
                     나중에 하기

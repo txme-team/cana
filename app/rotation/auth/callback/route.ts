@@ -5,7 +5,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/apply';
+  const next = searchParams.get('next') ?? '/rotation/apply';
 
   if (code) {
     // We need a mutable response; create a temporary redirect target first.
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
         if (!profile) {
           // No profile yet — start onboarding flow
-          const nudgeResponse = NextResponse.redirect(`${origin}/onboard`);
+          const nudgeResponse = NextResponse.redirect(`${origin}/rotation/onboard`);
           // Copy session cookies to the new response
           response.cookies.getAll().forEach(({ name, value, ...opts }) => {
             nudgeResponse.cookies.set(name, value, opts);
@@ -57,5 +57,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  return NextResponse.redirect(`${origin}/rotation/login?error=auth_failed`);
 }

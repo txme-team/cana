@@ -165,7 +165,7 @@ function StepProfileIntro() {
           프로필 카드 작성하기
         </button>
         <button
-          onClick={() => router.push('/apply')}
+          onClick={() => router.push('/rotation/apply')}
           className="w-full py-2 text-sm text-cana-ink3/60 underline underline-offset-2"
         >
           나중에 하기
