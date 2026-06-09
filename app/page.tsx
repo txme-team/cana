@@ -1,26 +1,28 @@
-import Nav from '@/components/landing/Nav';
-import Hero from '@/components/landing/Hero';
-import PainPoint from '@/components/landing/PainPoint';
-import Process from '@/components/landing/Process';
-import WhyCana from '@/components/landing/WhyCana';
-import TrustSafety from '@/components/landing/TrustSafety';
-import Events from '@/components/landing/Events';
-import FAQ from '@/components/landing/FAQ';
-import Footer from '@/components/landing/Footer';
+import Navbar from "@/components/landing-new/Navbar";
+import Hero from "@/components/landing-new/Hero";
+import Problem from "@/components/landing-new/Problem";
+import Solution1 from "@/components/landing-new/Solution1";
+import Solution2 from "@/components/landing-new/Solution2";
+import Solution3 from "@/components/landing-new/Solution3";
+import UserPool from "@/components/landing-new/UserPool";
+import HowItWorks from "@/components/landing-new/HowItWorks";
+import RotationPromo from "@/components/landing-new/RotationPromo";
+import Footer from "@/components/landing-new/Footer";
 
-export const dynamic = 'force-dynamic';
-
-export default function LandingPage() {
+export default function Home() {
   return (
     <>
-      <Nav />
-      <Hero />
-      <PainPoint />
-      <WhyCana />
-      <Process />
-      <Events preview />
-      <TrustSafety />
-      <FAQ preview />
+      <Navbar />
+      <main>
+        <Hero />
+        <Problem />
+        <Solution1 />
+        <Solution2 />
+        <Solution3 />
+        <UserPool />
+        <HowItWorks />
+        <RotationPromo />
+      </main>
       <Footer />
     </>
   );
