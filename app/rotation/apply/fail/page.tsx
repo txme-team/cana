@@ -53,7 +53,7 @@ export default async function PaymentFailPage({
               다시 시도하기
             </Link>
             <Link
-              href="/"
+              href="/rotation"
               className="block w-full rounded-xl border border-cana-rule py-3 text-center text-base text-cana-ink3 transition active:bg-cana-cream"
             >
               홈으로

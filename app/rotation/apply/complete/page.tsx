@@ -42,7 +42,7 @@ export default function CompletePage() {
         </div>
 
         <Link
-          href="/"
+          href="/rotation"
           className="mt-6 text-xs text-cana-ink3 underline underline-offset-2 hover:text-cana-ink"
         >
           홈으로 돌아가기
