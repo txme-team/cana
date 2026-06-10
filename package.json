@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prod": "node scripts/run-with-env.mjs .env.prod next dev",
     "build": "next build",
+    "build:prod": "node scripts/run-with-env.mjs .env.prod next build",
     "start": "next start",
+    "start:prod": "node scripts/run-with-env.mjs .env.prod next start",
     "lint": "next lint"
   },
   "dependencies": {

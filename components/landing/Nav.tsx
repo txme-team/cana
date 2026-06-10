@@ -49,7 +49,7 @@ export default function Nav() {
 
           {/* 좌측 — 로고 + 네비 */}
           <div className="flex items-center gap-6">
-            <Link href="/">
+            <Link href="/rotation">
               <img src="/logos/logo_black.svg" alt="cana" className="h-[14px]" />
             </Link>
             <nav className="hidden items-center gap-6 sm:flex">
