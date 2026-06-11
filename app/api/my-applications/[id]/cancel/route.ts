@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { sendSMS } from '@/lib/sms';
+import { notifyApplicationCancelled, notifyError } from '@/lib/slack';
 
 const CANCELLABLE_STATUSES = ['검토중', '대기'];
 
@@ -75,17 +76,23 @@ export async function POST(
     // 상태 → 취소
     const { data: cancelledApp } = await supa
       .from('applications')
-      .select('event_id, profiles ( gender ), events ( title )')
+      .select('event_id, profiles ( gender, nickname ), events ( title )')
       .eq('id', params.id)
       .single() as {
         data: {
           event_id: string;
-          profiles: { gender: string } | null;
+          profiles: { gender: string; nickname: string } | null;
           events: { title: string } | null;
         } | null;
       };
 
     await supa.from('applications').update({ status: '취소' }).eq('id', params.id);
+
+    // 슬랙 알림 — 신청 취소
+    await notifyApplicationCancelled(
+      cancelledApp?.profiles?.nickname ?? '알 수 없음',
+      params.id
+    ).catch(() => {});
 
     // waitlist SMS 트리거 (취소로 빈자리 발생 시)
     try {
@@ -129,6 +136,7 @@ export async function POST(
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : '서버 오류가 발생했어요.';
+    await notifyError(message, 'POST /api/my-applications/[id]/cancel').catch(() => {});
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

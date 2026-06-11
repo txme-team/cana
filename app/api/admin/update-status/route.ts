@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import type { ProfileStatus } from '@/lib/types';
 import { logAdminAction } from '@/lib/admin-logger';
+import { notifyApplicationCancelled } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
 
@@ -101,12 +102,12 @@ export async function PATCH(req: NextRequest) {
       const supa = serviceClient as any;
       const { data: cancelledApp } = await supa
         .from('applications')
-        .select('event_id, profiles ( gender ), events ( title )')
+        .select('event_id, profiles ( gender, nickname ), events ( title )')
         .eq('id', body.id)
         .single() as {
           data: {
             event_id: string;
-            profiles: { gender: string } | null;
+            profiles: { gender: string; nickname: string } | null;
             events: { title: string } | null;
           } | null;
         };
@@ -114,6 +115,12 @@ export async function PATCH(req: NextRequest) {
       const gender = cancelledApp?.profiles?.gender;
       const eventId = cancelledApp?.event_id;
       const eventTitle = cancelledApp?.events?.title ?? '이벤트';
+
+      // 슬랙 알림 — 신청 취소 (어드민 처리)
+      await notifyApplicationCancelled(
+        cancelledApp?.profiles?.nickname ?? '알 수 없음',
+        body.id
+      ).catch(() => {});
 
       if (gender && eventId) {
         const { data: waitlistEntries } = await supa

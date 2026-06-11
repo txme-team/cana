@@ -36,6 +36,36 @@ export async function notifyNewProfile(nickname: string, profileId: string) {
   });
 }
 
+export async function notifyPaymentComplete(nickname: string, applicationId: string) {
+  await send({
+    text: `결제 완료: ${nickname}`,
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*결제가 완료됐어요* :moneybag:\n이름: *${nickname}*\n신청 ID: \`${applicationId}\``,
+        },
+      },
+    ],
+  });
+}
+
+export async function notifyApplicationCancelled(nickname: string, applicationId: string) {
+  await send({
+    text: `신청 취소: ${nickname}`,
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*신청이 취소됐어요* :x:\n이름: *${nickname}*\n신청 ID: \`${applicationId}\``,
+        },
+      },
+    ],
+  });
+}
+
 export async function notifyNewMeeting(profileNickname: string, meetingId: string) {
   await send({
     text: `미팅 카드 생성: ${profileNickname}`,

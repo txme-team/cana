@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { notifyNewProfile, notifyError } from '@/lib/slack';
+import { notifyError } from '@/lib/slack';
 
 const BUCKET = 'profile-photos';
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -191,8 +191,6 @@ export async function POST(req: NextRequest) {
       .single() as { data: { id: string; nickname: string } | null; error: { message: string } | null };
 
     if (profileError) throw new Error(`프로필 저장 실패: ${profileError.message}`);
-
-    await notifyNewProfile(profile!.nickname, profile!.id);
 
     return NextResponse.json({ id: profile!.id }, { status: 201 });
   } catch (err) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { notifyNewProfile, notifyError } from '@/lib/slack';
+import { notifyPaymentComplete, notifyError } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
 
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 슬랙 알림 ─────────────────────────────────────────────────────────────
-    await notifyNewProfile(profile.nickname, applicationId).catch(() => {});
+    await notifyPaymentComplete(profile.nickname, applicationId).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (err) {
