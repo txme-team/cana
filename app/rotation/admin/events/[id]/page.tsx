@@ -1,17 +1,12 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import EventDetailPage from '@/components/admin/EventDetailPage';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminEventDetailPage({
+export default function AdminEventDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/rotation/admin/login');
-
+  // 인증/권한 확인은 middleware에서 이미 끝났음 (auth.getUser() 중복 호출 방지)
   return <EventDetailPage eventId={params.id} />;
 }

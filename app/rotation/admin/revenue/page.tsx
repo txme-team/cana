@@ -1,14 +1,10 @@
-import { redirect } from 'next/navigation';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import RevenuePage, { type RevenueItem } from '@/components/admin/RevenuePage';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminRevenuePage() {
-  const authClient = createClient();
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) redirect('/rotation/admin/login');
-
+  // 인증/권한 확인은 middleware에서 이미 끝났음 (auth.getUser() 중복 호출 방지)
   const supabase = createServiceClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supa = supabase as any;

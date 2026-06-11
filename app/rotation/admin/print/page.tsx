@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import type { ApplicationWithProfile, ProfileStatus } from '@/lib/types';
 import PrintDashboard from '@/components/print/PrintDashboard';
 import { PRINT_CARD_STYLES } from '@/components/print/printStyles';
@@ -14,10 +13,7 @@ interface PageProps {
 }
 
 export default async function PrintPage({ searchParams }: PageProps) {
-  const authClient = createClient();
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) redirect('/rotation/admin/login');
-
+  // 인증/권한 확인은 middleware에서 이미 끝났음 (auth.getUser() 중복 호출 방지)
   const supabase = createServiceClient();
 
   const rawStatus = searchParams.status;

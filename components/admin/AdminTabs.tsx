@@ -8,7 +8,6 @@ import EventsManager from './EventsManager';
 type Tab = 'applicants' | 'events';
 
 export default function AdminTabs({
-  profiles,
   eventMap,
 }: {
   profiles: ProfileRow[];
@@ -41,7 +40,18 @@ export default function AdminTabs({
       </div>
 
       {tab === 'applicants' && (
-        <AdminDashboard profiles={profiles} eventMap={eventMap} />
+        <AdminDashboard
+          maleApps={[]}
+          femaleApps={[]}
+          maleCount={0}
+          femaleCount={0}
+          malePage={1}
+          femalePage={1}
+          pageSize={10}
+          eventMap={eventMap}
+          eventOptions={[]}
+          filters={{ q: '', status: 'all', eventId: 'all' }}
+        />
       )}
       {tab === 'events' && (
         <EventsManager />

@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({ request });
+  let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,6 +38,14 @@ export async function middleware(request: NextRequest) {
     if (!isAdmin) {
       return NextResponse.redirect(new URL('/rotation', request.url));
     }
+
+    // 인증/권한 확인이 끝난 사용자 정보를 요청 헤더로 전달 →
+    // 이후 layout/page에서 auth.getUser()를 다시 호출(중복 네트워크 요청)하지 않아도 됨
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-admin-email', user.email ?? '');
+    const newResponse = NextResponse.next({ request: { headers: requestHeaders } });
+    response.cookies.getAll().forEach((cookie) => newResponse.cookies.set(cookie));
+    response = newResponse;
   }
 
   // ── /rotation/apply 보호 ────────────────────────────────────────────────────

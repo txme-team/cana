@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import Pagination from './Pagination';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -18,7 +20,7 @@ export interface PaymentItem {
   nickname: string;
 }
 
-type FilterStatus = '전체' | '성공' | '취소' | '반려';
+export type PaymentFilter = '전체' | '성공' | '취소' | '반려';
 
 const SUCCESS_STATUSES = ['검토중', '대기', '확정'];
 
@@ -54,26 +56,47 @@ function StatusBadge({ status }: { status: string }) {
 
 // ─── 메인 컴포넌트 ─────────────────────────────────────────────────────────────
 
-export default function PaymentsPage({ payments: initial }: { payments: PaymentItem[] }) {
-  const [search, setSearch]         = useState('');
-  const [filter, setFilter]         = useState<FilterStatus>('전체');
+export default function PaymentsPage({
+  payments: initial, count, page, pageSize, q, filter,
+}: {
+  payments: PaymentItem[];
+  count: number;
+  page: number;
+  pageSize: number;
+  q: string;
+  filter: PaymentFilter;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [search, setSearch]         = useState(q);
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [payments, setPayments]     = useState<PaymentItem[]>(initial);
   const [error, setError]           = useState<string | null>(null);
 
-  const FILTERS: FilterStatus[] = ['전체', '성공', '취소', '반려'];
+  useEffect(() => setPayments(initial), [initial]);
 
-  const filtered = useMemo(() => {
-    return payments.filter((p) => {
-      // 검색
-      if (search && !p.nickname.includes(search)) return false;
-      // 상태 필터
-      if (filter === '성공' && !SUCCESS_STATUSES.includes(p.status)) return false;
-      if (filter === '취소' && p.status !== '취소') return false;
-      if (filter === '반려' && p.status !== '반려') return false;
-      return true;
+  const FILTERS: PaymentFilter[] = ['전체', '성공', '취소', '반려'];
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+
+  const updateParams = (next: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(next).forEach(([key, value]) => {
+      if (value === '전체' || value === '') params.delete(key);
+      else params.set(key, value);
     });
-  }, [payments, search, filter]);
+    params.delete('page');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // 검색어 디바운스
+  useEffect(() => {
+    if (search === q) return;
+    const t = setTimeout(() => updateParams({ q: search }), 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const handleCancel = async (p: PaymentItem) => {
     if (!p.payment_key) return;
@@ -117,7 +140,7 @@ export default function PaymentsPage({ payments: initial }: { payments: PaymentI
           {FILTERS.map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => updateParams({ filter: f })}
               className={[
                 'rounded-full px-3 py-1 text-xs font-medium transition',
                 filter === f
@@ -129,7 +152,7 @@ export default function PaymentsPage({ payments: initial }: { payments: PaymentI
             </button>
           ))}
         </div>
-        <span className="ml-auto text-xs text-gray-400">{filtered.length}건</span>
+        <span className="ml-auto text-xs text-gray-400">총 {count}건</span>
       </div>
 
       {error && (
@@ -153,14 +176,14 @@ export default function PaymentsPage({ payments: initial }: { payments: PaymentI
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {payments.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-16 text-center text-sm text-gray-400">
                     결제 내역이 없어요
                   </td>
                 </tr>
               ) : (
-                filtered.map((p) => (
+                payments.map((p) => (
                   <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                     <td className="px-4 py-3 font-medium text-gray-800">{p.nickname}</td>
                     <td className="max-w-[180px] truncate px-4 py-3 text-gray-600">{p.event_title}</td>
@@ -203,6 +226,8 @@ export default function PaymentsPage({ payments: initial }: { payments: PaymentI
           </table>
         </div>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} paramName="page" />
     </>
   );
 }

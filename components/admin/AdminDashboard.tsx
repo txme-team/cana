@@ -1,25 +1,28 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import type { ApplicationWithProfile, ProfileStatus } from '@/lib/types';
 import StatusBadge from './StatusBadge';
 import ProfileModal from './ProfileModal';
+import Pagination from './Pagination';
 
 // ─── 공통 필터 바 ──────────────────────────────────────────────────────────────
 
 function SharedFilterBar({
-  search, onSearch,
-  statusFilter, onStatus,
-  eventFilter, onEvent,
-  eventOptions,
-  total, filtered,
+  q, status, eventId, eventOptions, total,
 }: {
-  search: string; onSearch: (v: string) => void;
-  statusFilter: ProfileStatus | 'all'; onStatus: (v: ProfileStatus | 'all') => void;
-  eventFilter: string; onEvent: (v: string) => void;
+  q: string;
+  status: ProfileStatus | 'all';
+  eventId: string;
   eventOptions: { id: string; title: string }[];
-  total: number; filtered: number;
+  total: number;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(q);
+
   const STATUS_OPTIONS: { value: ProfileStatus | 'all'; label: string }[] = [
     { value: 'all',    label: '전체' },
     { value: '검토중', label: '검토중' },
@@ -29,6 +32,26 @@ function SharedFilterBar({
     { value: '취소',   label: '취소' },
   ];
 
+  // 필터 변경 → URL 갱신 + 페이지를 1로 리셋
+  const updateParams = (next: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(next).forEach(([key, value]) => {
+      if (value === 'all' || value === '') params.delete(key);
+      else params.set(key, value);
+    });
+    params.delete('malePage');
+    params.delete('femalePage');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // 검색어 디바운스
+  useEffect(() => {
+    if (search === q) return;
+    const t = setTimeout(() => updateParams({ q: search }), 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
   return (
     <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white px-5 py-4">
       {/* 이벤트 필터 */}
@@ -36,15 +59,15 @@ function SharedFilterBar({
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-gray-400 w-10 shrink-0">회차</span>
           <button
-            onClick={() => onEvent('all')}
+            onClick={() => updateParams({ event: 'all' })}
             className={['rounded-full px-3 py-1 text-sm font-medium transition',
-              eventFilter === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
+              eventId === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
             ].join(' ')}
           >전체</button>
           {eventOptions.map((ev) => (
-            <button key={ev.id} onClick={() => onEvent(ev.id)}
+            <button key={ev.id} onClick={() => updateParams({ event: ev.id })}
               className={['rounded-full px-3 py-1 text-sm font-medium transition',
-                eventFilter === ev.id ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
+                eventId === ev.id ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
               ].join(' ')}
             >{ev.title}</button>
           ))}
@@ -56,15 +79,13 @@ function SharedFilterBar({
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-gray-400 w-10 shrink-0">상태</span>
           {STATUS_OPTIONS.map((opt) => (
-            <button key={opt.value} onClick={() => onStatus(opt.value)}
+            <button key={opt.value} onClick={() => updateParams({ status: opt.value })}
               className={['rounded-full px-3 py-1 text-sm font-medium transition',
-                statusFilter === opt.value ? 'bg-cana text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
+                status === opt.value ? 'bg-cana text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
               ].join(' ')}
             >{opt.label}</button>
           ))}
-          <span className="ml-1 text-sm text-gray-400">
-            {filtered !== total ? `${filtered} / ${total}명` : `${total}명`}
-          </span>
+          <span className="ml-1 text-sm text-gray-400">총 {total}명</span>
         </div>
 
         <div className="relative w-full sm:w-56">
@@ -74,7 +95,7 @@ function SharedFilterBar({
               d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input type="text" placeholder="이름 검색" value={search}
-            onChange={(e) => onSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-gray-200 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-cana focus:ring-1 focus:ring-cana/20"
           />
         </div>
@@ -86,23 +107,29 @@ function SharedFilterBar({
 // ─── 성별 테이블 ────────────────────────────────────────────────────────────────
 
 function GenderTable({
-  title, profiles, eventMap, onSelect,
+  title, profiles, eventMap, onSelect, count, page, pageSize, paramName,
 }: {
   title: string;
   profiles: ApplicationWithProfile[];
   eventMap: Record<string, string>;
   onSelect: (p: ApplicationWithProfile) => void;
+  count: number;
+  page: number;
+  pageSize: number;
+  paramName: string;
 }) {
   const birthDisplay = (year: number) => {
     const y = year < 100 ? 1900 + year : year;
     return String(y).slice(2) + '년생';
   };
 
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+
   return (
     <div className="flex flex-col">
       <div className="mb-3 flex items-center gap-2">
         <span className="text-sm font-semibold text-gray-700">{title}</span>
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-sm text-gray-500">{profiles.length}명</span>
+        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-sm text-gray-500">{count}명</span>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
@@ -153,6 +180,8 @@ function GenderTable({
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} paramName={paramName} />
     </div>
   );
 }
@@ -160,54 +189,49 @@ function GenderTable({
 // ─── 메인 대시보드 ─────────────────────────────────────────────────────────────
 
 export default function AdminDashboard({
-  profiles: initialProfiles,
-  eventMap,
+  maleApps, femaleApps, maleCount, femaleCount, malePage, femalePage, pageSize,
+  eventMap, eventOptions, filters,
 }: {
-  profiles: ApplicationWithProfile[];
+  maleApps: ApplicationWithProfile[];
+  femaleApps: ApplicationWithProfile[];
+  maleCount: number;
+  femaleCount: number;
+  malePage: number;
+  femalePage: number;
+  pageSize: number;
   eventMap: Record<string, string>;
+  eventOptions: { id: string; title: string }[];
+  filters: { q: string; status: ProfileStatus | 'all'; eventId: string };
 }) {
-  const [profiles, setProfiles] = useState<ApplicationWithProfile[]>(initialProfiles);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ProfileStatus | 'all'>('all');
-  const [eventFilter, setEventFilter] = useState<string>('all');
+  const [males, setMales] = useState(maleApps);
+  const [females, setFemales] = useState(femaleApps);
   const [selected, setSelected] = useState<ApplicationWithProfile | null>(null);
 
-  const eventOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const ids: string[] = [];
-    profiles.forEach((p) => { if (p.event_id && !seen.has(p.event_id)) { seen.add(p.event_id); ids.push(p.event_id); } });
-    return ids.map((id) => ({ id, title: eventMap[id] ?? id }));
-  }, [profiles, eventMap]);
-
-  const filtered = useMemo(() => {
-    return profiles.filter((p) => {
-      const matchSearch = p.profiles.nickname.includes(search);
-      const matchStatus = statusFilter === 'all' || p.status === statusFilter;
-      const matchEvent  = eventFilter === 'all' || p.event_id === eventFilter;
-      return matchSearch && matchStatus && matchEvent;
-    });
-  }, [profiles, search, statusFilter, eventFilter]);
-
-  const males   = filtered.filter((p) => p.profiles.gender === 'male');
-  const females = filtered.filter((p) => p.profiles.gender === 'female');
+  useEffect(() => setMales(maleApps), [maleApps]);
+  useEffect(() => setFemales(femaleApps), [femaleApps]);
 
   const handleStatusChange = (id: string, status: ProfileStatus) => {
-    setProfiles((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
+    setMales((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
+    setFemales((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
   };
 
   return (
     <>
       <SharedFilterBar
-        search={search} onSearch={setSearch}
-        statusFilter={statusFilter} onStatus={setStatusFilter}
-        eventFilter={eventFilter} onEvent={setEventFilter}
+        q={filters.q} status={filters.status} eventId={filters.eventId}
         eventOptions={eventOptions}
-        total={profiles.length} filtered={filtered.length}
+        total={maleCount + femaleCount}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <GenderTable title="남성" profiles={males} eventMap={eventMap} onSelect={setSelected} />
-        <GenderTable title="여성" profiles={females} eventMap={eventMap} onSelect={setSelected} />
+        <GenderTable
+          title="남성" profiles={males} eventMap={eventMap} onSelect={setSelected}
+          count={maleCount} page={malePage} pageSize={pageSize} paramName="malePage"
+        />
+        <GenderTable
+          title="여성" profiles={females} eventMap={eventMap} onSelect={setSelected}
+          count={femaleCount} page={femalePage} pageSize={pageSize} paramName="femalePage"
+        />
       </div>
 
       {selected && (
