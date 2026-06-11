@@ -44,10 +44,10 @@ export async function POST(
     // 확정 참여자 조회
     const { data: confirmedApps } = await supa
       .from('applications')
-      .select('profiles ( name, nickname, phone )')
+      .select('profiles ( nickname, phone )')
       .eq('event_id', params.id)
       .eq('status', '확정') as {
-        data: { profiles: { name: string | null; nickname: string; phone: string | null } | null }[] | null;
+        data: { profiles: { nickname: string; phone: string | null } | null }[] | null;
       };
 
     // 템플릿 조회 (DB 우선 → 기본값 fallback)
@@ -63,7 +63,7 @@ export async function POST(
     const messages = (confirmedApps ?? [])
       .filter((a) => !!a.profiles?.phone)
       .map((a) => {
-        const displayName = a.profiles!.name ?? a.profiles!.nickname;
+        const displayName = a.profiles!.nickname;
         return {
           phone: a.profiles!.phone!,
           text:  substituteVars(content, { name: displayName, ...eventVars }),

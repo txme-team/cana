@@ -13,64 +13,6 @@ import StepQnA from '@/components/apply/StepQnA';
 import Nav from '@/components/landing/Nav';
 import BackButton from '@/components/landing/BackButton';
 import StepIndicator from '@/components/common/StepIndicator';
-import { useFormContext, Controller } from 'react-hook-form';
-
-// ─── Phone Step (연락처) ────────────────────────────────────────────────────────
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
-
-function StepPhone() {
-  const { control, formState: { errors } } = useFormContext<ApplyFormData>();
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-cana-ink">연락처</h2>
-        <p className="text-sm text-cana-ink3">매칭 확정 시 상대방에게만 공개돼요.</p>
-      </div>
-
-      <Controller
-        name="phone"
-        control={control}
-        rules={{
-          required: '연락처를 입력해주세요',
-          pattern: {
-            value: /^010-\d{4}-\d{4}$/,
-            message: '올바른 형식으로 입력해주세요 (예: 010-1234-5678)',
-          },
-        }}
-        render={({ field }) => (
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-cana-ink3">휴대폰 번호</label>
-            <input
-              type="tel"
-              inputMode="tel"
-              placeholder="010-1234-5678"
-              value={field.value ?? ''}
-              onChange={(e) => field.onChange(formatPhone(e.target.value))}
-              className={[
-                'w-full rounded-xl border px-4 py-3 text-base outline-none transition',
-                'focus:border-cana focus:ring-1 focus:ring-cana',
-                errors.phone ? 'border-red-400' : 'border-cana-rule',
-              ].join(' ')}
-            />
-            {errors.phone && (
-              <p className="text-xs text-red-500">{errors.phone.message}</p>
-            )}
-            <p className="text-xs text-cana-ink3/60">
-              🔒 연락처는 안전하게 저장되며, 매칭 완료 전까지 누구에게도 공개되지 않아요.
-            </p>
-          </div>
-        )}
-      />
-    </div>
-  );
-}
 
 // ─── 임시저장 헬퍼 ────────────────────────────────────────────────────────────
 
@@ -103,7 +45,7 @@ function clearDraft() {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-const STEPS = ['프로필', '라이프스타일', '신앙', 'Q&A', '인증', '연락처'];
+const STEPS = ['프로필', '라이프스타일', '신앙', 'Q&A', '인증'];
 
 const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   [
@@ -117,9 +59,8 @@ const STEP_FIELDS: (keyof ApplyFormData)[][] = [
     'marriageView', 'conflictStyle', 'restDay', 'pet', 'dateStyle',
   ],
   [
-    'denomination', 'faithYears', 'churchName',
-    'churchCity', 'churchDistrict', 'faithLevel',
-    'faithStyle', 'sundayAttendance', 'ministry',
+    'faithYears', 'churchName', 'faithLevel',
+    'sundayAttendance', 'ministry',
   ],
   [
     'prayerRequest', 'bibleVerse', 'ministryNote', 'faithGrowthMoment', 'answeredPrayer', 'communityRole',
@@ -127,7 +68,6 @@ const STEP_FIELDS: (keyof ApplyFormData)[][] = [
     'relationshipPromise', 'partnerStyle', 'feelingLoved', 'humorStyle', 'weekendStyle', 'spendingHabit', 'conflictApproach',
   ],
   ['photo', 'churchVerification'],
-  ['phone'],
 ];
 
 // Map DB profile fields → ApplyFormData fields
@@ -155,12 +95,6 @@ function prefillFromProfile(
     const map: Record<string, string> = { family: '가족과', alone: '혼자', other: '기타' };
     setValue('livingWith', (map[profile.living_with] ?? '') as ApplyFormData['livingWith']);
   }
-  if (profile.church_location) {
-    const parts = String(profile.church_location).split(' ');
-    setValue('churchCity', parts[0] ?? '');
-    setValue('churchDistrict', parts.slice(1).join(' ') ?? '');
-  }
-  if (profile.church_denomination) setValue('denomination', profile.church_denomination);
   if (profile.faith_years)         setValue('faithYears', String(profile.faith_years));
   if (profile.contact_preference)  setValue('contactFrequency', profile.contact_preference);
   if (profile.opposite_friends)    setValue('oppositeFriend', profile.opposite_friends);
@@ -171,7 +105,6 @@ function prefillFromProfile(
   if (profile.marriage_view)       setValue('marriageView', profile.marriage_view);
   if (profile.pet)                 setValue('pet', profile.pet);
   if (profile.date_style)          setValue('dateStyle', profile.date_style);
-  if (profile.faith_style)         setValue('faithStyle', profile.faith_style);
   if (profile.ministry)            setValue('ministry', profile.ministry);
   if (profile.church_name)         setValue('churchName', profile.church_name);
   if (profile.faith_level)         setValue('faithLevel', profile.faith_level);
@@ -204,7 +137,7 @@ function ProfileCreateContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNudge = searchParams.get('nudge') === 'true';
-  const returnTo = searchParams.get('return') ?? '/apply';
+  const returnTo = searchParams.get('return') ?? '/rotation/apply';
 
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -367,13 +300,9 @@ function ProfileCreateContent() {
         restDay:          data.restDay,
         pet:              data.pet,
         dateStyle:        data.dateStyle,
-        denomination:     data.denomination,
         faithYears:       data.faithYears,
         churchName:       data.churchName,
-        churchCity:       data.churchCity,
-        churchDistrict:   data.churchDistrict,
         faithLevel:       data.faithLevel,
-        faithStyle:       data.faithStyle,
         sundayAttendance: data.sundayAttendance,
         ministry:         data.ministry,
         phone:            data.phone,
@@ -463,7 +392,6 @@ function ProfileCreateContent() {
               {step === 2 && <Step3 />}
               {step === 3 && <StepQnA />}
               {step === 4 && <Step5 />}
-              {step === 5 && <StepPhone />}
             </div>
 
             {serverError && (

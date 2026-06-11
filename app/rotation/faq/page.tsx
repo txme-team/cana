@@ -3,10 +3,9 @@ import FAQ from '@/components/landing/FAQ';
 import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata = {
-  title: '자주 묻는 질문 | cana',
+  title: '자주 묻는 질문',
+  description: '카나 로테이션 소개팅 이용 전 자주 묻는 질문을 확인해보세요.',
 };
 
 export default function FAQPage() {

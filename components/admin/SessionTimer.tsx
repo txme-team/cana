@@ -23,7 +23,7 @@ export default function SessionTimer() {
         if (prev === null) return null;
         if (prev <= 1) {
           createClient().auth.signOut().then(() => {
-            window.location.href = '/admin/login';
+            window.location.href = '/rotation/admin/login';
           });
           return 0;
         }

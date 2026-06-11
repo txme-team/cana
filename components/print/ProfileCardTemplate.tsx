@@ -3,23 +3,23 @@ import type { Profile } from '@/lib/types';
 // ─── 에세이 메타 ───────────────────────────────────────────────────────────────
 
 const ESSAY_META: { field: string; label: string }[] = [
-  { field: 'prayerRequest',      label: '요즘 나의 기도제목은요' },
-  { field: 'bibleVerse',         label: '나에게 힘이 되는 성경 말씀이 있다면' },
-  { field: 'ministryNote',       label: '섬기는 사역에 대해 조금 더 알려주세요' },
-  { field: 'faithGrowthMoment',  label: '신앙이 가장 많이 성장했던 순간은' },
-  { field: 'answeredPrayer',     label: '응답받은 기도가 있다면 나눠주세요' },
-  { field: 'communityRole',      label: '공동체 안에서 나는 어떤 사람인가요' },
-  { field: 'jobDescription',     label: '이런 일을 하고 있어요' },
-  { field: 'careerGoal',         label: '앞으로 이런 커리어를 그리고 있어요' },
-  { field: 'coworkerOpinion',    label: '동료들은 저를 이렇게 봐요' },
-  { field: 'careerMotivation',   label: '일하면서 가장 보람을 느끼는 순간은' },
-  { field: 'relationshipPromise',label: "'이것' 하나만큼은 꼭 약속해 줄 수 있어요" },
-  { field: 'partnerStyle',       label: '나는 이런 사람과 잘 맞아요' },
-  { field: 'feelingLoved',       label: '이럴 때 사랑받는다고 느껴요' },
-  { field: 'humorStyle',         label: '저의 유머 스타일은요' },
-  { field: 'weekendStyle',       label: '완벽한 주말을 보낸다면' },
-  { field: 'spendingHabit',      label: '돈 쓰는 기준이 있다면' },
-  { field: 'conflictApproach',   label: '갈등이 생겼을 때 저는요' },
+  { field: 'prayerRequest',       label: '요즘 나의 기도제목은요' },
+  { field: 'bibleVerse',          label: '가장 좋아하는 성경 구절과 그 이유는요' },
+  { field: 'ministryNote',        label: '교회에서 섬기고 있는 사역은요' },
+  { field: 'faithGrowthMoment',   label: '나의 신앙이 성장했던 순간은요' },
+  { field: 'answeredPrayer',      label: '가장 크게 응답받았던 기도는요' },
+  { field: 'communityRole',       label: '공동체 안에서 내 모습은요' },
+  { field: 'jobDescription',      label: '이런 일을 하고 있어요' },
+  { field: 'careerGoal',          label: '설레는 커리어 목표가 있어요' },
+  { field: 'coworkerOpinion',     label: "직장 동료들이 평가하는 '나'는요" },
+  { field: 'careerMotivation',    label: '지금의 직업을 선택한 계기는요' },
+  { field: 'relationshipPromise', label: "'이것' 하나만큼은 꼭 약속해 줄 수 있어요" },
+  { field: 'partnerStyle',        label: '이런 남자/여자친구이고 싶어요' },
+  { field: 'feelingLoved',        label: '내가 사랑받고 있다고 느끼는 순간은요' },
+  { field: 'humorStyle',          label: '나의 유머 코드나 웃음 포인트는요' },
+  { field: 'weekendStyle',        label: '주말엔 이렇게 시간 보내는 걸 좋아해요' },
+  { field: 'spendingHabit',       label: '내 소비습관은요' },
+  { field: 'conflictApproach',    label: '갈등이 생기면 이렇게 해결해요' },
 ];
 
 // ─── 서브 컴포넌트 ─────────────────────────────────────────────────────────────
@@ -105,9 +105,6 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
 
             <div className="panel-title-wrap">
               <div className="panel-title">프로필 카드</div>
-              <div className="q-banner">
-                <div className="q-banner-txt">미리 작성한 프로필 카드를 바탕으로 대화를 진행해보세요.</div>
-              </div>
             </div>
 
             {/* 기본 정보 */}
@@ -115,9 +112,9 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
               <div className="sec-label">기본 정보</div>
               <div className="info-grid">
 
-                {/* 1행: 닉네임 · 나이 · MBTI · 키 · 학력 · 근무지 */}
+                {/* 1행: 이름 · 나이 · MBTI · 키 · 학력 · 근무지 */}
                 <div className="i-cell">
-                  <div className="i-label">닉네임</div>
+                  <div className="i-label">이름</div>
                   <div className="i-val">{p.nickname}</div>
                 </div>
                 <div className="i-cell">
@@ -254,25 +251,16 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
               <div className="sec-label">신앙</div>
               <div className="faith-grid">
 
-                <div className="fa-cell w2">
-                  <div className="fa-label">교단</div>
-                  <div className="fa-val">{p.church_denomination}</div>
-                </div>
-                <div className="fa-cell w2">
+                <div className="fa-cell w3">
                   <div className="fa-label">신앙 연수</div>
                   <div className="fa-val">{p.faith_years}년</div>
                 </div>
-                <div className="fa-cell w2">
-                  <div className="fa-label">교회 위치</div>
-                  <div className="fa-val">{p.church_location}</div>
-                </div>
-                <div className="fa-cell w6">
-                  <div className="fa-label">신앙 스타일</div>
-                  <FaItems
-                    options={['말씀 중심', '예배·찬양 중심', '봉사·섬김 중심', '균형형']}
-                    selected={p.faith_style}
-                  />
-                </div>
+                {p.faith_level && (
+                  <div className="fa-cell w3">
+                    <div className="fa-label">신앙 단계</div>
+                    <div className="fa-val">{p.faith_level}</div>
+                  </div>
+                )}
                 <div className="fa-cell w3">
                   <div className="fa-label">주일 예배</div>
                   <FaItems
@@ -301,9 +289,6 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
             {/* Q&A */}
             <div className="panel-title-wrap">
               <div className="panel-title">Q&amp;A</div>
-              <div className="q-banner">
-                <div className="q-banner-txt">상대방이 직접 작성한 답변을 미리 읽고 대화를 시작해보세요.</div>
-              </div>
             </div>
 
             <div className="section-qa">
@@ -325,9 +310,6 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
             <div className="section-gap" />
             <div className="panel-title-wrap">
               <div className="panel-title">추천 질문</div>
-              <div className="q-banner">
-                <div className="q-banner-txt">모든 질문을 다 하실 필요 없어요 — 대화가 잠깐 끊길 때, 아래에서 하나씩 자연스럽게 꺼내보세요.</div>
-              </div>
             </div>
 
             <div className="q-cols">
@@ -348,13 +330,7 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
                   <div className="q-group-label">신앙</div>
                   <div className="q-row"><div className="q-dot" /><div className="q-txt">어떻게 교회를 다니게 됐어요?</div></div>
                   <div className="q-row"><div className="q-dot" /><div className="q-txt">예배 끝나면 보통 뭐하세요?</div></div>
-                  <div className="q-row">
-                    <div className="q-dot" />
-                    <div className="q-txt">
-                      신앙 스타일이 어떤 편이에요?
-                      <span className="q-hint">말씀 파 · 예배찬양 파 · 봉사 파</span>
-                    </div>
-                  </div>
+                  <div className="q-row"><div className="q-dot" /><div className="q-txt">신앙 스타일이 어떤 편이에요?</div></div>
                 </div>
               </div>
 
@@ -367,10 +343,6 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
                   <div className="q-row"><div className="q-dot" /><div className="q-txt">데이트할 때 계획 세우는 편, 즉흥적인 편?</div></div>
                   <div className="q-row"><div className="q-dot" /><div className="q-txt">어떤 데이트를 좋아하세요?</div></div>
                   <div className="q-row"><div className="q-dot" /><div className="q-txt">첫 데이트로 가고 싶은 곳 있어요?</div></div>
-                </div>
-                <div className="tip-row">
-                  <span className="tip-icon">✦</span>
-                  <div className="tip-txt">상대방 카드의 사역·신앙 스타일 항목을 먼저 확인하고 이어서 물어보면 훨씬 자연스러운 대화가 돼요.</div>
                 </div>
               </div>
             </div>

@@ -39,10 +39,10 @@ async function getTemplate(supa: any, key: string): Promise<string> {
 async function fetchConfirmedParticipants(supa: any, eventId: string) {
   const { data } = await supa
     .from('applications')
-    .select('profiles ( name, nickname, phone )')
+    .select('profiles ( nickname, phone )')
     .eq('event_id', eventId)
     .eq('status', '확정') as {
-      data: { profiles: { name: string | null; nickname: string; phone: string | null } | null }[] | null;
+      data: { profiles: { nickname: string; phone: string | null } | null }[] | null;
     };
   return (data ?? []).filter((a) => !!a.profiles?.phone);
 }
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       const eventVars    = buildEventVars(event);
       const messages     = participants.map((a) => ({
         phone: a.profiles!.phone!,
-        text:  substituteVars(content, { name: a.profiles!.name ?? a.profiles!.nickname, ...eventVars }),
+        text:  substituteVars(content, { name: a.profiles!.nickname, ...eventVars }),
       }));
       if (messages.length > 0) {
         await sendPersonalizedSMS(messages).catch(console.error);
@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
       const eventVars    = buildEventVars(event);
       const messages     = participants.map((a) => ({
         phone: a.profiles!.phone!,
-        text:  substituteVars(content, { name: a.profiles!.name ?? a.profiles!.nickname, ...eventVars }),
+        text:  substituteVars(content, { name: a.profiles!.nickname, ...eventVars }),
       }));
       if (messages.length > 0) {
         await sendPersonalizedSMS(messages).catch(console.error);
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
       const eventVars    = buildEventVars(event);
       const messages     = participants.map((a) => ({
         phone: a.profiles!.phone!,
-        text:  substituteVars(content, { name: a.profiles!.name ?? a.profiles!.nickname, ...eventVars }),
+        text:  substituteVars(content, { name: a.profiles!.nickname, ...eventVars }),
       }));
       if (messages.length > 0) {
         await sendPersonalizedSMS(messages).catch(console.error);

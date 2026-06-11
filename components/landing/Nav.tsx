@@ -82,7 +82,7 @@ export default function Nav() {
               </>
             ) : (
               <Link
-                href="/rotation/login?redirectTo=/"
+                href="/rotation/login?redirectTo=/rotation"
                 className="text-base font-medium text-cana-ink3 transition hover:text-cana-ink"
               >
                 로그인

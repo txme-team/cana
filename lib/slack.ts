@@ -29,7 +29,7 @@ export async function notifyNewProfile(nickname: string, profileId: string) {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*새 프로필이 등록됐어요* :tada:\n닉네임: *${nickname}*\nID: \`${profileId}\``,
+          text: `*새 프로필이 등록됐어요* :tada:\n이름: *${nickname}*\nID: \`${profileId}\``,
         },
       },
     ],

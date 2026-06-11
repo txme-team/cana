@@ -108,50 +108,16 @@ function SectionLabel({ title }: { title: string }) {
   );
 }
 
-function PhotoAvatar({ url }: { url?: string | null }) {
-  const [err, setErr] = useState(false);
-  if (url && !err) {
-    return (
-      <img
-        src={url}
-        alt=""
-        className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover"
-        onError={() => setErr(true)}
-      />
-    );
-  }
-  return (
-    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-cana-cream">
-      <svg className="h-7 w-7 text-cana-ink3/30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-      </svg>
-    </div>
-  );
-}
-
-function CertRow({ label, url }: { label: string; url?: string | null }) {
-  const ok = !!url;
-  return (
-    <div className="flex items-center justify-between">
-      <p className="text-base text-cana-ink">{label}</p>
-      <span className={`flex items-center gap-1.5 text-sm font-medium ${ok ? 'text-green-500' : 'text-cana-ink3/40'}`}>
-        <span className={`h-1.5 w-1.5 rounded-full ${ok ? 'bg-green-400' : 'bg-gray-200'}`} />
-        {ok ? '완료' : '미완료'}
-      </span>
-    </div>
-  );
-}
-
 function InfoSection({
   profile,
   userInfo,
+  onWithdrawClick,
 }: {
   profile: Profile | null | 'loading';
   userInfo: UserInfo | null;
+  onWithdrawClick: () => void;
 }) {
   if (profile === 'loading') return <Spinner />;
-
-  const photoUrl = profile?.photo_urls?.[0];
 
   return (
     <div className="flex flex-col gap-4">
@@ -176,58 +142,24 @@ function InfoSection({
         </div>
       </div>
 
-      {/* ── 프로필 ── */}
+      {/* ── 연락처 ── */}
       <div className="rounded-2xl border border-cana-rule bg-white px-5 py-6">
-        <SectionLabel title="프로필" />
-        {!profile ? (
-          <p className="text-sm text-cana-ink3">프로필을 아직 작성하지 않았어요.</p>
+        <SectionLabel title="연락처" />
+        {profile ? (
+          <p className="text-base font-medium text-cana-ink">{profile.phone ?? '연락처 없음'}</p>
         ) : (
-          <div className="flex items-center gap-4">
-            <PhotoAvatar url={photoUrl} />
-            <div>
-              <p className="text-lg font-semibold text-cana-ink">{profile.nickname ?? '—'}</p>
-              <p className="text-sm text-cana-ink3">{profile.phone ?? '연락처 없음'}</p>
-            </div>
-          </div>
+          <p className="text-sm text-cana-ink3">프로필을 아직 작성하지 않았어요.</p>
         )}
       </div>
 
-      {/* ── 인증 ── */}
-      <div className="rounded-2xl border border-cana-rule bg-white px-5 py-6">
-        <SectionLabel title="인증" />
-        {!profile ? (
-          <p className="text-sm text-cana-ink3">프로필을 아직 작성하지 않았어요.</p>
-        ) : (
-          <div className="flex flex-col divide-y divide-cana-rule">
-            <div className="py-3 first:pt-0 last:pb-0">
-              <CertRow label="사진 인증"  url={profile.photo_urls?.[0]} />
-            </div>
-            <div className="py-3 first:pt-0 last:pb-0">
-              <CertRow label="교회 인증"  url={profile.bulletin_url} />
-            </div>
-            <div className="py-3 first:pt-0 last:pb-0">
-              <CertRow label="직장 인증"  url={profile.job_cert_url} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {profile && (
-        <Link
-          href="/rotation/profile/create"
-          className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
-        >
-          프로필 수정하기
-        </Link>
-      )}
-      {!profile && (
-        <Link
-          href="/rotation/profile/create"
-          className="block w-full rounded-xl bg-cana py-3 text-center text-sm font-medium text-white transition hover:bg-cana-dark"
-        >
-          프로필 작성하기
-        </Link>
-      )}
+      {/* ── 회원 탈퇴 ── */}
+      <button
+        type="button"
+        onClick={onWithdrawClick}
+        className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
+      >
+        회원 탈퇴
+      </button>
     </div>
   );
 }
@@ -245,7 +177,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
 
       <Sec title="프로필" />
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-        <F label="닉네임"    value={profile.nickname} />
+        <F label="이름"      value={profile.nickname} />
         <F label="성별"      value={profile.gender === 'male' ? '남성' : '여성'} />
         <F label="출생연도"  value={`${birthYear}년생`} />
         <F label="MBTI"      value={profile.mbti} />
@@ -293,19 +225,13 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
 
       <Sec title="신앙" />
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-        <F label="교단"      value={profile.church_denomination} />
-        <F label="신앙 연수" value={profile.faith_years ? `${profile.faith_years}년` : null} />
         <F label="교회명"    value={profile.church_name} />
-        <F label="교회 위치" value={profile.church_location} />
+        <F label="신앙 연수" value={profile.faith_years ? `${profile.faith_years}년` : null} />
       </div>
-      {profile.faith_level && (
-        <div>
-          <p className="mb-1.5 text-xs text-cana-ink3">신앙 단계</p>
-          <p className="text-base font-medium text-cana-ink">{profile.faith_level}</p>
-        </div>
-      )}
       <div className="flex flex-wrap gap-3">
-        <div><p className="mb-1.5 text-xs text-cana-ink3">신앙 스타일</p><Pill value={profile.faith_style} /></div>
+        {profile.faith_level && (
+          <div><p className="mb-1.5 text-xs text-cana-ink3">신앙 단계</p><Pill value={profile.faith_level} /></div>
+        )}
         <div><p className="mb-1.5 text-xs text-cana-ink3">주일 예배</p><Pill value={profile.worship_frequency} /></div>
         <div><p className="mb-1.5 text-xs text-cana-ink3">섬기는 사역</p><Pill value={profile.ministry} /></div>
       </div>
@@ -314,7 +240,7 @@ function ProfileCardSection({ profile }: { profile: Profile | null | 'loading' }
 
       <div className="pt-2">
         <Link
-          href="/rotation/profile/create"
+          href="/rotation/profile/create?return=/rotation/my"
           className="block w-full rounded-xl border border-cana-rule py-3 text-center text-sm font-medium text-cana-ink3 transition hover:bg-cana-cream active:scale-[0.99]"
         >
           프로필 수정하기
@@ -507,7 +433,7 @@ function NoProfileCard() {
         <p className="mb-1 text-base font-medium text-cana-ink">아직 프로필이 없어요</p>
         <p className="mb-6 text-sm text-cana-ink3">프로필을 작성하면 이벤트에 신청할 수 있어요.</p>
         <Link
-          href="/rotation/profile/create"
+          href="/rotation/profile/create?return=/rotation/my"
           className="inline-block rounded-xl bg-cana px-6 py-3 text-sm font-medium text-white transition hover:bg-cana-dark"
         >
           프로필 작성하기
@@ -520,10 +446,10 @@ function NoProfileCard() {
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 
-const TABS: Tab[] = ['내 정보', '프로필 카드', '신청 내역'];
+const TABS: Tab[] = ['프로필 카드', '신청 내역', '내 정보'];
 
 export default function MyPage() {
-  const [tab, setTab] = useState<Tab>('내 정보');
+  const [tab, setTab] = useState<Tab>('프로필 카드');
   const [profile, setProfile] = useState<Profile | null | 'loading'>('loading');
   const [applications, setApplications] = useState<ApplicationItem[] | 'loading'>('loading');
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -532,6 +458,11 @@ export default function MyPage() {
   const [cancelTarget, setCancelTarget] = useState<ApplicationItem | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+
+  // ── 회원 탈퇴 모달 ────────────────────────────────────────────────────────
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
   const loadApplications = () => {
     fetch('/api/my-applications')
@@ -576,6 +507,24 @@ export default function MyPage() {
     }
   };
 
+  const handleWithdrawConfirm = async () => {
+    setWithdrawing(true);
+    setWithdrawError(null);
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(error ?? '회원 탈퇴에 실패했어요.');
+      }
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (e) {
+      setWithdrawError(e instanceof Error ? e.message : '오류가 발생했어요.');
+      setWithdrawing(false);
+    }
+  };
+
   return (
     <>
       <Nav />
@@ -606,7 +555,13 @@ export default function MyPage() {
           </div>
 
           {/* 탭 콘텐츠 */}
-          {tab === '내 정보'    && <InfoSection       profile={profile} userInfo={userInfo} />}
+          {tab === '내 정보'    && (
+            <InfoSection
+              profile={profile}
+              userInfo={userInfo}
+              onWithdrawClick={() => { setShowWithdraw(true); setWithdrawError(null); }}
+            />
+          )}
           {tab === '프로필 카드' && <ProfileCardSection profile={profile} />}
           {tab === '신청 내역'  && (
             <ApplicationsSection
@@ -656,6 +611,43 @@ export default function MyPage() {
                 className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-40"
               >
                 {cancelling ? '처리 중...' : '취소하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 회원 탈퇴 확인 모달 */}
+      {showWithdraw && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6"
+          onClick={() => !withdrawing && setShowWithdraw(false)}
+        >
+          <div
+            className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-base font-semibold text-cana-ink">정말 탈퇴하시겠어요?</p>
+            <p className="text-sm text-cana-ink3">탈퇴 시 프로필과 신청 내역을 포함한 모든 정보가 삭제되며, 되돌릴 수 없어요.</p>
+
+            {withdrawError && (
+              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-500">{withdrawError}</p>
+            )}
+
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setShowWithdraw(false)}
+                disabled={withdrawing}
+                className="flex-1 rounded-xl border border-cana-rule py-2.5 text-sm text-cana-ink3 transition hover:bg-cana-warm disabled:opacity-40"
+              >
+                닫기
+              </button>
+              <button
+                onClick={handleWithdrawConfirm}
+                disabled={withdrawing}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-40"
+              >
+                {withdrawing ? '처리 중...' : '탈퇴하기'}
               </button>
             </div>
           </div>

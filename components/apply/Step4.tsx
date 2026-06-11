@@ -128,9 +128,9 @@ export default function Step4() {
         </p>
       </div>
 
-      {/* 동의 항목들 */}
+      {/* 필수 동의 항목 */}
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-gray-500">약관 동의</p>
+        <p className="text-sm font-medium text-gray-500">필수 동의</p>
 
         {/* 1. 개인정보 수집 및 이용 동의 (필수) */}
         <Controller
@@ -185,27 +185,33 @@ export default function Step4() {
           )}
         />
 
-        {/* 3. 자기소개 파일 전달 동의 (선택) */}
+        {/* 3. 자기소개 파일 전달 동의 (필수) */}
         <Controller
           name="agreeProfileShare"
           control={control}
+          rules={{ validate: (v) => v === true || '필수 동의 항목이에요' }}
           render={({ field }) => (
             <ConsentBlock
+              required
               label="자기소개 파일 전달 동의"
-              description="비동의 시 해당 항목이 빈칸으로 전달돼요."
               content={
                 <div className="flex flex-col gap-1.5">
                   <p>소개팅 전날, 참여자들에게 상대방의 자기소개 파일이 전달될 예정이에요.</p>
                   <p>• 전달 항목: MBTI, 취미, 성격, 신앙 스타일 등 비식별 정보</p>
                   <p>• 미전달 항목: 연락처, 직장명, 거주지 등 개인정보</p>
-                  <p>동의하지 않으시면 해당 항목이 빈칸으로 처리돼요.</p>
                 </div>
               }
               checked={field.value ?? false}
               onChange={field.onChange}
+              error={errors.agreeProfileShare?.message}
             />
           )}
         />
+      </div>
+
+      {/* 선택 동의 항목 */}
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-gray-500">선택 동의</p>
 
         {/* 4. 카나 인스타그램 자기 PR 동의 (선택) */}
         <Controller

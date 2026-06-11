@@ -41,9 +41,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-[15px] text-white/75 mb-4 tracking-wide"
+          className="text-[18px] text-white/75 mb-4 tracking-wide"
         >
-          교회 밖에서 안전하게 크리스천 이성 만나기
+          교회 밖에서 안전하게 연애하기
         </motion.p>
 
         <motion.h1

@@ -8,7 +8,7 @@ export default function LogoutButton() {
     const supabase = createClient();
     await supabase.auth.signOut();
     // 하드 리다이렉트로 서버 레이아웃이 세션 만료를 정확히 읽도록
-    window.location.href = '/admin/login';
+    window.location.href = '/rotation/admin/login';
   };
 
   return (

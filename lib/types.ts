@@ -31,11 +31,6 @@ export type DateStyleOption =
 
 // ─── 신앙 ─────────────────────────────────────────────────────────────────────
 
-export type FaithStyleOption =
-  | '말씀 중심'
-  | '예배·찬양 중심'
-  | '봉사·섬김 중심'
-  | '균형형';
 export type SundayAttendanceOption = '거의 매주' | '2~3주에 1회' | '상황에 따라';
 export type MinistryOption = '찬양팀' | '교육부' | '행정' | '없음' | '기타';
 export type FaithLevelOption =
@@ -80,13 +75,9 @@ export interface ApplyFormData {
   dateStyle: DateStyleOption;
 
   // Step 3: 신앙
-  denomination: string;
   faithYears: string;
   churchName: string;
-  churchCity: string;
-  churchDistrict: string;
   faithLevel: FaithLevelOption | '';
-  faithStyle: FaithStyleOption;
   sundayAttendance: SundayAttendanceOption;
   ministry: MinistryOption;
 
@@ -174,12 +165,9 @@ export interface Profile {
   pet?: string;
   date_style?: string;
   // 신앙
-  church_denomination?: string;
   faith_years?: number;
-  church_location?: string;
   church_name?: string;
   church_pastor?: string;
-  faith_style?: string;
   worship_frequency?: string;
   ministry?: string;
   faith_level?: string;

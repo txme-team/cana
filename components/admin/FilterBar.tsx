@@ -55,7 +55,7 @@ export default function FilterBar({
         </svg>
         <input
           type="text"
-          placeholder="닉네임 검색"
+          placeholder="이름 검색"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           className="w-full rounded-lg border border-gray-200 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-cana focus:ring-1 focus:ring-cana/20"

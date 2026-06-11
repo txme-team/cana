@@ -167,7 +167,7 @@ export default function EventsManager() {
               <tr
                 key={ev.id}
                 className="cursor-pointer transition hover:bg-gray-50"
-                onClick={() => router.push(`/admin/events/${ev.id}`)}
+                onClick={() => router.push(`/rotation/admin/events/${ev.id}`)}
               >
                 <td className="px-5 py-3 font-medium text-gray-800">{ev.title}</td>
                 <td className="px-5 py-3 text-sm text-gray-500">{formatDate(ev.event_date)}</td>

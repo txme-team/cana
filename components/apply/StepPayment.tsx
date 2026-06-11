@@ -198,9 +198,6 @@ export default function StepPayment({
           {paying ? '결제 처리 중...' : !widgetReady ? '불러오는 중...' : `${formatted}원 결제하기`}
         </button>
 
-        <p className="text-center text-xs text-cana-ink3">
-          행사 3일 전까지 취소 시 전액 환불 · 문의: @cana_official
-        </p>
       </div>
     </>
   );

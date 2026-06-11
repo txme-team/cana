@@ -18,20 +18,34 @@ const STEPS = ['일정', '프로필 확인', '동의'];
 
 // ─── Step 1: Profile Review ────────────────────────────────────────────────────
 
-function StepProfileReview({ profile }: { profile: Profile | null }) {
+function StepProfileReview({ profile, profileLoaded }: { profile: Profile | null; profileLoaded: boolean }) {
   const handleEdit = () => {
     const methods = (window as unknown as { __applyFormMethods?: { getValues: () => ApplyFormData } }).__applyFormMethods;
     if (methods) {
       const eventId = methods.getValues().eventId;
       if (eventId) sessionStorage.setItem('cana_apply_eventId', eventId);
     }
-    window.location.href = '/profile/create?return=/apply';
+    window.location.href = '/rotation/profile/create?return=/rotation/apply';
   };
 
   if (!profile) {
+    if (!profileLoaded) {
+      return (
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <p className="text-base text-cana-ink3">프로필 정보를 불러오는 중...</p>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center gap-4 py-6 text-center">
-        <p className="text-base text-cana-ink3">프로필 정보를 불러오는 중...</p>
+        <p className="text-base text-cana-ink3">작성된 프로필카드가 없어요.<br />참여하기 위해서는 프로필 카드 작성이 필요해요.</p>
+        <Link
+          href="/rotation/profile/create?return=/rotation/apply"
+          className="rounded-xl bg-cana px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
+        >
+          지금 작성하기
+        </Link>
       </div>
     );
   }
@@ -48,7 +62,7 @@ function StepProfileReview({ profile }: { profile: Profile | null }) {
       <div className="rounded-2xl border border-cana-rule bg-cana-cream px-5 py-5">
         <div className="grid grid-cols-2 gap-y-3 gap-x-4">
           <div>
-            <p className="text-xs text-cana-ink3">닉네임</p>
+            <p className="text-xs text-cana-ink3">이름</p>
             <p className="text-base font-medium text-cana-ink">{profile.nickname ?? '—'}</p>
           </div>
           <div>
@@ -100,10 +114,12 @@ interface ConsentBlockProps {
   checked: boolean;
   onChange: (v: boolean) => void;
   error?: string;
+  alwaysExpanded?: boolean;
 }
 
-function ConsentBlock({ required, label, description, content, checked, onChange, error }: ConsentBlockProps) {
+function ConsentBlock({ required, label, description, content, checked, onChange, error, alwaysExpanded }: ConsentBlockProps) {
   const [expanded, setExpanded] = useState(false);
+  const isExpanded = alwaysExpanded || expanded;
 
   return (
     <div className={[
@@ -120,16 +136,18 @@ function ConsentBlock({ required, label, description, content, checked, onChange
           </div>
           {description && <p className="text-sm text-cana-ink3">{description}</p>}
         </div>
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="flex-shrink-0 text-sm text-cana-ink3 underline underline-offset-2"
-        >
-          {expanded ? '접기' : '내용 보기'}
-        </button>
+        {!alwaysExpanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex-shrink-0 text-sm text-cana-ink3 underline underline-offset-2"
+          >
+            {expanded ? '접기' : '내용 보기'}
+          </button>
+        )}
       </div>
 
-      {expanded && (
+      {isExpanded && (
         <div className="mt-3 rounded-xl bg-cana-cream px-3 py-3 text-sm leading-relaxed text-cana-ink3">
           {content}
         </div>
@@ -170,7 +188,10 @@ function StepAgreements() {
         <p className="text-sm text-cana-ink3">이벤트 참여에 필요한 동의 항목이에요.</p>
       </div>
 
+      {/* 필수 동의 */}
       <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-cana-ink3">필수 동의</p>
+
         {/* 1. 개인정보 수집 및 이용 동의 (필수) */}
         <Controller
           name="agreePrivacy"
@@ -187,9 +208,11 @@ function StepAgreements() {
                   <p className="font-medium text-cana-ink2">수집 목적</p>
                   <p>매칭 서비스 운영 및 참여자 심사, 행사 진행</p>
                   <p className="font-medium text-cana-ink2">보유 기간</p>
-                  <p>서비스 종료 후 즉시 파기 (최대 1년)</p>
+                  <p>회원 탈퇴 시 즉시 파기</p>
                   <p className="font-medium text-cana-ink2">제3자 제공</p>
-                  <p>매칭 확정 시 상대방에게 연락처만 제공. 그 외 제3자 제공 없음.</p>
+                  <p>전자 결제 서비스: (주)토스페이먼츠</p>
+                  <p>알림 메시지 전송: (주)인포뱅크</p>
+                  <p>서버 운영 및 관리: supabase, vercel</p>
                 </div>
               }
               checked={field.value ?? false}
@@ -207,7 +230,7 @@ function StepAgreements() {
           render={({ field }) => (
             <ConsentBlock
               required
-              label="참여 시 주의 사항 확인"
+              label="서비스 이용약관 동의"
               content={
                 <div className="flex flex-col gap-1.5">
                   <p>• 행사 당일 노쇼(무단 불참) 시 향후 참여가 제한될 수 있어요.</p>
@@ -224,27 +247,34 @@ function StepAgreements() {
           )}
         />
 
-        {/* 3. 자기소개 파일 전달 동의 (선택) */}
+        {/* 3. 자기소개 파일 전달 동의 (필수) */}
         <Controller
           name="agreeProfileShare"
           control={control}
+          rules={{ validate: (v) => v === true || '필수 동의 항목이에요' }}
           render={({ field }) => (
             <ConsentBlock
-              label="자기소개 파일 전달 동의"
-              description="비동의 시 해당 항목이 빈칸으로 전달돼요."
+              required
+              label="프로필카드 전달 동의"
+              description="이름, 연락처, 직장명 등 개인정보는 전달되지 않아요"
               content={
                 <div className="flex flex-col gap-1.5">
-                  <p>소개팅 전날, 참여자들에게 상대방의 자기소개 파일이 전달될 예정이에요.</p>
+                  <p>소개팅 전날, 참여자들에게 프로필카드가 전달될 예정이에요.</p>
                   <p>• 전달 항목: MBTI, 취미, 성격, 신앙 스타일 등 비식별 정보</p>
                   <p>• 미전달 항목: 연락처, 직장명, 거주지 등 개인정보</p>
-                  <p>동의하지 않으시면 해당 항목이 빈칸으로 처리돼요.</p>
                 </div>
               }
               checked={field.value ?? false}
               onChange={field.onChange}
+              error={errors.agreeProfileShare?.message}
             />
           )}
         />
+      </div>
+
+      {/* 선택 동의 */}
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-cana-ink3">선택 동의</p>
 
         {/* 4. 카나 인스타그램 자기 PR 동의 (선택) */}
         <Controller
@@ -252,14 +282,17 @@ function StepAgreements() {
           control={control}
           render={({ field }) => (
             <ConsentBlock
-              label="카나 인스타그램 자기 PR 콘텐츠 동의"
-              description="개인정보는 절대 공개되지 않아요."
+              alwaysExpanded
+              label="카나 인스타그램 자기 PR 콘텐츠 참여 신청"
+              description="이름, 연락처, 사진, 직장명 등 개인정보는 절대 공개되지 않아요."
               content={
                 <div className="flex flex-col gap-1.5">
                   <p>카나 인스타그램에서 참여자들의 자기 PR 콘텐츠를 게시할 예정이에요.</p>
-                  <p>• 공개 항목: MBTI, 취미, 한 줄 소개 등 본인이 동의한 비식별 정보</p>
-                  <p>• 비공개 항목: 이름, 연락처, 직장명, 사진 등 모든 개인정보</p>
+                  <p>이성에게 내 매력을 어필해보고 싶다면 참여해보세요.</p>
                   <p>동의하지 않으셔도 서비스 이용에 불이익이 없어요.</p>
+                  <p>• 공개 항목: MBTI, 취미, Q&amp;A 등 본인이 동의한 비식별 정보</p>
+                  <p>• 비공개 항목: 이름, 연락처, 직장명, 사진 등 모든 개인정보</p>
+                  <p>(사진은 블러 처리하여 올라가요)</p>
                 </div>
               }
               checked={field.value ?? false}
@@ -277,7 +310,7 @@ function StepAgreements() {
 const STEP_FIELDS: (keyof ApplyFormData)[][] = [
   ['eventId'],
   [], // 프로필 확인 — 폼 필드 없음
-  ['agreePrivacy', 'agreeAttendance'],
+  ['agreePrivacy', 'agreeAttendance', 'agreeProfileShare'],
 ];
 
 const TOSS_AMOUNT = parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '50000', 10);
@@ -335,16 +368,17 @@ export default function ApplyPage() {
     };
   }, [methods]);
 
-  // profile/create 에서 돌아온 경우 eventId 복원
+  // profile/create 에서 돌아온 경우 eventId 복원 (프로필이 실제로 작성된 경우에만 단계 이동)
   useEffect(() => {
+    if (!profileLoaded) return;
     const savedEventId = sessionStorage.getItem('cana_apply_eventId');
     if (savedEventId) {
       methods.setValue('eventId', savedEventId);
       sessionStorage.removeItem('cana_apply_eventId');
-      setStep(1);
+      if (profile) setStep(1);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [profileLoaded]);
 
   // URL ?eventId= 파라미터로 진입 시 일정 선택 스킵 (프로필 있을 때만)
   useEffect(() => {
@@ -352,7 +386,7 @@ export default function ApplyPage() {
     const params = new URLSearchParams(window.location.search);
     const eventId = params.get('eventId');
     if (!eventId) return;
-    window.history.replaceState({}, '', '/apply');
+    window.history.replaceState({}, '', '/rotation/apply');
     methods.setValue('eventId', eventId);
     if (profile) setStep(1);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -400,8 +434,8 @@ export default function ApplyPage() {
             amount: { value: TOSS_AMOUNT, currency: 'KRW' },
             orderId,
             orderName: 'cana 소개팅 참여비',
-            successUrl: `${window.location.origin}/apply/success`,
-            failUrl:    `${window.location.origin}/apply/fail`,
+            successUrl: `${window.location.origin}/rotation/apply/success`,
+            failUrl:    `${window.location.origin}/rotation/apply/fail`,
           });
         // 리다이렉트 발생 — 아래 코드는 실행 안 됨
       } catch (err) {
@@ -488,7 +522,7 @@ export default function ApplyPage() {
               작성된 프로필카드가 없어요. 참여하기 위해서는 프로필 카드 작성이 필요해요.
             </p>
             <Link
-              href="/rotation/profile/create?return=/apply"
+              href="/rotation/profile/create?return=/rotation/apply"
               className="mt-2 inline-block text-sm font-medium text-cana underline underline-offset-2"
             >
               지금 작성하기
@@ -507,7 +541,7 @@ export default function ApplyPage() {
                   }
                 />
               )}
-              {step === 1 && <StepProfileReview profile={profile} />}
+              {step === 1 && <StepProfileReview profile={profile} profileLoaded={profileLoaded} />}
               {step === 2 && <StepAgreements />}
             </div>
 
@@ -533,6 +567,8 @@ export default function ApplyPage() {
                 disabled={
                   submitting ||
                   (step === 0 && profileLoaded && !profile) ||
+                  (step === 1 && !profile) ||
+                  (step === 2 && !profile) ||
                   (step === 2 && !tossReady)
                 }
                 className="flex-1 rounded-xl bg-cana py-3 text-base font-medium text-white transition active:bg-cana-dark disabled:opacity-40"

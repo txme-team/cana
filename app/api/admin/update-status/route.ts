@@ -156,17 +156,17 @@ export async function PATCH(req: NextRequest) {
       const supa = serviceClient as any;
       const { data: appData } = await supa
         .from('applications')
-        .select('profiles ( name, nickname, phone ), events ( event_date )')
+        .select('profiles ( nickname, phone ), events ( event_date )')
         .eq('id', body.id)
         .single() as {
           data: {
-            profiles: { name: string | null; nickname: string; phone: string | null } | null;
+            profiles: { nickname: string; phone: string | null } | null;
             events:   { event_date: string } | null;
           } | null;
         };
 
       const phone       = appData?.profiles?.phone;
-      const displayName = appData?.profiles?.name ?? appData?.profiles?.nickname;
+      const displayName = appData?.profiles?.nickname;
       const eventDate   = appData?.events?.event_date;
 
       if (phone && displayName && eventDate) {

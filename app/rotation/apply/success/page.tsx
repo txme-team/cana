@@ -3,7 +3,7 @@ import Nav from '@/components/landing/Nav';
 import SuccessHandler from './SuccessHandler';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: '결제 확인 중 | cana' };
+export const metadata = { title: '결제 확인 중', robots: { index: false, follow: false } };
 
 export default function PaymentSuccessPage() {
   return (

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Nav from '@/components/landing/Nav';
 
-export const metadata = { title: '결제 실패 | cana' };
+export const metadata = { title: '결제 실패', robots: { index: false, follow: false } };
 
 export default async function PaymentFailPage({
   searchParams,
@@ -63,7 +63,7 @@ export default async function PaymentFailPage({
 
         <p className="mt-6 text-xs text-cana-ink3">
           문의가 필요하시면{' '}
-          <span className="font-medium text-cana">@cana_official</span>로 연락해주세요
+          <span className="font-medium text-cana">ask@teambuildercorp.com</span>로 연락해주세요
         </p>
       </main>
     </>

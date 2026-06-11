@@ -79,15 +79,17 @@ export async function POST(req: NextRequest) {
     }
     const userId = user.id;
 
+    // 연락처: 작성 폼에 없으면 온보딩 시 저장된 user_metadata.phone 사용
+    const phone = data.phone || (user.user_metadata?.phone as string | undefined) || null;
+
     const required = [
       'name', 'birthYear', 'mbti', 'heightCm', 'education',
       'workplaceCity', 'workplaceDistrict', 'residenceCity', 'residenceDistrict',
       'livingWith', 'job', 'drinking', 'smoking', 'hobbies', 'personality',
       'contactFrequency', 'dateFrequency', 'oppositeFriend', 'marriageView',
       'conflictStyle', 'restDay', 'pet', 'dateStyle',
-      'denomination', 'faithYears', 'churchName', 'churchCity', 'churchDistrict',
-      'faithLevel', 'faithStyle', 'sundayAttendance', 'ministry',
-      'phone',
+      'faithYears', 'churchName',
+      'faithLevel', 'sundayAttendance', 'ministry',
     ];
     for (const key of required) {
       if (data[key] === undefined || data[key] === null || data[key] === '') {
@@ -153,10 +155,7 @@ export async function POST(req: NextRequest) {
           day_off_style:       data.restDay,
           pet:                 data.pet,
           date_style:          data.dateStyle,
-          church_denomination: data.denomination,
           faith_years:         parseInt(data.faithYears, 10),
-          church_location:     `${data.churchCity} ${data.churchDistrict}`,
-          faith_style:         data.faithStyle,
           worship_frequency:   data.sundayAttendance,
           ministry:            data.ministry,
           church_name:         data.churchName,
@@ -165,7 +164,7 @@ export async function POST(req: NextRequest) {
           ...(photoUrl !== null && { photo_urls: [photoUrl] }),
           ...(workplaceVerificationUrl !== null && { job_cert_url: workplaceVerificationUrl }),
           ...(churchVerificationUrl !== null && { bulletin_url: churchVerificationUrl }),
-          phone:               data.phone,
+          ...(phone && { phone }),
           profile_essays: {
             prayerRequest:       data.prayerRequest       ?? '',
             bibleVerse:          data.bibleVerse          ?? '',

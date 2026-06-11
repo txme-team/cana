@@ -179,10 +179,8 @@ export default function ProfileDetail({ profile: p }: { profile: Profile }) {
       <SectionHeader>신앙</SectionHeader>
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-        <Field label="교단"      value={p.church_denomination} />
         <Field label="신앙 연수" value={`${p.faith_years}년`} />
         <Field label="교회명"    value={p.church_name} />
-        <Field label="교회 위치" value={p.church_location} />
       </div>
 
       <div className="flex flex-col gap-1">
@@ -190,7 +188,6 @@ export default function ProfileDetail({ profile: p }: { profile: Profile }) {
         <span className="text-sm font-medium text-gray-800">{p.faith_level ?? '—'}</span>
       </div>
 
-      <LabeledCheck label="신앙 스타일" options={['말씀 중심', '예배·찬양 중심', '봉사·섬김 중심', '균형형']} selected={p.faith_style ?? ''} />
       <LabeledCheck label="주일 예배"   options={['거의 매주', '2~3주에 1회', '상황에 따라']}                  selected={p.worship_frequency ?? ''} />
       <LabeledCheck label="섬기는 사역" options={['찬양팀', '교육부', '행정', '없음', '기타']}                 selected={p.ministry ?? ''} />
 

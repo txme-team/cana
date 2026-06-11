@@ -27,7 +27,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'auto',
     trigger_desc: '신청서 제출 및 결제 완료 시 즉시',
     variables: [
-      { key: 'name',       label: '신청자 이름', desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',       label: '신청자 이름', desc: '프로필 이름' },
       { key: 'event_date', label: '행사일',       desc: '예: 6월 14일' },
     ],
   },
@@ -38,7 +38,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'auto',
     trigger_desc: '운영진이 참석 확정 처리 시 즉시',
     variables: [
-      { key: 'name',       label: '신청자 이름', desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',       label: '신청자 이름', desc: '프로필 이름' },
       { key: 'event_date', label: '행사일',       desc: '예: 6월 14일' },
     ],
   },
@@ -49,7 +49,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'manual',
     trigger_desc: '운영진이 장소 확정 문자 발송 버튼 클릭 시',
     variables: [
-      { key: 'name',       label: '신청자 이름', desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',       label: '신청자 이름', desc: '프로필 이름' },
       { key: 'event_date', label: '행사일',       desc: '예: 6월 14일' },
       { key: 'venue_name', label: '장소명',       desc: '이벤트 venue_name' },
       { key: 'address',    label: '주소',         desc: '이벤트 venue_detail 또는 location' },
@@ -63,7 +63,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'auto',
     trigger_desc: '운영진이 참석 반려 처리 시 즉시',
     variables: [
-      { key: 'name',       label: '신청자 이름', desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',       label: '신청자 이름', desc: '프로필 이름' },
       { key: 'event_date', label: '행사일',       desc: '예: 6월 14일' },
     ],
   },
@@ -74,7 +74,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'scheduled',
     trigger_desc: '행사 전날 오후 6시 자동 발송',
     variables: [
-      { key: 'name',              label: '신청자 이름',      desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',              label: '신청자 이름',      desc: '프로필 이름' },
       { key: 'event_date',        label: '행사일',            desc: '예: 6월 14일' },
       { key: 'profile_card_url',  label: '프로필 카드 URL',  desc: '수동 발송 시 직접 입력' },
     ],
@@ -86,7 +86,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'scheduled',
     trigger_desc: '행사 전날 오후 7시 자동 발송',
     variables: [
-      { key: 'name',           label: '신청자 이름', desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',           label: '신청자 이름', desc: '프로필 이름' },
       { key: 'event_datetime', label: '행사 일시',   desc: '예: 6월 14일 오후 3시' },
       { key: 'venue_name',     label: '장소명',       desc: '이벤트 venue_name' },
       { key: 'address',        label: '주소',         desc: '이벤트 venue_detail 또는 location' },
@@ -99,7 +99,7 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     trigger_type: 'scheduled',
     trigger_desc: '행사 종료 1시간 후 자동 발송',
     variables: [
-      { key: 'name',        label: '신청자 이름',   desc: '프로필 실명 (없으면 닉네임)' },
+      { key: 'name',        label: '신청자 이름',   desc: '프로필 이름' },
       { key: 'event_date',  label: '행사일',         desc: '예: 6월 14일' },
       { key: 'survey_url',  label: '만족도 조사 URL', desc: '수동 발송 시 직접 입력' },
     ],

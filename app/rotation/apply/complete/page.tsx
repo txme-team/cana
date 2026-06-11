@@ -38,7 +38,7 @@ export default function CompletePage() {
           <div className="mb-6 h-px w-full bg-cana-rule" />
 
           <p className="mb-1 text-xs text-cana-ink3/60">cana | CHRISTIAN ROTATION DATING</p>
-          <p className="text-xs text-cana-ink3/60">문의: @cana_official</p>
+          <p className="text-xs text-cana-ink3/60">문의: @cana_for_love</p>
         </div>
 
         <Link

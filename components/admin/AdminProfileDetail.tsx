@@ -139,14 +139,11 @@ export default function AdminProfileDetail({ profile: p }: { profile: Profile })
       {/* 신앙 */}
       <Sec title="신앙" />
       <div className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-4">
-        <F label="교단"      value={p.church_denomination} />
         <F label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : null} />
         <F label="교회명"    value={p.church_name} />
-        <F label="교회 위치" value={p.church_location} />
       </div>
       <F label="신앙 단계" value={p.faith_level} />
       <div className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3">
-        <FBadge label="신앙 스타일" value={p.faith_style} />
         <FBadge label="주일 예배"   value={p.worship_frequency} />
         <FBadge label="섬기는 사역" value={p.ministry} />
       </div>

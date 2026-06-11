@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') ?? '/apply';
+  const redirectTo = searchParams.get('redirectTo') ?? '/rotation/apply';
   const error = searchParams.get('error');
 
   const handleGoogleLogin = async () => {
@@ -14,7 +14,7 @@ function LoginContent() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
+        redirectTo: `${window.location.origin}/rotation/auth/callback?next=${redirectTo}`,
       },
     });
   };

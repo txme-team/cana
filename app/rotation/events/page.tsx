@@ -3,10 +3,9 @@ import EventsList from '@/components/landing/EventsPage';
 import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata = {
-  title: '소개팅 일정 | cana',
+  title: '소개팅 일정',
+  description: '카나에서 진행되는 로테이션 소개팅 일정을 확인하고 신청하세요.',
 };
 
 export default function EventsPage() {

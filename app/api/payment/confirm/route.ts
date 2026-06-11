@@ -46,12 +46,13 @@ export async function POST(req: NextRequest) {
     const supa = supabase as any;
 
     // ── 프로필 조회 ──────────────────────────────────────────────────────────
-    const { data: profile } = await supa
-      .from('profiles').select('id, nickname, name, phone')
+    const { data: profile, error: profileLookupError } = await supa
+      .from('profiles').select('id, nickname, phone')
       .eq('user_id', user.id).maybeSingle() as
-      { data: { id: string; nickname: string; name: string | null; phone: string | null } | null };
+      { data: { id: string; nickname: string; phone: string | null } | null; error: { message: string } | null };
 
     if (!profile) {
+      console.error('[payment/confirm] profile not found for user_id=', user.id, 'error:', profileLookupError);
       return NextResponse.json({ error: '프로필을 먼저 작성해주세요.' }, { status: 400 });
     }
 
@@ -170,7 +171,7 @@ export async function POST(req: NextRequest) {
         { data: { event_date: string } | null };
 
       if (profile.phone && evtData?.event_date) {
-        const displayName = profile.name ?? profile.nickname;
+        const displayName = profile.nickname;
         const content = await fetchTemplateContent(supa, 'application_complete');
         const text = substituteVars(content, { name: displayName, ...buildEventVars(evtData) });
         await sendSMS([profile.phone], text);

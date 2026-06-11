@@ -20,25 +20,30 @@ export async function GET(req: NextRequest) {
     { data: { id: string } | null };
   if (!profile) return NextResponse.json({ error: '프로필을 먼저 작성해주세요.' }, { status: 400 });
 
-  const { data: existing } = await supa
-    .from('applications').select('status')
-    .eq('profile_id', profile.id).eq('event_id', eventId).maybeSingle() as
-    { data: { status: string } | null };
+  // 중복 신청 여부, 이벤트 정보, 확정 인원을 동시에 조회
+  const [existingResult, eventResult, confirmedResult] = await Promise.all([
+    supa
+      .from('applications').select('status')
+      .eq('profile_id', profile.id).eq('event_id', eventId).maybeSingle() as
+      Promise<{ data: { status: string } | null }>,
+    supa
+      .from('events').select('capacity, is_active').eq('id', eventId).maybeSingle() as
+      Promise<{ data: { capacity: number; is_active: boolean } | null }>,
+    supa
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('event_id', eventId)
+      .in('status', ['검토중', '대기', '확정']) as Promise<{ count: number | null }>,
+  ]);
 
+  const { data: existing } = existingResult;
   if (existing && !['취소'].includes(existing.status)) {
     return NextResponse.json({ error: '이미 신청한 이벤트예요.' }, { status: 409 });
   }
 
   // 마감 이벤트는 waitlist '연락됨' 상태인 사람만 신청 가능
-  const { data: eventData } = await supa
-    .from('events').select('capacity, is_active').eq('id', eventId).maybeSingle() as
-    { data: { capacity: number; is_active: boolean } | null };
-
-  const { count: confirmedCount } = await supa
-    .from('applications')
-    .select('id', { count: 'exact', head: true })
-    .eq('event_id', eventId)
-    .in('status', ['검토중', '대기', '확정']) as { count: number | null };
+  const { data: eventData } = eventResult;
+  const { count: confirmedCount } = confirmedResult;
 
   const isFull = eventData && (confirmedCount ?? 0) >= eventData.capacity;
 

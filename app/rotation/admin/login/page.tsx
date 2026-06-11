@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 export default function AdminLoginPage() {
   const router = useRouter();
   const params = useSearchParams();
-  const redirectTo = params.get('redirectTo') ?? '/admin';
+  const redirectTo = params.get('redirectTo') ?? '/rotation/admin';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

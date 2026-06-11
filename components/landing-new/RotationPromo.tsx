@@ -18,7 +18,7 @@ export default function RotationPromo() {
                 1:1 매칭이 부담스럽다면? 여러 명과 편안하게 대화하며 인연을 찾는 로테이션 소개팅을 경험해보세요.
               </p>
               <a
-                href="/rotation/events"
+                href="/rotation"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center bg-[#559BFF] text-white text-[15px] font-semibold px-8 py-3.5 rounded-[12px] hover:bg-[#3A6EA5] transition-colors duration-200 shadow-lg shadow-[#559BFF]/25"

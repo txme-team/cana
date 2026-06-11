@@ -21,14 +21,14 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
-  // ── /admin 보호 ─────────────────────────────────────────────────────────────
-  const isAdminPath = pathname.startsWith('/admin');
-  const isAdminLogin = pathname === '/admin/login';
+  // ── /rotation/admin 보호 ────────────────────────────────────────────────────
+  const isAdminPath = pathname.startsWith('/rotation/admin');
+  const isAdminLogin = pathname === '/rotation/admin/login';
 
   if (isAdminPath && !isAdminLogin) {
     // 미인증
     if (!user) {
-      const url = new URL('/admin/login', request.url);
+      const url = new URL('/rotation/admin/login', request.url);
       url.searchParams.set('redirectTo', pathname);
       return NextResponse.redirect(url);
     }
@@ -36,16 +36,16 @@ export async function middleware(request: NextRequest) {
     // (일반 회원은 절대 이 값을 가질 수 없음 — 서비스 롤 키로만 설정 가능)
     const isAdmin = user.app_metadata?.role === 'admin';
     if (!isAdmin) {
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/rotation', request.url));
     }
   }
 
-  // ── /apply 보호 ─────────────────────────────────────────────────────────────
-  const isApplyPath = pathname.startsWith('/apply');
-  const isApplyComplete = pathname === '/apply/complete';
+  // ── /rotation/apply 보호 ────────────────────────────────────────────────────
+  const isApplyPath = pathname.startsWith('/rotation/apply');
+  const isApplyComplete = pathname === '/rotation/apply/complete';
 
   if (isApplyPath && !isApplyComplete && !user) {
-    const url = new URL('/login', request.url);
+    const url = new URL('/rotation/login', request.url);
     url.searchParams.set('redirectTo', pathname);
     return NextResponse.redirect(url);
   }
@@ -54,5 +54,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/apply/:path*', '/apply'],
+  matcher: ['/rotation/admin/:path*', '/rotation/apply/:path*', '/rotation/apply'],
 };

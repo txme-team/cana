@@ -159,13 +159,13 @@ function StepProfileIntro() {
       {/* CTA */}
       <div className="flex flex-col gap-3">
         <button
-          onClick={() => router.push('/profile/create')}
+          onClick={() => router.push('/rotation/profile/create')}
           className="w-full rounded-xl bg-cana py-3.5 text-base font-semibold text-white transition active:bg-cana-dark"
         >
           프로필 카드 작성하기
         </button>
         <button
-          onClick={() => router.push('/rotation/apply')}
+          onClick={() => router.push('/rotation')}
           className="w-full py-2 text-sm text-cana-ink3/60 underline underline-offset-2"
         >
           나중에 하기

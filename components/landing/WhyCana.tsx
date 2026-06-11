@@ -30,6 +30,11 @@ export default function WhyCana() {
     <section className="bg-cana-cream px-5 py-20 sm:py-28">
       <div className="mx-auto max-w-5xl">
 
+        {/* 프로필 카드 미리보기 */}
+        <div className="mb-20 sm:mb-28">
+          <ProfileCardPreview />
+        </div>
+
         {/* 섹션 라벨 + 타이틀 */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
@@ -41,38 +46,22 @@ export default function WhyCana() {
           </p>
         </div>
 
-        {/* 하단 2열 */}
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
-
-          {/* 좌측 — 포인트 카드 */}
-          <div className="flex flex-col gap-4">
-            {POINTS.map((pt) => (
-              <div
-                key={pt.title}
-                className="flex items-start gap-4 rounded-2xl border border-cana-rule bg-white px-5 py-5 shadow-sm shadow-cana/5"
-              >
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-cana/8">
-                  <img src={pt.icon} alt="" className="h-9 w-9" />
-                </span>
-                <div>
-                  <p className="text-lg font-semibold text-cana-ink">{pt.title}</p>
-                  <p className="mt-0.5 text-base leading-relaxed text-cana-ink3">{pt.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 우측 — 프로필 카드 미리보기 */}
-          <div className="lg:sticky lg:top-24">
-            {/* 프레임 배경 */}
-            <div className="relative rounded-3xl bg-gradient-to-br from-cana/10 via-cana-muted to-cana-rule/40 p-6 pb-0">
-              {/* 카드 — 살짝 기울이고 아래로 살짝 튀어나오게 */}
-              <div className="translate-y-3 rotate-1 transform overflow-hidden rounded-2xl shadow-2xl shadow-cana/20">
-                <ProfileCardPreview />
+        {/* 포인트 카드 */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {POINTS.map((pt) => (
+            <div
+              key={pt.title}
+              className="flex items-start gap-4 rounded-2xl border border-cana-rule bg-white px-5 py-5 shadow-sm shadow-cana/5"
+            >
+              <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-cana/8">
+                <img src={pt.icon} alt="" className="h-9 w-9" />
+              </span>
+              <div>
+                <p className="text-lg font-semibold text-cana-ink">{pt.title}</p>
+                <p className="mt-0.5 text-base leading-relaxed text-cana-ink3">{pt.description}</p>
               </div>
             </div>
-          </div>
-
+          ))}
         </div>
       </div>
     </section>

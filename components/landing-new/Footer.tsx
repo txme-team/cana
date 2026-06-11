@@ -18,15 +18,14 @@ export default function Footer() {
           <div>
             <div className="text-[13px] text-white/40 leading-[22px] space-y-0.5 mb-6">
               <p className="font-semibold text-white/60">주식회사 팀빌더</p>
-              <p>대표 : 김지섭  │  연락처 : 070-4768-5491</p>
+              <p>대표 : 김지섭  │  연락처 : ask@teambuildercorp.com</p>
               <p>주소 : 서울특별시 강남구 강남대로 132길 55, 5층</p>
               <p>사업자등록번호 : 873-86-02735  │  통신판매업 신고번호 : (추후 추가 예정)</p>
             </div>
 
             <div className="flex items-center gap-0 mb-6 text-[13px] text-white/40">
               {[
-                { label: "Instagram", href: "#" },
-                { label: "문의하기", href: "#" },
+                { label: "Instagram", href: "https://instagram.com/cana_for_love" },
                 { label: "서비스 이용약관", href: "https://cana.im/terms" },
                 { label: "개인정보처리방침", href: "https://cana.im/privacy" },
               ].map(({ label, href }, i) => (

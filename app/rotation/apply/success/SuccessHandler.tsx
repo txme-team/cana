@@ -19,14 +19,14 @@ export default function SuccessHandler() {
     const amount     = searchParams.get('amount');
 
     if (!paymentKey || !orderId || !amount) {
-      router.replace('/apply/fail?message=' + encodeURIComponent('결제 정보가 올바르지 않아요.'));
+      router.replace('/rotation/apply/fail?message=' + encodeURIComponent('결제 정보가 올바르지 않아요.'));
       return;
     }
 
     // 결제 전 저장해 둔 신청 데이터 복원
     const raw = sessionStorage.getItem(PAYMENT_PENDING_KEY);
     if (!raw) {
-      router.replace('/apply/fail?message=' + encodeURIComponent('신청 정보를 찾을 수 없어요. 처음부터 다시 시도해주세요.'));
+      router.replace('/rotation/apply/fail?message=' + encodeURIComponent('신청 정보를 찾을 수 없어요. 처음부터 다시 시도해주세요.'));
       return;
     }
 
@@ -34,7 +34,7 @@ export default function SuccessHandler() {
     try {
       pending = JSON.parse(raw) as PendingPayload;
     } catch {
-      router.replace('/apply/fail?message=' + encodeURIComponent('신청 정보가 올바르지 않아요.'));
+      router.replace('/rotation/apply/fail?message=' + encodeURIComponent('신청 정보가 올바르지 않아요.'));
       return;
     }
 
@@ -59,11 +59,11 @@ export default function SuccessHandler() {
           const err = await res.json().catch(() => ({})) as { error?: string };
           throw new Error(err.error ?? '결제 확인에 실패했어요.');
         }
-        router.replace('/apply/complete');
+        router.replace('/rotation/apply/complete');
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : '오류가 발생했어요.';
-        router.replace('/apply/fail?message=' + encodeURIComponent(msg));
+        router.replace('/rotation/apply/fail?message=' + encodeURIComponent(msg));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -203,7 +203,7 @@ export default function EventsPage() {
                   </button>
                 ) : (
                   <Link
-                    href={`/apply?eventId=${event.id}`}
+                    href={`/rotation/apply?eventId=${event.id}`}
                     className="flex-shrink-0 rounded-xl bg-cana px-4 py-2 text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
                   >
                     신청하기

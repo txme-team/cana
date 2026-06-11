@@ -14,7 +14,7 @@ export default function Footer() {
           {/* 사업자 정보 */}
           <div className="flex flex-col gap-1 text-[11px] text-cana-ink3/70">
             <p className="font-semibold text-cana-ink3">주식회사 팀빌더</p>
-            <p>대표 : 김지섭 &nbsp;|&nbsp; 연락처 : 070-4768-5491</p>
+            <p>대표 : 김지섭 &nbsp;|&nbsp; 연락처 : ask@teambuildercorp.com</p>
             <p>주소 : 서울특별시 강남구 강남대로 132길 55, 5층</p>
             <p>사업자등록번호 : 873-86-02735 &nbsp;|&nbsp; 통신판매업 신고번호 : (추후 추가 예정)</p>
           </div>
@@ -31,21 +31,14 @@ export default function Footer() {
             </a>
             <span className="text-xs text-cana-rule">|</span>
             <a
-              href="mailto:ask@teambuildercorp.com"
-              className="text-xs text-cana-ink3 transition hover:text-cana"
-            >
-              문의하기
-            </a>
-            <span className="text-xs text-cana-rule">|</span>
-            <a
-              href="#"
+              href="https://cana.im/terms"
               className="text-xs text-cana-ink3 transition hover:text-cana"
             >
               서비스 이용약관
             </a>
             <span className="text-xs text-cana-rule">|</span>
             <a
-              href="#"
+              href="https://cana.im/privacy"
               className="text-xs font-bold text-cana-ink3 transition hover:text-cana"
             >
               개인정보처리방침

@@ -64,10 +64,10 @@ export async function POST(
 
     const { data: apps } = await supa
       .from('applications')
-      .select('profiles ( name, nickname, phone )')
+      .select('profiles ( nickname, phone )')
       .eq('event_id', eventId)
       .in('status', statusFilter) as {
-        data: { profiles: { name: string | null; nickname: string; phone: string | null } | null }[] | null;
+        data: { profiles: { nickname: string; phone: string | null } | null }[] | null;
       };
 
     const eventVars = buildEventVars(event);
@@ -75,7 +75,7 @@ export async function POST(
     const messages = (apps ?? [])
       .filter((a) => !!a.profiles?.phone)
       .map((a) => {
-        const displayName = a.profiles!.name ?? a.profiles!.nickname;
+        const displayName = a.profiles!.nickname;
         return {
           phone: a.profiles!.phone!,
           text:  substituteVars(content, { name: displayName, ...eventVars, ...extraVars }),

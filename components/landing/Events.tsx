@@ -158,7 +158,7 @@ export default function Events({ preview = false }: Props) {
                 </button>
               ) : (
                 <Link
-                  href={`/apply?eventId=${event.id}`}
+                  href={`/rotation/apply?eventId=${event.id}`}
                   className="block w-full rounded-xl bg-cana py-2.5 text-center text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
                 >
                   신청하기
