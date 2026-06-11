@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendPersonalizedSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
+import { ensureProfileCardMeta } from '@/lib/profile-card';
 
 function verifyCron(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET?.trim();
@@ -47,6 +48,29 @@ async function fetchConfirmedParticipants(supa: any, eventId: string) {
   return (data ?? []).filter((a) => !!a.profiles?.phone);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchConfirmedParticipantsWithToken(supa: any, eventId: string) {
+  const { data } = await supa
+    .from('applications')
+    .select('id, share_token, profiles ( nickname, phone )')
+    .eq('event_id', eventId)
+    .eq('status', '확정') as {
+      data: { id: string; share_token: string | null; profiles: { nickname: string; phone: string | null } | null }[] | null;
+    };
+
+  const rows = (data ?? []).filter((a) => !!a.profiles?.phone);
+
+  // share_token이 없는 신청건은 발송 직전 생성 (확정 처리 시 보통 이미 부여돼 있음)
+  await Promise.all(
+    rows.filter((r) => !r.share_token).map(async (r) => {
+      const meta = await ensureProfileCardMeta(supa, r.id);
+      r.share_token = meta?.share_token ?? r.share_token;
+    })
+  );
+
+  return rows;
+}
+
 export async function GET(req: NextRequest) {
   if (!verifyCron(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -72,13 +96,21 @@ export async function GET(req: NextRequest) {
         data: { id: string; title: string; event_date: string; venue_name?: string | null; venue_detail?: string | null; location?: string | null; venue_url?: string | null }[] | null;
       };
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cana.im';
+
     for (const event of events ?? []) {
-      const participants = await fetchConfirmedParticipants(supa, event.id);
+      const participants = await fetchConfirmedParticipantsWithToken(supa, event.id);
       const eventVars    = buildEventVars(event);
-      const messages     = participants.map((a) => ({
-        phone: a.profiles!.phone!,
-        text:  substituteVars(content, { name: a.profiles!.nickname, ...eventVars }),
-      }));
+      const messages     = participants
+        .filter((a) => !!a.share_token)
+        .map((a) => ({
+          phone: a.profiles!.phone!,
+          text:  substituteVars(content, {
+            name: a.profiles!.nickname,
+            ...eventVars,
+            profile_card_url: `${appUrl}/rotation/profile-card/${a.share_token}`,
+          }),
+        }));
       if (messages.length > 0) {
         await sendPersonalizedSMS(messages).catch(console.error);
         results.push(`5-1 [${event.title}] ${messages.length}명`);

@@ -5,6 +5,7 @@ import { logAdminAction } from '@/lib/admin-logger';
 import { notifyApplicationCancelled } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
+import { ensureProfileCardMeta } from '@/lib/profile-card';
 
 async function fetchTemplateContent(supa: any, key: string): Promise<string> { // eslint-disable-line @typescript-eslint/no-explicit-any
   const { data } = await supa.from('sms_templates').select('content').eq('key', key).maybeSingle() as { data: { content: string } | null };
@@ -51,6 +52,13 @@ export async function PATCH(req: NextRequest) {
     targetId:   body.id,
     detail:     { status: body.status },
   }).catch(() => {});
+
+  // 확정 처리 시, 프로필 카드 공유 페이지용 토큰/번호 부여 (없으면 생성, idempotent)
+  if (body.status === '확정') {
+    ensureProfileCardMeta(serviceClient, body.id).catch((e) => {
+      console.error('[ensureProfileCardMeta error]', e);
+    });
+  }
 
   // 확정 처리 시, 해당 이벤트의 정원이 다 찼으면 자동 마감
   if (body.status === '확정') {
