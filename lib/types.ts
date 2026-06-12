@@ -195,6 +195,7 @@ export interface Application {
   created_at: string;
   share_token?: string | null;
   display_no?: number | null;
+  ai_summary?: string | null;
 }
 
 /** 어드민 조회용 JOIN 타입 (applications + profiles) */

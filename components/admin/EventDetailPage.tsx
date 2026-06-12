@@ -203,7 +203,8 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
     setLoading(true);
     fetch(`/api/admin/events/${eventId}`)
       .then((r) => r.json())
-      .then((d: DetailData) => {
+      .then((d: DetailData | { error: string }) => {
+        if (!d || 'error' in d || !d.event) return;
         setData(d);
         setVenueName(d.event.venue_name ?? '');
         setVenueUrl(d.event.venue_url ?? '');
@@ -308,8 +309,8 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
     load();
   };
 
-  const males = data?.participants.filter((p) => p.profiles.gender === 'male') ?? [];
-  const females = data?.participants.filter((p) => p.profiles.gender === 'female') ?? [];
+  const males = (data?.participants ?? []).filter((p) => p.profiles.gender === 'male');
+  const females = (data?.participants ?? []).filter((p) => p.profiles.gender === 'female');
   const waitlist = data?.waitlist ?? [];
   const waitlistMales = waitlist.filter((p) => p.profiles.gender === 'male');
   const waitlistFemales = waitlist.filter((p) => p.profiles.gender === 'female');
@@ -540,7 +541,27 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
 
           {/* ── 확정 인원 현황 ── */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6">
-            <h2 className="mb-4 text-base font-semibold text-gray-700">확정 인원 현황</h2>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-base font-semibold text-gray-700">확정 인원 현황</h2>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`/rotation/admin/profile-card-preview/${eventId}/male`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition hover:border-cana/40 hover:text-cana"
+                >
+                  남자 프로필카드
+                </a>
+                <a
+                  href={`/rotation/admin/profile-card-preview/${eventId}/female`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition hover:border-cana/40 hover:text-cana"
+                >
+                  여자 프로필카드
+                </a>
+              </div>
+            </div>
 
             {/* 중복 경고 */}
             {hasDuplicates && (

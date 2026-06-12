@@ -36,6 +36,15 @@ export default async function ProfileCardPage({ params }: PageProps) {
     );
   }
 
+  if (result.status === 'cancelled') {
+    return (
+      <NoticeScreen
+        title="더 이상 볼 수 없는 페이지예요"
+        description="신청이 취소되어 더 이상 프로필 카드를 확인할 수 없어요."
+      />
+    );
+  }
+
   return (
     <ProfileCardView
       viewerLabel={result.viewerLabel}

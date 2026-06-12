@@ -20,7 +20,7 @@ export default function Footer() {
               <p className="font-semibold text-white/60">주식회사 팀빌더</p>
               <p>대표 : 김지섭  │  연락처 : ask@teambuildercorp.com</p>
               <p>주소 : 서울특별시 강남구 강남대로 132길 55, 5층</p>
-              <p>사업자등록번호 : 873-86-02735  │  통신판매업 신고번호 : (추후 추가 예정)</p>
+              <p>사업자등록번호 : 873-86-02735  │  통신판매업 신고번호 : 2023-서울강남-06128</p>
             </div>
 
             <div className="flex items-center gap-0 mb-6 text-[13px] text-white/40">

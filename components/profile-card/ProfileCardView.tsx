@@ -25,7 +25,8 @@ export default function ProfileCardView({
 
         {/* 헤더 */}
         <div className="mb-6 text-center">
-          <p className="text-xs font-medium tracking-wide text-cana">CANA</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logos/logo_black.svg" alt="CANA" className="mx-auto h-5" />
           <h1 className="mt-2 text-xl font-semibold text-cana-ink">
             내일 만날 분들의 프로필이에요
           </h1>
@@ -48,7 +49,7 @@ export default function ProfileCardView({
         ) : (
           <div className="space-y-3">
             {cards.map((c) => (
-              <ProfileCardItem key={c.label} label={c.label} profile={c.profile} />
+              <ProfileCardItem key={c.label} label={c.label} profile={c.profile} aiSummary={c.aiSummary} />
             ))}
           </div>
         )}

@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
 
   if (isApplyPath && !isApplyComplete && !user) {
     const url = new URL('/rotation/login', request.url);
-    url.searchParams.set('redirectTo', pathname);
+    url.searchParams.set('redirectTo', pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 

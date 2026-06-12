@@ -8,9 +8,9 @@ export default function CanaPromo() {
           {/* 텍스트 */}
           <div>
             <h2 className="mb-4 text-[28px] font-bold leading-[1.3] tracking-tight text-cana-ink lg:text-[34px]">
-              더 많은 인연을
+              온라인 1:1 소개팅
               <br />
-              카나에서 만나보세요.
+              서비스도 있어요.
             </h2>
             <p className="mb-8 max-w-md text-base leading-relaxed text-cana-ink3">
               바른 신앙관은 물론, 단정한 외모와 탄탄한 커리어까지. 교회 안에서는 마주치기 어려웠던 매력적인 선남선녀 크리스천들이 지금 카나에서 기다리고 있어요.

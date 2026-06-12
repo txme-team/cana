@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
@@ -104,6 +104,8 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
 
 function StepProfileIntro() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') ?? '/rotation/apply';
 
   return (
     <div className="flex flex-col gap-8">
@@ -159,7 +161,7 @@ function StepProfileIntro() {
       {/* CTA */}
       <div className="flex flex-col gap-3">
         <button
-          onClick={() => router.push('/rotation/profile/create')}
+          onClick={() => router.push(`/rotation/profile/create?return=${encodeURIComponent(next)}`)}
           className="w-full rounded-xl bg-cana py-3.5 text-base font-semibold text-white transition active:bg-cana-dark"
         >
           프로필 카드 작성하기
