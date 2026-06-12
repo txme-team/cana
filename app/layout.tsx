@@ -16,8 +16,10 @@ const pretendard = localFont({
   ],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cana.im';
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://cana.im'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: '카나 | 크리스천끼리 설레는 이상형 찾기',
     template: '%s | 카나',
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '카나 | 크리스천끼리 설레는 이상형 찾기',
     description: '같은 믿음을 가진 사람들을 위한 프리미엄 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
-    url: 'https://cana.im',
+    url: siteUrl,
     siteName: '카나',
     locale: 'ko_KR',
     type: 'website',

@@ -46,6 +46,7 @@ export default function SmsPage() {
   const [editContent, setEditContent]     = useState('');
   const [saving, setSaving]               = useState(false);
   const [saveOk, setSaveOk]               = useState(false);
+  const [toggling, setToggling]           = useState(false);
 
   // 수동 발송 폼
   const [sendEventId, setSendEventId]     = useState('');
@@ -107,6 +108,27 @@ export default function SmsPage() {
       alert((err as Error).message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ── 자동/예약 발송 ON/OFF 토글 ───────────────────────────────────────────────
+  const handleToggleEnabled = async (next: boolean) => {
+    if (!selectedKey) return;
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/admin/sms-templates/${selectedKey}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: next }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      setTemplates((prev) =>
+        prev.map((t) => t.key === selectedKey ? { ...t, enabled: next } : t),
+      );
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setToggling(false);
     }
   };
 
@@ -181,9 +203,16 @@ export default function SmsPage() {
                     <span className={`text-sm font-medium ${isSelected ? 'text-cana' : ''}`}>
                       {t.name}
                     </span>
-                    <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
-                      {badge.label}
-                    </span>
+                    <div className="flex flex-shrink-0 items-center gap-1">
+                      {t.trigger_type !== 'manual' && t.enabled === false && (
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-400">
+                          꺼짐
+                        </span>
+                      )}
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+                        {badge.label}
+                      </span>
+                    </div>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-gray-400">{t.trigger_desc}</p>
                 </button>
@@ -204,13 +233,45 @@ export default function SmsPage() {
 
             {/* 헤더 */}
             <div>
-              <div className="flex items-center gap-3">
-                <h2 className="text-lg font-bold text-gray-900">{selected.name}</h2>
-                <span className={`rounded-full px-2.5 py-1 text-sm font-medium ${TRIGGER_STYLE[selected.trigger_type].cls}`}>
-                  {TRIGGER_STYLE[selected.trigger_type].label}
-                </span>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-bold text-gray-900">{selected.name}</h2>
+                  <span className={`rounded-full px-2.5 py-1 text-sm font-medium ${TRIGGER_STYLE[selected.trigger_type].cls}`}>
+                    {TRIGGER_STYLE[selected.trigger_type].label}
+                  </span>
+                </div>
+
+                {/* 자동/예약 발송 ON/OFF — 수동 발송은 토글 불필요 */}
+                {selected.trigger_type !== 'manual' && (
+                  <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>{selected.enabled === false ? '발송 꺼짐' : '발송 켜짐'}</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={selected.enabled !== false}
+                      disabled={toggling}
+                      onClick={() => handleToggleEnabled(!(selected.enabled !== false))}
+                      className={[
+                        'relative h-6 w-11 flex-shrink-0 rounded-full transition disabled:opacity-50',
+                        selected.enabled === false ? 'bg-gray-200' : 'bg-cana',
+                      ].join(' ')}
+                    >
+                      <span
+                        className={[
+                          'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition',
+                          selected.enabled === false ? 'left-0.5' : 'left-[1.375rem]',
+                        ].join(' ')}
+                      />
+                    </button>
+                  </label>
+                )}
               </div>
               <p className="mt-1 text-sm text-gray-500">{selected.trigger_desc}</p>
+              {selected.enabled === false && selected.trigger_type !== 'manual' && (
+                <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                  현재 자동/예약 발송이 꺼져 있어요. 필요할 때 위 &apos;수동 발송&apos;으로 직접 보내주세요.
+                </p>
+              )}
             </div>
 
             {/* ── 문자 내용 편집 ────────────────────────────────────────────── */}

@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { notifyPaymentComplete, notifyError } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
-import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
-
-async function fetchTemplateContent(supa: any, key: string): Promise<string> { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const { data } = await supa.from('sms_templates').select('content').eq('key', key).maybeSingle() as { data: { content: string } | null };
-  return data?.content ?? DEFAULT_TEMPLATES.find((t) => t.key === key)?.content ?? '';
-}
+import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -172,9 +167,11 @@ export async function POST(req: NextRequest) {
 
       if (profile.phone && evtData?.event_date) {
         const displayName = profile.nickname;
-        const content = await fetchTemplateContent(supa, 'application_complete');
-        const text = substituteVars(content, { name: displayName, ...buildEventVars(evtData) });
-        await sendSMS([profile.phone], text);
+        const { content, enabled } = await getTemplateConfig(supa, 'application_complete');
+        if (enabled) {
+          const text = substituteVars(content, { name: displayName, ...buildEventVars(evtData) });
+          await sendSMS([profile.phone], text);
+        }
       }
     } catch (smsErr) {
       console.error('[신청완료 SMS error]', smsErr);

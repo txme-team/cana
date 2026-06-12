@@ -26,7 +26,7 @@ export async function GET() {
     // DB에 없는 기본 템플릿은 기본값으로 채움
     const dbMap = new Map((data ?? []).map((t: { key: string }) => [t.key, t]));
     const result = DEFAULT_TEMPLATES.map((def) =>
-      dbMap.has(def.key) ? dbMap.get(def.key) : { ...def, updated_at: null },
+      dbMap.has(def.key) ? dbMap.get(def.key) : { ...def, enabled: true, updated_at: null },
     );
 
     return NextResponse.json(result);

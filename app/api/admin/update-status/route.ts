@@ -4,13 +4,8 @@ import type { ProfileStatus } from '@/lib/types';
 import { logAdminAction } from '@/lib/admin-logger';
 import { notifyApplicationCancelled } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
-import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
+import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 import { ensureProfileCardMeta } from '@/lib/profile-card';
-
-async function fetchTemplateContent(supa: any, key: string): Promise<string> { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const { data } = await supa.from('sms_templates').select('content').eq('key', key).maybeSingle() as { data: { content: string } | null };
-  return data?.content ?? DEFAULT_TEMPLATES.find((t) => t.key === key)?.content ?? '';
-}
 
 const VALID_STATUSES: ProfileStatus[] = ['검토중', '대기', '확정', '반려', '취소'];
 
@@ -186,9 +181,11 @@ export async function PATCH(req: NextRequest) {
 
       if (phone && displayName && eventDate) {
         const tmplKey = body.status === '확정' ? 'attendance_confirmed' : 'attendance_rejected';
-        const content = await fetchTemplateContent(supa, tmplKey);
-        const text = substituteVars(content, { name: displayName, ...buildEventVars({ event_date: eventDate }) });
-        await sendSMS([phone], text);
+        const { content, enabled } = await getTemplateConfig(supa, tmplKey);
+        if (enabled) {
+          const text = substituteVars(content, { name: displayName, ...buildEventVars({ event_date: eventDate }) });
+          await sendSMS([phone], text);
+        }
       }
     } catch (smsErr) {
       console.error('[확정/반려 SMS error]', smsErr);

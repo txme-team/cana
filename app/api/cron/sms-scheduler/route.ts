@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendPersonalizedSMS } from '@/lib/sms';
-import { substituteVars, buildEventVars, DEFAULT_TEMPLATES } from '@/lib/sms-templates';
+import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 import { ensureProfileCardMeta } from '@/lib/profile-card';
 
 function verifyCron(req: NextRequest): boolean {
@@ -26,14 +26,6 @@ function verifyCron(req: NextRequest): boolean {
 
 function nowKST(): Date {
   return new Date(Date.now() + 9 * 60 * 60 * 1000);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getTemplate(supa: any, key: string): Promise<string> {
-  const { data } = await supa
-    .from('sms_templates').select('content').eq('key', key).maybeSingle() as
-    { data: { content: string } | null };
-  return data?.content ?? DEFAULT_TEMPLATES.find((t) => t.key === key)?.content ?? '';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,7 +80,10 @@ export async function GET(req: NextRequest) {
 
   // ── 5-1. 프로필 카드 LMS (전날 18:00 KST) ──────────────────────────────────
   if (kstHour === 18) {
-    const content = await getTemplate(supa, 'profile_card');
+    const { content, enabled } = await getTemplateConfig(supa, 'profile_card');
+    if (!enabled) {
+      results.push('5-1 skipped (disabled)');
+    } else {
     const { data: events } = await supa
       .from('events').select('id, title, event_date, venue_name, venue_detail, location, venue_url')
       .gte('event_date', `${tomorrowStr}T00:00:00+09:00`)
@@ -116,11 +111,15 @@ export async function GET(req: NextRequest) {
         results.push(`5-1 [${event.title}] ${messages.length}명`);
       }
     }
+    }
   }
 
   // ── 5-2. 1일 전 안내 SMS (전날 19:00 KST) ──────────────────────────────────
   if (kstHour === 19) {
-    const content = await getTemplate(supa, 'day_before');
+    const { content, enabled } = await getTemplateConfig(supa, 'day_before');
+    if (!enabled) {
+      results.push('5-2 skipped (disabled)');
+    } else {
     const { data: events } = await supa
       .from('events').select('id, title, event_date, venue_name, venue_detail, location, venue_url')
       .gte('event_date', `${tomorrowStr}T00:00:00+09:00`)
@@ -140,11 +139,15 @@ export async function GET(req: NextRequest) {
         results.push(`5-2 [${event.title}] ${messages.length}명`);
       }
     }
+    }
   }
 
   // ── 6. 소개팅 종료 SMS (행사 종료 +1h) ────────────────────────────────────
   {
-    const content     = await getTemplate(supa, 'event_ended');
+    const { content, enabled } = await getTemplateConfig(supa, 'event_ended');
+    if (!enabled) {
+      results.push('6 skipped (disabled)');
+    } else {
     const utcStart    = new Date(Date.now() - (60 + 5) * 60 * 1000).toISOString();
     const utcEnd      = new Date(Date.now() - (60 - 5) * 60 * 1000).toISOString();
 
@@ -166,6 +169,7 @@ export async function GET(req: NextRequest) {
         await sendPersonalizedSMS(messages).catch(console.error);
         results.push(`6 [${event.title}] ${messages.length}명`);
       }
+    }
     }
   }
 

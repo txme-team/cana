@@ -15,6 +15,7 @@ export interface SmsTemplate {
   trigger_type: 'auto' | 'manual' | 'scheduled';
   trigger_desc: string;
   variables: SmsVariable[];
+  enabled?: boolean;
   updated_at?: string;
 }
 
@@ -93,6 +94,17 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     ],
   },
   {
+    key: 'event_cancelled',
+    name: '소개팅 취소',
+    content: '[카나] 부득이한 사정으로 {{event_date}} 소개팅이 취소되었습니다. 참가비는 영업일 기준 3~5일 내 전액 환불됩니다. 다음 일정에서 좋은 인연을 만나시길 바랍니다. 불편을 드려 죄송합니다.',
+    trigger_type: 'manual',
+    trigger_desc: '운영진이 이벤트 취소 처리 후 수동 발송',
+    variables: [
+      { key: 'name',       label: '신청자 이름', desc: '프로필 이름' },
+      { key: 'event_date', label: '행사일',       desc: '예: 6월 14일' },
+    ],
+  },
+  {
     key: 'event_ended',
     name: '소개팅 종료',
     content: '[카나] {{name}}님 오늘 {{event_date}} 소개팅에 함께해 주셔서 감사합니다. 좋은 인연으로 이어지길 바랍니다. 만족도 조사: {{survey_url}}',
@@ -105,6 +117,27 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     ],
   },
 ];
+
+// ─── DB 템플릿 설정 조회 (content + enabled, 공통 헬퍼) ─────────────────────────
+// supa: Supabase 클라이언트 (서버 전용 코드에서 createServiceClient() 등을 넘겨 사용)
+export async function getTemplateConfig(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supa: any,
+  key: string,
+): Promise<{ content: string; enabled: boolean }> {
+  const { data } = await supa
+    .from('sms_templates')
+    .select('content, enabled')
+    .eq('key', key)
+    .maybeSingle() as { data: { content: string; enabled: boolean | null } | null };
+
+  const def = DEFAULT_TEMPLATES.find((t) => t.key === key);
+
+  return {
+    content: data?.content ?? def?.content ?? '',
+    enabled: data?.enabled ?? def?.enabled ?? true,
+  };
+}
 
 // ─── 변수 치환 ──────────────────────────────────────────────────────────────────
 export function substituteVars(

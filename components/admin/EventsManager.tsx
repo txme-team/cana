@@ -12,6 +12,7 @@ interface EventRow {
   age_range_female: string;
   capacity: number;
   is_active: boolean;
+  cancelled_at?: string | null;
   birth_year_min_male: number | null;
   birth_year_max_male: number | null;
   birth_year_min_female: number | null;
@@ -186,9 +187,11 @@ export default function EventsManager() {
                 </td>
                 <td className="px-5 py-3">
                   <span className={`rounded-full px-2.5 py-1 text-sm font-medium ${
-                    ev.is_active ? 'bg-cana/10 text-cana' : 'bg-gray-100 text-gray-400'
+                    ev.cancelled_at
+                      ? 'bg-red-50 text-red-500'
+                      : ev.is_active ? 'bg-cana/10 text-cana' : 'bg-gray-100 text-gray-400'
                   }`}>
-                    {ev.is_active ? '모집중' : '마감'}
+                    {ev.cancelled_at ? '취소됨' : ev.is_active ? '모집중' : '마감'}
                   </span>
                 </td>
               </tr>

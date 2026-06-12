@@ -19,6 +19,7 @@ interface EventData {
   venue_detail?: string;
   capacity: number;
   is_active: boolean;
+  cancelled_at?: string | null;
   age_range_male?: string;
   age_range_female?: string;
   birth_year_min_male?: number | null;
@@ -199,6 +200,12 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
+  // 이벤트 취소 모달
+  const [cancelModal, setCancelModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelResult, setCancelResult] = useState<{ affected: number; refunded: number; smsSent: number; refundErrors: string[] } | null>(null);
+  const [cancelError, setCancelError] = useState('');
+
   const load = () => {
     setLoading(true);
     fetch(`/api/admin/events/${eventId}`)
@@ -309,6 +316,31 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
     load();
   };
 
+  // ── 이벤트 전체 취소 ─────────────────────────────────────────────────────────
+  const handleCancelEvent = async () => {
+    setCancelling(true);
+    setCancelError('');
+    try {
+      const res = await fetch(`/api/admin/events/${eventId}/cancel`, { method: 'PATCH' });
+      const json = await res.json() as {
+        ok?: boolean; affected?: number; refunded?: number; smsSent?: number;
+        refundErrors?: string[]; error?: string;
+      };
+      if (!res.ok) throw new Error(json.error ?? '취소 처리에 실패했어요.');
+      setCancelResult({
+        affected: json.affected ?? 0,
+        refunded: json.refunded ?? 0,
+        smsSent: json.smsSent ?? 0,
+        refundErrors: json.refundErrors ?? [],
+      });
+      load();
+    } catch (err) {
+      setCancelError((err as Error).message);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   const males = (data?.participants ?? []).filter((p) => p.profiles.gender === 'male');
   const females = (data?.participants ?? []).filter((p) => p.profiles.gender === 'female');
   const waitlist = data?.waitlist ?? [];
@@ -343,13 +375,15 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
           </h1>
           {data && (
             <span className={`flex-shrink-0 rounded-xl px-2.5 py-1 text-sm font-medium ${
-              data.event.is_active ? 'bg-cana/10 text-cana' : 'bg-gray-100 text-gray-400'
+              data.event.cancelled_at
+                ? 'bg-red-50 text-red-500'
+                : data.event.is_active ? 'bg-cana/10 text-cana' : 'bg-gray-100 text-gray-400'
             }`}>
-              {data.event.is_active ? '모집중' : '마감'}
+              {data.event.cancelled_at ? '취소됨' : data.event.is_active ? '모집중' : '마감'}
             </span>
           )}
         </div>
-        {data && (
+        {data && !data.event.cancelled_at && (
           <div className="flex flex-shrink-0 items-center gap-2">
             <button
               onClick={handleToggleActive}
@@ -361,9 +395,22 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
             >
               {data.event.is_active ? '마감 처리' : '모집 재개'}
             </button>
+            <button
+              onClick={() => { setCancelModal(true); setCancelResult(null); setCancelError(''); }}
+              className="rounded-xl border border-red-200 px-4 py-2 text-base font-medium text-red-500 transition hover:bg-red-50"
+            >
+              이벤트 취소
+            </button>
           </div>
         )}
       </div>
+
+      {data?.event.cancelled_at && (
+        <div className="mb-6 rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-600">
+          이 소개팅은 {new Date(data.event.cancelled_at).toLocaleString('ko-KR')}에 취소 처리되었어요.
+          신청자 전원이 &apos;취소&apos; 상태로 변경되고, 결제건은 환불 처리됐어요.
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-20 text-base text-gray-400">
@@ -744,6 +791,95 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                     className="flex-1 rounded-xl bg-cana py-2.5 text-base font-medium text-white transition hover:bg-cana-dark disabled:opacity-50"
                   >
                     {sendingNotify ? '발송 중...' : '발송'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── 이벤트 취소 확인 모달 ── */}
+      {cancelModal && data && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => { if (!cancelling) setCancelModal(false); }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {cancelResult ? (
+              /* 처리 완료 */
+              <div className="flex flex-col items-center gap-4 py-2 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+                  <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-gray-800">이벤트 취소 처리 완료</p>
+                  <div className="mt-2 space-y-1 text-sm text-gray-500">
+                    <p>대상 신청 <span className="font-medium text-gray-700">{cancelResult.affected}건</span> → 전체 &apos;취소&apos; 처리</p>
+                    <p>환불 처리 <span className="font-medium text-gray-700">{cancelResult.refunded}건</span></p>
+                    <p>SMS 발송 <span className="font-medium text-gray-700">{cancelResult.smsSent}명</span></p>
+                  </div>
+                  {cancelResult.refundErrors.length > 0 && (
+                    <div className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-left text-xs text-amber-700">
+                      <p className="mb-1 font-semibold">환불 실패 — 직접 확인이 필요해요</p>
+                      <ul className="list-disc pl-4">
+                        {cancelResult.refundErrors.map((e, i) => <li key={i}>{e}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setCancelModal(false)}
+                  className="w-full rounded-xl bg-cana py-2.5 text-base font-medium text-white transition hover:bg-cana-dark"
+                >
+                  확인
+                </button>
+              </div>
+            ) : (
+              /* 취소 전 확인 */
+              <>
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-50">
+                    <svg className="h-5 w-5 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-800">이 소개팅을 전체 취소할까요?</h3>
+                </div>
+
+                <div className="mb-4 space-y-1.5 text-sm text-gray-600">
+                  <p>· 검토중/대기/확정 신청 전체가 <span className="font-medium text-red-500">&apos;취소&apos;</span> 상태로 변경돼요.</p>
+                  <p>· 결제가 완료된 건은 <span className="font-medium text-red-500">전액 환불</span> 처리돼요.</p>
+                  <p>· 대상자 전원에게 <span className="font-medium text-red-500">&apos;소개팅 취소&apos;</span> 안내 문자가 발송돼요.</p>
+                </div>
+
+                <p className="mb-5 text-xs text-gray-400">
+                  이 작업은 되돌릴 수 없어요. 진행 전에 다시 한 번 확인해주세요.
+                </p>
+
+                {cancelError && (
+                  <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{cancelError}</p>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCancelModal(false)}
+                    disabled={cancelling}
+                    className="flex-1 rounded-xl border border-gray-200 py-2.5 text-base text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    닫기
+                  </button>
+                  <button
+                    onClick={handleCancelEvent}
+                    disabled={cancelling}
+                    className="flex-1 rounded-xl bg-red-500 py-2.5 text-base font-medium text-white transition hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {cancelling ? '처리 중...' : '취소 처리'}
                   </button>
                 </div>
               </>
