@@ -11,6 +11,7 @@ interface EventRow {
   age_range_male: string;
   age_range_female: string;
   capacity: number;
+  price?: number | null;
   is_active: boolean;
   cancelled_at?: string | null;
   birth_year_min_male: number | null;
@@ -28,6 +29,7 @@ const EMPTY_FORM = {
   location: '',
   venue_detail: '',
   capacity: 20,
+  price: '',
   is_active: true,
   birth_year_min_male: '',
   birth_year_max_male: '',
@@ -75,6 +77,10 @@ export default function EventsManager() {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EventRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const fetchEvents = () => {
     setLoading(true);
@@ -105,6 +111,7 @@ export default function EventsManager() {
         location: form.location,
         venue_detail: form.venue_detail || null,
         capacity: form.capacity,
+        price: form.price ? Number(form.price) : null,
         is_active: form.is_active,
         birth_year_min_male: minMale,
         birth_year_max_male: maxMale,
@@ -122,6 +129,43 @@ export default function EventsManager() {
       fetchEvents();
     } finally {
       setSaving(false);
+    }
+  };
+
+  // 모집 상태(모집중/마감) 토글 — 마감 처리 시 공개 목록에서도 숨겨짐
+  const handleToggleActive = async (ev: EventRow) => {
+    setTogglingId(ev.id);
+    try {
+      await fetch('/api/admin/events', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: ev.id, is_active: !ev.is_active }),
+      });
+      fetchEvents();
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  // 이벤트 삭제
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch('/api/admin/events', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: deleteTarget.id }),
+      });
+      const json = await res.json().catch(() => ({})) as { error?: string };
+      if (!res.ok) throw new Error(json.error ?? '삭제에 실패했어요.');
+      setDeleteTarget(null);
+      fetchEvents();
+    } catch (err) {
+      setDeleteError((err as Error).message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -152,17 +196,19 @@ export default function EventsManager() {
               <th className="hidden px-5 py-3 text-left font-medium md:table-cell">연령대</th>
               <th className="px-5 py-3 text-left font-medium">정원</th>
               <th className="px-5 py-3 text-left font-medium">확정</th>
+              <th className="hidden px-5 py-3 text-left font-medium lg:table-cell">참가비</th>
               <th className="px-5 py-3 text-left font-medium">상태</th>
+              <th className="px-5 py-3 text-left font-medium">관리</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {loading ? (
               <tr>
-                <td colSpan={7} className="py-10 text-center text-sm text-gray-400">불러오는 중...</td>
+                <td colSpan={9} className="py-10 text-center text-sm text-gray-400">불러오는 중...</td>
               </tr>
             ) : events.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-10 text-center text-sm text-gray-400">등록된 이벤트가 없어요.</td>
+                <td colSpan={9} className="py-10 text-center text-sm text-gray-400">등록된 이벤트가 없어요.</td>
               </tr>
             ) : events.map((ev) => (
               <tr
@@ -185,6 +231,9 @@ export default function EventsManager() {
                     <span className="text-pink-600">여 {ev.confirmed_female ?? 0}</span>
                   </div>
                 </td>
+                <td className="hidden px-5 py-3 text-sm text-gray-500 lg:table-cell">
+                  {typeof ev.price === 'number' ? `${ev.price.toLocaleString('ko-KR')}원` : '기본'}
+                </td>
                 <td className="px-5 py-3">
                   <span className={`rounded-full px-2.5 py-1 text-sm font-medium ${
                     ev.cancelled_at
@@ -193,6 +242,25 @@ export default function EventsManager() {
                   }`}>
                     {ev.cancelled_at ? '취소됨' : ev.is_active ? '모집중' : '마감'}
                   </span>
+                </td>
+                <td className="px-5 py-3">
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {!ev.cancelled_at && (
+                      <button
+                        onClick={() => handleToggleActive(ev)}
+                        disabled={togglingId === ev.id}
+                        className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        {ev.is_active ? '숨기기' : '공개'}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setDeleteTarget(ev); setDeleteError(''); }}
+                      className="rounded-lg border border-red-200 px-2.5 py-1 text-xs text-red-500 transition hover:bg-red-50"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -319,6 +387,19 @@ export default function EventsManager() {
                   </select>
                 </div>
               </div>
+              <div>
+                <label className="mb-1 block text-sm text-gray-500">참가비 (원)</label>
+                <input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="비워두면 기본 참가비 적용"
+                  min={0}
+                  step={1000}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-cana focus:ring-1 focus:ring-cana/20"
+                />
+                <p className="mt-1 text-xs text-gray-400">할인가 등 이 이벤트에만 적용할 참가비를 설정할 수 있어요. 비워두면 기본 참가비가 적용됩니다.</p>
+              </div>
             </div>
 
             <div className="mt-6 flex gap-2">
@@ -334,6 +415,44 @@ export default function EventsManager() {
                 className="flex-1 rounded-xl bg-cana py-2.5 text-sm font-medium text-white transition hover:bg-cana-dark disabled:opacity-50"
               >
                 {saving ? '저장 중...' : '추가'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 삭제 확인 모달 */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => { if (!deleting) setDeleteTarget(null); }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-2 text-base font-semibold text-gray-800">이벤트를 삭제할까요?</h3>
+            <p className="mb-4 text-sm text-gray-500">
+              <span className="font-medium text-gray-700">{deleteTarget.title}</span> 이벤트를 영구적으로 삭제해요.
+              신청 내역이 있는 이벤트는 삭제할 수 없으니, 그런 경우 &apos;숨기기&apos;를 이용해주세요.
+            </p>
+            {deleteError && (
+              <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{deleteError}</p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? '삭제 중...' : '삭제'}
               </button>
             </div>
           </div>

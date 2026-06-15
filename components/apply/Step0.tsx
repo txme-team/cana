@@ -13,7 +13,10 @@ interface EventOption {
   age_range_female: string;
   capacity: number;
   confirmed_count: number;
+  price?: number | null;
 }
+
+const DEFAULT_AMOUNT = parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '50000', 10);
 
 function formatEventDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -107,24 +110,44 @@ export default function Step0({ onWaitlist }: Step0Props) {
                       {/* 이벤트 정보 */}
                       <div className="flex min-w-0 flex-1 flex-col gap-2">
 
-                        {/* 제목 + 상태 뱃지 */}
-                        <div className="flex items-center gap-2">
-                          <p className={`text-base font-semibold ${applied || isFull ? 'text-gray-400' : selected ? 'text-cana' : 'text-gray-800'}`}>
-                            {event.title}
-                          </p>
-                          {applied ? (
-                            <span className="flex h-[20px] flex-shrink-0 items-center rounded-xl bg-gray-200 px-2 text-[11px] font-medium text-gray-500">
-                              신청 완료
-                            </span>
-                          ) : isFull ? (
-                            <span className="flex h-[20px] flex-shrink-0 items-center rounded-xl bg-gray-100 px-2 text-[11px] font-medium text-gray-500">
-                              마감
-                            </span>
-                          ) : (
-                            <span className="flex h-[20px] flex-shrink-0 items-center rounded-xl bg-cana/10 px-2 text-[11px] font-medium text-cana">
-                              모집중
-                            </span>
-                          )}
+                        {/* 제목 + 상태 뱃지 + 참가비 */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className={`text-base font-semibold ${applied || isFull ? 'text-gray-400' : selected ? 'text-cana' : 'text-gray-800'}`}>
+                              {event.title}
+                            </p>
+                            {applied ? (
+                              <span className="flex h-[20px] flex-shrink-0 items-center rounded-xl bg-gray-200 px-2 text-[11px] font-medium text-gray-500">
+                                신청 완료
+                              </span>
+                            ) : isFull ? (
+                              <span className="flex h-[20px] flex-shrink-0 items-center rounded-xl bg-gray-100 px-2 text-[11px] font-medium text-gray-500">
+                                마감
+                              </span>
+                            ) : (
+                              <span className="flex h-[20px] flex-shrink-0 items-center rounded-xl bg-cana/10 px-2 text-[11px] font-medium text-cana">
+                                모집중
+                              </span>
+                            )}
+                          </div>
+
+                          {/* 참가비 */}
+                          {(() => {
+                            const hasDiscount = typeof event.price === 'number' && event.price < DEFAULT_AMOUNT;
+                            const finalPrice = typeof event.price === 'number' ? event.price : DEFAULT_AMOUNT;
+                            return (
+                              <div className="flex flex-shrink-0 items-center gap-1.5 text-sm">
+                                {hasDiscount && (
+                                  <span className="text-gray-400 line-through">
+                                    {DEFAULT_AMOUNT.toLocaleString('ko-KR')}원
+                                  </span>
+                                )}
+                                <span className={hasDiscount ? 'font-semibold text-cana' : 'text-gray-600'}>
+                                  {finalPrice.toLocaleString('ko-KR')}원
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* 날짜 · 장소 */}

@@ -18,6 +18,7 @@ interface EventData {
   venue_url?: string;
   venue_detail?: string;
   capacity: number;
+  price?: number | null;
   is_active: boolean;
   cancelled_at?: string | null;
   age_range_male?: string;
@@ -40,6 +41,7 @@ const EMPTY_FORM = {
   location: '',
   venue_detail: '',
   capacity: 20,
+  price: '',
   is_active: true,
   birth_year_min_male: '',
   birth_year_max_male: '',
@@ -230,6 +232,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
       location: ev.location,
       venue_detail: ev.venue_detail ?? '',
       capacity: ev.capacity,
+      price: typeof ev.price === 'number' ? String(ev.price) : '',
       is_active: ev.is_active,
       birth_year_min_male: ev.birth_year_min_male ? String(ev.birth_year_min_male) : '',
       birth_year_max_male: ev.birth_year_max_male ? String(ev.birth_year_max_male) : '',
@@ -257,6 +260,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
           location: form.location,
           venue_detail: form.venue_detail || null,
           capacity: form.capacity,
+          price: form.price ? Number(form.price) : null,
           is_active: form.is_active,
           birth_year_min_male: minMale,
           birth_year_max_male: maxMale,
@@ -462,6 +466,16 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                   }
                   label={`정원 ${data.event.capacity}명`}
                 />
+                {typeof data.event.price === 'number' && (
+                  <InfoRow
+                    icon={
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    }
+                    label={`참가비 ${data.event.price.toLocaleString('ko-KR')}원 (기본가 적용 안 함)`}
+                  />
+                )}
                 <div className="flex gap-2 pt-1">
                   {(data.event.birth_year_min_male || data.event.birth_year_max_male) && (
                     <span className="rounded-xl bg-blue-50 px-2.5 py-1 text-sm text-blue-600">
@@ -965,6 +979,13 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                     <option value="false">마감</option>
                   </select>
                 </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-gray-500">참가비 (원)</label>
+                <input type="number" value={form.price} placeholder="비워두면 기본 참가비 적용" min={0} step={1000}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-cana focus:ring-1 focus:ring-cana/20" />
+                <p className="mt-1 text-xs text-gray-400">할인가 등 이 이벤트에만 적용할 참가비를 설정할 수 있어요. 비워두면 기본 참가비가 적용됩니다.</p>
               </div>
             </div>
             <div className="mt-6 flex gap-2">

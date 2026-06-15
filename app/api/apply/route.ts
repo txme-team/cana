@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
       .eq('profile_id', profile.id).eq('event_id', eventId).maybeSingle() as
       Promise<{ data: { status: string } | null }>,
     supa
-      .from('events').select('capacity, is_active').eq('id', eventId).maybeSingle() as
-      Promise<{ data: { capacity: number; is_active: boolean } | null }>,
+      .from('events').select('capacity, is_active, price').eq('id', eventId).maybeSingle() as
+      Promise<{ data: { capacity: number; is_active: boolean; price: number | null } | null }>,
     supa
       .from('applications')
       .select('id', { count: 'exact', head: true })
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, price: eventData?.price ?? null });
 }
 
 export async function POST(req: NextRequest) {

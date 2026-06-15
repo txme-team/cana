@@ -23,12 +23,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '필수 파라미터가 누락됐어요.' }, { status: 400 });
     }
 
-    // ── 금액 검증 ─────────────────────────────────────────────────────────────
-    const expectedAmount = parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '39000', 10);
-    if (amount !== expectedAmount) {
-      return NextResponse.json({ error: '결제 금액이 올바르지 않아요.' }, { status: 400 });
-    }
-
     // ── 로그인 확인 ──────────────────────────────────────────────────────────
     const authClient = createClient();
     const { data: { user } } = await authClient.auth.getUser();
@@ -39,6 +33,16 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supa = supabase as any;
+
+    // ── 금액 검증 (이벤트별 참가비, 없으면 기본값) ────────────────────────────
+    const { data: priceEvent } = await supa
+      .from('events').select('price').eq('id', eventId).maybeSingle() as
+      { data: { price: number | null } | null };
+
+    const expectedAmount = priceEvent?.price ?? parseInt(process.env.NEXT_PUBLIC_TOSS_AMOUNT ?? '39000', 10);
+    if (amount !== expectedAmount) {
+      return NextResponse.json({ error: '결제 금액이 올바르지 않아요.' }, { status: 400 });
+    }
 
     // ── 프로필 조회 ──────────────────────────────────────────────────────────
     const { data: profile, error: profileLookupError } = await supa

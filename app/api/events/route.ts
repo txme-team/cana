@@ -13,7 +13,7 @@ export async function GET() {
   const [eventsResult, confirmedResult] = await Promise.all([
     supa
       .from('events')
-      .select('id, title, event_date, location, age_range_male, age_range_female, capacity, birth_year_min_male, birth_year_max_male, birth_year_min_female, birth_year_max_female')
+      .select('id, title, event_date, location, age_range_male, age_range_female, capacity, price, birth_year_min_male, birth_year_max_male, birth_year_min_female, birth_year_max_female')
       .eq('is_active', true)
       .order('event_date', { ascending: true }),
     supa

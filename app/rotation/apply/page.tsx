@@ -188,6 +188,19 @@ function StepAgreements() {
         <p className="text-sm text-cana-ink3">이벤트 참여에 필요한 동의 항목이에요.</p>
       </div>
 
+      {/* 취소·환불 주의사항 안내 */}
+      <div className="flex flex-col gap-2 rounded-2xl border border-cana-rule bg-cana-cream px-5 py-4 text-sm text-cana-ink2">
+        <p className="font-semibold text-cana-ink">취소·환불 안내</p>
+        <ul className="flex flex-col gap-1.5 list-disc pl-4">
+          <li>결제 후 ~ 행사 7일 전 취소: 전액 환불</li>
+          <li>행사 6일 전 ~ 2일 전 취소: 50% 환불</li>
+          <li>행사 1일 전 ~ 당일 취소: 환불 불가</li>
+          <li>행사 전일 15시 기준 최소 인원 미달 시 소개팅 자체가 취소되며, 이 경우 참가비는 전액 환불됩니다.</li>
+          <li>남녀 성비는 신청 현황에 따라 달라질 수 있으며, 성비 불균형으로 인한 별도 추가 환불은 제공되지 않습니다.</li>
+        </ul>
+        <p className="text-xs text-cana-ink3">자세한 내용은 <a href="/rotation/faq" target="_blank" className="underline">자주 묻는 질문</a>의 &apos;취소·환불&apos; 항목을 참고해주세요.</p>
+      </div>
+
       {/* 필수 동의 */}
       <div className="flex flex-col gap-3">
         <p className="text-sm font-medium text-cana-ink3">필수 동의</p>
@@ -321,6 +334,7 @@ export default function ApplyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [amount, setAmount] = useState(TOSS_AMOUNT);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [tossReady, setTossReady] = useState(false);
 
@@ -380,6 +394,25 @@ export default function ApplyPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileLoaded]);
 
+  // 선택한 이벤트의 참가비(할인가 등) 조회 — 없으면 기본값 사용
+  const watchedEventId = methods.watch('eventId');
+  useEffect(() => {
+    if (!watchedEventId) {
+      setAmount(TOSS_AMOUNT);
+      return;
+    }
+    let cancelled = false;
+    fetch('/api/events')
+      .then((r) => r.json())
+      .then((events) => {
+        if (cancelled || !Array.isArray(events)) return;
+        const ev = events.find((e: { id: string; price?: number | null }) => e.id === watchedEventId);
+        setAmount(typeof ev?.price === 'number' ? ev.price : TOSS_AMOUNT);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [watchedEventId]);
+
   // URL ?eventId= 파라미터로 진입 시 일정 선택 스킵 (프로필 있을 때만)
   useEffect(() => {
     if (!profileLoaded) return;
@@ -431,7 +464,7 @@ export default function ApplyPage() {
         await tossPayments.payment({ customerKey: profile!.user_id })
           .requestPayment({
             method: 'CARD',
-            amount: { value: TOSS_AMOUNT, currency: 'KRW' },
+            amount: { value: amount, currency: 'KRW' },
             orderId,
             orderName: 'cana 소개팅 참여비',
             successUrl: `${window.location.origin}/rotation/apply/success`,
@@ -485,7 +518,7 @@ export default function ApplyPage() {
 
   const onSubmit = () => {};
 
-  const formattedAmount = TOSS_AMOUNT.toLocaleString('ko-KR');
+  const formattedAmount = amount.toLocaleString('ko-KR');
 
   return (
     <div className="min-h-screen bg-cana-cream">
