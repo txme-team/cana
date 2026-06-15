@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form';
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import type { ApplyFormData } from '@/lib/types';
+import { compressImage } from '@/lib/image';
 import { SectionHeader } from './ui';
 
 // ─── 파일 업로드 블록 ──────────────────────────────────────────────────────────
@@ -37,12 +38,13 @@ function FileUploadBlock({
     });
   }, [register, fieldName, required, label]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const compressed = await compressImage(file);
     setFileName(file.name);
     const dt = new DataTransfer();
-    dt.items.add(file);
+    dt.items.add(compressed);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setValue(fieldName, dt.files as any, { shouldValidate: true });
   };
@@ -112,19 +114,21 @@ export default function Step4() {
   }, [register]);
 
   const handleFile = useCallback(
-    (file: File | undefined) => {
+    async (file: File | undefined) => {
       if (!file) return;
       if (!file.type.startsWith('image/')) return;
       if (file.size > 5 * 1024 * 1024) return;
 
+      const compressed = await compressImage(file);
+
       const dt = new DataTransfer();
-      dt.items.add(file);
+      dt.items.add(compressed);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setValue('photo', dt.files as any, { shouldValidate: true });
 
       const reader = new FileReader();
       reader.onload = (e) => setPreview(e.target?.result as string);
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressed);
     },
     [setValue]
   );
