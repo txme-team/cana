@@ -36,7 +36,9 @@ export async function compressImage(
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, 'image/jpeg', quality)
   );
-  if (!blob || blob.size >= file.size) return file;
+  if (!blob) return file;
+  // 원본이 이미 충분히 작으면 원본 유지, 그 외엔 항상 압축 결과 사용
+  if (blob.size >= file.size && file.size < 500 * 1024) return file;
 
   const newName = file.name.replace(/\.\w+$/, '') + '.jpg';
   return new File([blob], newName, { type: 'image/jpeg' });

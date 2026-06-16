@@ -117,7 +117,6 @@ export default function Step4() {
     async (file: File | undefined) => {
       if (!file) return;
       if (!file.type.startsWith('image/')) return;
-      if (file.size > 5 * 1024 * 1024) return;
 
       const compressed = await compressImage(file);
 
