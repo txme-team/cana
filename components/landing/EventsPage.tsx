@@ -14,6 +14,13 @@ interface EventItem {
   confirmed_count: number;
 }
 
+interface Applicant {
+  gender: string;
+  birth_year: number;
+  job: string;
+  mbti: string;
+}
+
 interface WaitlistModal {
   open: boolean;
   event: { id: string; title: string } | null;
@@ -34,10 +41,59 @@ function formatEventDate(dateStr: string) {
   return `${month}월 ${day}일 (${dow}) ${ampm} ${h}시`;
 }
 
+// ─── 신청자 현황 패널 ──────────────────────────────────────────────────────────
+function ApplicantsPanel({ eventId }: { eventId: string }) {
+  const [applicants, setApplicants] = useState<Applicant[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/events/applicants?eventId=${eventId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setApplicants(data);
+        else setError(data.error ?? '불러오기 실패');
+      })
+      .catch(() => setError('불러오기 실패'))
+      .finally(() => setLoading(false));
+  }, [eventId]);
+
+  const males = applicants?.filter((a) => a.gender === 'male') ?? [];
+  const females = applicants?.filter((a) => a.gender === 'female') ?? [];
+
+  if (loading) return <p className="text-sm text-cana-ink3">불러오는 중...</p>;
+  if (error) return <p className="text-sm text-red-400">{error}</p>;
+  if (!applicants || applicants.length === 0) return <p className="text-sm text-cana-ink3">아직 신청자가 없어요.</p>;
+
+  const Row = ({ list, label, color }: { list: Applicant[]; label: string; color: string }) => (
+    <div className="flex flex-col gap-1.5">
+      <p className={`text-xs font-semibold ${color}`}>{label} {list.length}명</p>
+      <div className="flex flex-col gap-1">
+        {list.map((a, i) => (
+          <div key={i} className="flex items-center gap-2 rounded-xl bg-cana-cream px-3 py-2 text-sm text-cana-ink2">
+            <span className="w-14 flex-shrink-0">{a.birth_year}년생</span>
+            <span className="flex-1 truncate">{a.job}</span>
+            <span className="flex-shrink-0 font-medium text-cana-ink3">{a.mbti}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {males.length > 0 && <Row list={males} label="남성" color="text-blue-500" />}
+      {females.length > 0 && <Row list={females} label="여성" color="text-cana" />}
+    </div>
+  );
+}
+
 export default function EventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [wl, setWl] = useState<WaitlistModal>({ open: false, event: null, loading: false, done: false, error: null });
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const openWaitlist = (event: { id: string; title: string }) =>
     setWl({ open: true, event, loading: false, done: false, error: null });
@@ -208,6 +264,28 @@ export default function EventsPage() {
                   >
                     신청하기
                   </Link>
+                )}
+              </div>
+
+              {/* 신청자 현황 토글 */}
+              <div className="border-t border-cana-rule pt-4">
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(expandedId === event.id ? null : event.id)}
+                  className="flex w-full items-center justify-between text-sm text-cana-ink3 transition hover:text-cana-ink"
+                >
+                  <span className="font-medium">신청자 현황</span>
+                  <svg
+                    className={`h-4 w-4 transition-transform ${expandedId === event.id ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {expandedId === event.id && (
+                  <div className="mt-3">
+                    <ApplicantsPanel eventId={event.id} />
+                  </div>
                 )}
               </div>
             </div>

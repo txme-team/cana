@@ -88,10 +88,13 @@ export interface ApplyFormData {
   agreeProfileShare: boolean;
   agreeInstagram: boolean;
 
-  // Step 5: 인증
+  // Step 5: 인증 (FileList는 미리보기/validate용, 실제 업로드는 *Url 필드)
   photo: FileList;
   workplaceVerification: FileList | null;
   churchVerification: FileList | null;
+  photoUrl?: string;
+  workplaceVerificationUrl?: string;
+  churchVerificationUrl?: string;
 
   // Step QnA: 자기소개
   prayerRequest: string;
