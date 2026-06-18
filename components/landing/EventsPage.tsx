@@ -66,25 +66,26 @@ function ApplicantsPanel({ eventId }: { eventId: string }) {
   if (error) return <p className="text-sm text-red-400">{error}</p>;
   if (!applicants || applicants.length === 0) return <p className="text-sm text-cana-ink3">아직 신청자가 없어요.</p>;
 
-  const Row = ({ list, label, color }: { list: Applicant[]; label: string; color: string }) => (
-    <div className="flex flex-col gap-1.5">
+  const Column = ({ list, label, color }: { list: Applicant[]; label: string; color: string }) => (
+    <div className="flex flex-1 flex-col gap-1.5">
       <p className={`text-xs font-semibold ${color}`}>{label} {list.length}명</p>
       <div className="flex flex-col gap-1">
-        {list.map((a, i) => (
-          <div key={i} className="flex items-center gap-2 rounded-xl bg-cana-cream px-3 py-2 text-sm text-cana-ink2">
-            <span className="w-14 flex-shrink-0">{a.birth_year}년생</span>
-            <span className="flex-1 truncate">{a.job}</span>
-            <span className="flex-shrink-0 font-medium text-cana-ink3">{a.mbti}</span>
-          </div>
-        ))}
+        {list.length === 0
+          ? <p className="text-xs text-cana-ink3">없음</p>
+          : list.map((a, i) => (
+            <p key={i} className="text-sm text-cana-ink2">
+              {label === '남성' ? '남자' : '여자'} / {a.birth_year}년생 / {a.job} / {a.mbti}
+            </p>
+          ))
+        }
       </div>
     </div>
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      {males.length > 0 && <Row list={males} label="남성" color="text-blue-500" />}
-      {females.length > 0 && <Row list={females} label="여성" color="text-cana" />}
+    <div className="flex gap-6">
+      <Column list={males} label="남성" color="text-blue-500" />
+      <Column list={females} label="여성" color="text-cana" />
     </div>
   );
 }

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 
 // GET /api/events/applicants?eventId=xxx
-// 로그인 유저에게 해당 이벤트의 신청자 기본 정보(성별·나이·직업·MBTI)만 공개한다.
+// 비로그인 포함 누구나 신청자 기본 정보(성별·나이·직업·MBTI)를 확인할 수 있다.
 export async function GET(req: NextRequest) {
-  const authClient = createClient();
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
-
   const eventId = new URL(req.url).searchParams.get('eventId');
   if (!eventId) return NextResponse.json({ error: 'eventId가 필요해요.' }, { status: 400 });
 
