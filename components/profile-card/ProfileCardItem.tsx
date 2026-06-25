@@ -77,7 +77,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function ProfileCardItem({
   label,
   profile: p,
-  aiSummary,
 }: {
   label: string;
   profile: Profile;
