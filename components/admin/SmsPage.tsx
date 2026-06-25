@@ -51,6 +51,7 @@ export default function SmsPage() {
   // 수동 발송 폼
   const [sendEventId, setSendEventId]     = useState('');
   const [recipients, setRecipients]       = useState<'confirmed' | 'all_active'>('confirmed');
+  const [genderFilter, setGenderFilter]   = useState<'all' | 'male' | 'female'>('all');
   const [extraVars, setExtraVars]         = useState<Record<string, string>>({});
 
   // 발송 모달
@@ -156,7 +157,7 @@ export default function SmsPage() {
       const res = await fetch(`/api/admin/sms-templates/${selectedKey}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId: sendEventId, recipients, extraVars }),
+        body: JSON.stringify({ eventId: sendEventId, recipients, genderFilter, extraVars }),
       });
       const json = await res.json() as { ok?: boolean; sent?: number; error?: string };
       if (!res.ok) throw new Error(json.error ?? '발송 실패');
@@ -384,6 +385,30 @@ export default function SmsPage() {
                   </div>
                 </div>
 
+                {/* 성별 필터 */}
+                <div>
+                  <label className="mb-1.5 block text-sm text-gray-500">성별 필터</label>
+                  <div className="flex gap-4">
+                    {([
+                      { value: 'all',    label: '전체' },
+                      { value: 'male',   label: '남성만' },
+                      { value: 'female', label: '여성만' },
+                    ] as const).map(({ value, label }) => (
+                      <label key={value} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="radio"
+                          name="genderFilter"
+                          value={value}
+                          checked={genderFilter === value}
+                          onChange={() => setGenderFilter(value)}
+                          className="accent-cana"
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 {/* 추가 변수 입력 (profile_card_url, survey_url) */}
                 {neededExtraVars.length > 0 && (
                   <div className="flex flex-col gap-3 rounded-xl bg-amber-50/60 px-4 py-3">
@@ -488,7 +513,7 @@ export default function SmsPage() {
                 <div className="mb-2 space-y-1.5 text-sm text-gray-600">
                   <p><span className="font-medium text-gray-700">템플릿:</span> {selected.name}</p>
                   <p><span className="font-medium text-gray-700">이벤트:</span> {events.find((e) => e.id === sendEventId)?.title ?? '-'}</p>
-                  <p><span className="font-medium text-gray-700">수신 대상:</span> {recipients === 'confirmed' ? '확정자' : '전체 활성 신청자'}</p>
+                  <p><span className="font-medium text-gray-700">수신 대상:</span> {recipients === 'confirmed' ? '확정자' : '전체 활성 신청자'}{genderFilter !== 'all' ? ` (${genderFilter === 'male' ? '남성' : '여성'}만)` : ''}</p>
                 </div>
 
                 {/* 미리보기 */}

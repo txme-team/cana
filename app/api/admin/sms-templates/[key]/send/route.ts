@@ -22,10 +22,11 @@ export async function POST(
     const body = await req.json() as {
       eventId: string;
       recipients: 'confirmed' | 'all_active';
+      genderFilter?: 'all' | 'male' | 'female';
       extraVars?: Record<string, string>;
     };
 
-    const { eventId, recipients = 'confirmed', extraVars = {} } = body;
+    const { eventId, recipients = 'confirmed', genderFilter = 'all', extraVars = {} } = body;
     if (!eventId) return NextResponse.json({ error: 'eventId가 필요합니다.' }, { status: 400 });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,13 +63,19 @@ export async function POST(
       ? ['확정']
       : ['검토중', '대기', '확정'];
 
-    const { data: apps } = await supa
+    let appsQuery = supa
       .from('applications')
-      .select('profiles ( nickname, phone )')
+      .select('profiles!inner ( nickname, phone, gender )')
       .eq('event_id', eventId)
-      .in('status', statusFilter) as {
-        data: { profiles: { nickname: string; phone: string | null } | null }[] | null;
-      };
+      .in('status', statusFilter);
+
+    if (genderFilter === 'male' || genderFilter === 'female') {
+      appsQuery = appsQuery.eq('profiles.gender', genderFilter);
+    }
+
+    const { data: apps } = await appsQuery as {
+      data: { profiles: { nickname: string; phone: string | null; gender: string } | null }[] | null;
+    };
 
     const eventVars = buildEventVars(event);
 

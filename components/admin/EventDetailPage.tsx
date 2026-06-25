@@ -203,6 +203,11 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   const [saving, setSaving] = useState(false);
 
   // 이벤트 취소 모달
+  // 프로필카드 URL 생성
+  const [cardGenerating, setCardGenerating] = useState(false);
+  const [cardTokens, setCardTokens] = useState<{ male: string; female: string } | null>(null);
+  const [cardUrlsOpen, setCardUrlsOpen] = useState(false);
+
   const [cancelModal, setCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelResult, setCancelResult] = useState<{ affected: number; refunded: number; smsSent: number; refundErrors: string[] } | null>(null);
@@ -604,7 +609,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
           <div className="rounded-2xl border border-gray-100 bg-white p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-gray-700">확정 인원 현황</h2>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <a
                   href={`/rotation/admin/profile-card-preview/${eventId}/male`}
                   target="_blank"
@@ -621,6 +626,29 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                 >
                   여자 프로필카드
                 </a>
+                <button
+                  onClick={async () => {
+                    setCardGenerating(true);
+                    try {
+                      const res = await fetch('/api/admin/profile-cards', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ eventId }),
+                      });
+                      const json = await res.json();
+                      if (json.card_token_male && json.card_token_female) {
+                        setCardTokens({ male: json.card_token_male, female: json.card_token_female });
+                      }
+                      setCardUrlsOpen(true);
+                    } finally {
+                      setCardGenerating(false);
+                    }
+                  }}
+                  disabled={cardGenerating}
+                  className="rounded-lg border border-cana/40 bg-cana/5 px-2.5 py-1 text-xs font-medium text-cana transition hover:bg-cana/10 disabled:opacity-40"
+                >
+                  {cardGenerating ? 'URL 생성 중...' : '카드 URL 생성'}
+                </button>
               </div>
             </div>
 
@@ -728,6 +756,59 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
             load();
           }}
         />
+      )}
+
+      {/* ── 프로필카드 URL 모달 ── */}
+      {cardUrlsOpen && cardTokens && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => setCardUrlsOpen(false)}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-4 text-base font-semibold text-gray-800">프로필카드 URL</h3>
+            <p className="mb-4 text-sm text-gray-500">
+              남자 카드 URL → 여자 참가자에게, 여자 카드 URL → 남자 참가자에게 발송하세요.
+            </p>
+            <div className="flex flex-col gap-3">
+              {([
+                { label: '남자 프로필카드', sublabel: '(여성 참가자에게 발송)', token: cardTokens.male, color: 'bg-blue-400' },
+                { label: '여자 프로필카드', sublabel: '(남성 참가자에게 발송)', token: cardTokens.female, color: 'bg-pink-400' },
+              ]).map(({ label, sublabel, token, color }) => {
+                const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cana.im';
+                const url = `${siteUrl}/rotation/profile-card/event/${token}`;
+                return (
+                  <div key={token} className="rounded-xl bg-gray-50 px-4 py-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className={`h-3 w-3 rounded-full ${color}`} />
+                      <span className="text-sm font-medium text-gray-700">{label}</span>
+                      <span className="text-xs text-gray-400">{sublabel}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        readOnly
+                        value={url}
+                        className="min-w-0 flex-1 rounded-lg bg-white px-3 py-2 text-xs text-gray-500 outline-none"
+                        onFocus={(e) => e.target.select()}
+                      />
+                      <button
+                        onClick={() => navigator.clipboard.writeText(url)}
+                        className="flex-shrink-0 rounded-lg bg-cana/10 px-3 py-2 text-xs font-medium text-cana transition hover:bg-cana/20"
+                      >
+                        복사
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setCardUrlsOpen(false)}
+              className="mt-4 w-full rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ── 장소 확정 문자 발송 확인 모달 ── */}

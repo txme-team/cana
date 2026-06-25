@@ -112,11 +112,8 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
               <div className="sec-label">기본 정보</div>
               <div className="info-grid">
 
-                {/* 1행: 이름 · 나이 · MBTI · 키 · 학력 · 근무지 */}
-                <div className="i-cell">
-                  <div className="i-label">이름</div>
-                  <div className="i-val">{p.nickname}</div>
-                </div>
+                {/* 1행: 나이 · MBTI · 키 · 학력 · 근무지 */}
+                <div className="i-cell" style={{ background: 'white' }} />
                 <div className="i-cell">
                   <div className="i-label">나이</div>
                   <div className="i-val">{displayYear}</div>

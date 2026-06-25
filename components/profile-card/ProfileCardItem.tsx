@@ -106,9 +106,6 @@ export default function ProfileCardItem({
             <div className="text-sm font-semibold text-cana-ink">
               {[displayYear, p.job, p.mbti].filter(Boolean).join(' · ')}
             </div>
-            {aiSummary && (
-              <div className="mt-1 text-xs font-medium text-cana">{aiSummary}</div>
-            )}
           </div>
         </div>
         <svg
@@ -167,6 +164,24 @@ export default function ProfileCardItem({
               <div>
                 <div className="mb-1.5 text-xs text-cana-ink3">흡연</div>
                 <PillRow options={['비흡연', '흡연(전자담배)', '흡연(연초)', '금연 중']} selected={p.smoking} />
+              </div>
+            </div>
+          </Section>
+
+          {/* 신앙 정보 */}
+          <Section title="신앙 정보">
+            <div className="divide-y divide-cana-rule/60">
+              <InfoRow label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : undefined} />
+              <InfoRow label="신앙 단계" value={p.faith_level} />
+            </div>
+            <div className="mt-2.5 space-y-2.5">
+              <div>
+                <div className="mb-1.5 text-xs text-cana-ink3">주일 예배</div>
+                <PillRow options={['거의 매주', '2~3주에 1회', '상황에 따라']} selected={p.worship_frequency} />
+              </div>
+              <div>
+                <div className="mb-1.5 text-xs text-cana-ink3">섬기는 사역</div>
+                <PillRow options={['찬양팀', '교육부', '행정', '없음', '기타']} selected={p.ministry} />
               </div>
             </div>
           </Section>
@@ -233,24 +248,6 @@ export default function ProfileCardItem({
                   options={['활동(액티비티·여행·운동)', '일상(카페·산책·맛집)', '문화(전시·공연·영화)', '집콕(집에서 영화·게임)']}
                   selected={p.date_style}
                 />
-              </div>
-            </div>
-          </Section>
-
-          {/* 신앙 정보 */}
-          <Section title="신앙 정보">
-            <div className="divide-y divide-cana-rule/60">
-              <InfoRow label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : undefined} />
-              <InfoRow label="신앙 단계" value={p.faith_level} />
-            </div>
-            <div className="mt-2.5 space-y-2.5">
-              <div>
-                <div className="mb-1.5 text-xs text-cana-ink3">주일 예배</div>
-                <PillRow options={['거의 매주', '2~3주에 1회', '상황에 따라']} selected={p.worship_frequency} />
-              </div>
-              <div>
-                <div className="mb-1.5 text-xs text-cana-ink3">섬기는 사역</div>
-                <PillRow options={['찬양팀', '교육부', '행정', '없음', '기타']} selected={p.ministry} />
               </div>
             </div>
           </Section>

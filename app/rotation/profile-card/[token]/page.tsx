@@ -46,10 +46,12 @@ export default async function ProfileCardPage({ params }: PageProps) {
   }
 
   return (
-    <ProfileCardView
-      viewerLabel={result.viewerLabel}
-      event={result.event}
-      cards={result.cards}
-    />
+    <div className="bg-cana-cream">
+      <ProfileCardView
+        viewerLabel={result.viewerLabel}
+        event={result.event}
+        cards={result.cards}
+      />
+    </div>
   );
 }
