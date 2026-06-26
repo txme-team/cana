@@ -113,7 +113,6 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
               <div className="info-grid">
 
                 {/* 1행: 나이 · MBTI · 키 · 학력 · 근무지 */}
-                <div className="i-cell" style={{ background: 'white' }} />
                 <div className="i-cell">
                   <div className="i-label">나이</div>
                   <div className="i-val">{displayYear}</div>
@@ -134,6 +133,7 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
                   <div className="i-label">근무지</div>
                   <div className="i-val">{p.workplace}</div>
                 </div>
+                <div className="i-cell" style={{ background: 'white', border: 'none' }} />
 
                 {/* 2행: 사는 곳 · 직업 */}
                 <div className="i-cell w3">
