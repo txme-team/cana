@@ -192,7 +192,6 @@ export default function EventsPage() {
 
       <div className="flex flex-col gap-4">
         {events.map((event) => {
-          const pct = Math.min((event.confirmed_count / event.capacity) * 100, 100);
           const isFull = event.confirmed_count >= event.capacity;
 
           return (
@@ -236,37 +235,23 @@ export default function EventsPage() {
                 </span>
               </div>
 
-              {/* 확정 인원 바 + 컴팩트 버튼 */}
-              <div className="flex items-end gap-4">
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-cana-ink3">확정 인원</span>
-                    <span className="font-semibold text-cana">
-                      {event.confirmed_count} / {event.capacity}명
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-xl bg-cana-rule">
-                    <div className="h-full rounded-xl bg-cana transition-all" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-
-                {isFull ? (
-                  <button
-                    type="button"
-                    onClick={() => openWaitlist({ id: event.id, title: event.title })}
-                    className="flex-shrink-0 rounded-xl border border-cana px-4 py-2 text-sm font-semibold text-cana transition hover:bg-cana/5 active:scale-95"
-                  >
-                    대기 신청
-                  </button>
-                ) : (
-                  <Link
-                    href={`/rotation/apply?eventId=${event.id}`}
-                    className="flex-shrink-0 rounded-xl bg-cana px-4 py-2 text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
-                  >
-                    신청하기
-                  </Link>
-                )}
-              </div>
+              {/* 버튼 */}
+              {isFull ? (
+                <button
+                  type="button"
+                  onClick={() => openWaitlist({ id: event.id, title: event.title })}
+                  className="w-full rounded-xl border border-cana py-2.5 text-center text-sm font-semibold text-cana transition hover:bg-cana/5 active:scale-95"
+                >
+                  대기 신청
+                </button>
+              ) : (
+                <Link
+                  href={`/rotation/apply?eventId=${event.id}`}
+                  className="w-full rounded-xl bg-cana py-2.5 text-center text-sm font-semibold text-white transition hover:bg-cana-dark active:scale-95"
+                >
+                  신청하기
+                </Link>
+              )}
 
               {/* 신청자 현황 토글 */}
               <div className="border-t border-cana-rule pt-4">

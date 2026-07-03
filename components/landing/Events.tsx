@@ -90,7 +90,6 @@ export default function Events({ preview = false }: Props) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((event) => {
           const { date, time } = formatEventDate(event.event_date);
-          const pct = Math.min((event.confirmed_count / event.capacity) * 100, 100);
           const isFull = event.confirmed_count >= event.capacity;
 
           return (
@@ -132,19 +131,6 @@ export default function Events({ preview = false }: Props) {
                 <span className="flex h-[26px] items-center rounded-xl bg-cana-cream px-2.5 text-sm text-cana-ink3">
                   여 {event.age_range_female}
                 </span>
-              </div>
-
-              {/* 확정 인원 바 */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-cana-ink3">확정 인원</span>
-                  <span className="font-semibold text-cana">
-                    {event.confirmed_count} / {event.capacity}명
-                  </span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-xl bg-cana-rule">
-                  <div className="h-full rounded-xl bg-cana transition-all" style={{ width: `${pct}%` }} />
-                </div>
               </div>
 
               {/* 버튼 — 하단 풀 너비 */}
