@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     .from('applications')
     .select('profiles(gender, birth_year, job, mbti)')
     .eq('event_id', eventId)
-    .in('status', ['검토중', '대기', '확정']) as {
+    .eq('status', '확정') as {
       data: { profiles: { gender: string; birth_year: number; job: string; mbti: string } | null }[] | null;
       error: { message: string } | null;
     };
