@@ -34,6 +34,7 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
   const [targetEventId, setTargetEventId]   = useState('');
   const [processing, setProcessing]         = useState(false);
   const [photoUrl, setPhotoUrl]             = useState<string | null>(null);
+  const [showFullPhoto, setShowFullPhoto]   = useState(false);
 
   // ESC 닫기
   useEffect(() => {
@@ -130,74 +131,71 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
         style={{ maxHeight: 'calc(100vh - 48px)' }}
       >
 
-        {/* ── 좌 패널 ── */}
-        <div className="w-52 flex-shrink-0 border-r border-gray-100 flex flex-col overflow-y-auto bg-gray-50/40">
+        {/* 닫기 버튼 (모달 전체 우측 상단) */}
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 z-10 rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
-          {/* 닫기 버튼 */}
-          <div className="flex justify-end p-3 flex-shrink-0">
-            <button
-              onClick={onClose}
-              className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+        {/* ── 좌 패널 ── */}
+        <div className="w-80 flex-shrink-0 border-r border-gray-100 flex flex-col overflow-y-auto bg-gray-50/40">
 
           {/* 사진 + 신원 */}
-          <div className="flex flex-col items-center gap-4 px-5 pb-5 flex-shrink-0">
+          <div className="flex flex-col items-center gap-4 px-5 pt-10 pb-5 flex-shrink-0">
             {/* 사진 */}
             {photoUrl ? (
-              <img
-                src={photoUrl}
-                alt={pr.nickname}
-                className="h-28 w-28 rounded-2xl object-cover border border-gray-200 shadow-sm"
-              />
+              <button
+                type="button"
+                onClick={() => setShowFullPhoto(true)}
+                className="block h-[280px] w-[280px] overflow-hidden rounded-2xl border border-gray-200 shadow-sm"
+              >
+                <img
+                  src={photoUrl}
+                  alt={pr.nickname}
+                  className="h-full w-full object-cover"
+                />
+              </button>
             ) : (
-              <div className="h-28 w-28 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-300 text-3xl border border-gray-200">
+              <div className="h-[280px] w-[280px] rounded-2xl bg-gray-100 flex items-center justify-center text-gray-300 text-3xl border border-gray-200">
                 👤
               </div>
             )}
 
-            {/* 이름 */}
-            <div className="text-center">
-              <p className="text-base font-semibold text-gray-900">{pr.nickname}</p>
-              <div className="mt-1.5 flex items-center justify-center gap-1.5 flex-wrap">
-                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[11px] text-gray-600">
-                  {pr.gender === 'male' ? '남성' : '여성'}
-                </span>
-                {pr.mbti && (
-                  <span className="rounded-full bg-cana/10 px-2 py-0.5 text-[11px] font-medium text-cana">
-                    {pr.mbti}
-                  </span>
-                )}
+            {/* 이름 - 년생 - 상태 뱃지 */}
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="flex items-center gap-2">
+                <p className="text-base font-semibold text-gray-900">{pr.nickname}</p>
+                <span className="text-sm text-gray-400">{birthYear}년생</span>
               </div>
+              <StatusBadge status={status} />
             </div>
 
             {/* 핵심 정보 */}
-            <div className="w-full space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-400">년생</span>
-                <span className="text-gray-700 font-medium">{birthYear}년</span>
+            <div className="w-full space-y-2.5">
+              <div>
+                <p className="mb-0.5 text-[10px] text-gray-400">성별</p>
+                <p className="text-sm text-gray-800">{pr.gender === 'male' ? '남성' : '여성'}</p>
+              </div>
+              <div>
+                <p className="mb-0.5 text-[10px] text-gray-400">MBTI</p>
+                <p className="text-sm text-gray-800">{pr.mbti ?? '—'}</p>
               </div>
               {pr.phone && (
-                <div className="flex justify-between text-xs gap-2">
-                  <span className="text-gray-400 shrink-0">연락처</span>
-                  <span className="font-mono text-gray-700 text-right">{pr.phone}</span>
+                <div>
+                  <p className="mb-0.5 text-[10px] text-gray-400">연락처</p>
+                  <p className="font-mono text-sm text-gray-800">{pr.phone}</p>
                 </div>
               )}
               {pr.church_name && (
-                <div className="flex justify-between text-xs gap-2">
-                  <span className="text-gray-400 shrink-0">교회</span>
-                  <span className="text-gray-700 text-right">{pr.church_name}</span>
+                <div>
+                  <p className="mb-0.5 text-[10px] text-gray-400">교회</p>
+                  <p className="text-sm text-gray-800">{pr.church_name}</p>
                 </div>
               )}
-            </div>
-
-            {/* 현재 상태 */}
-            <div className="w-full">
-              <StatusBadge status={status} />
             </div>
           </div>
 
@@ -340,6 +338,20 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
         </div>
 
       </div>
+
+      {/* 프로필 사진 전체보기 */}
+      {showFullPhoto && photoUrl && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-6"
+          onClick={() => setShowFullPhoto(false)}
+        >
+          <img
+            src={photoUrl}
+            alt={pr.nickname}
+            className="max-h-full max-w-full rounded-lg object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }
