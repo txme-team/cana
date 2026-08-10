@@ -185,7 +185,7 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
               {pr.phone && (
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[10px] text-gray-400 shrink-0">연락처</p>
-                  <p className="font-mono text-sm text-gray-800 text-right">{pr.phone}</p>
+                  <p className="text-sm text-gray-800 text-right">{pr.phone}</p>
                 </div>
               )}
               {pr.church_name && (

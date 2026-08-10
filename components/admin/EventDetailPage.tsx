@@ -183,7 +183,7 @@ function ParticipantTable({
                   >
                     <td className="px-3 py-3 font-medium text-gray-800">{pr.nickname}</td>
                     <td className="px-3 py-3 text-gray-500">{pr.birth_year ? `${2026 - pr.birth_year}세` : '-'}</td>
-                    <td className="px-3 py-3 text-gray-500 font-mono text-xs">{pr.phone || '-'}</td>
+                    <td className="px-3 py-3 text-gray-500">{pr.phone || '-'}</td>
                     <td className="px-3 py-3 text-gray-500">{pr.mbti || '-'}</td>
                     <td className="px-3 py-3">
                       <div className="text-gray-700">{pr.job || '-'}</div>
