@@ -98,8 +98,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 신청 레코드 생성 (또는 취소 → 검토중으로 업데이트) ─────────────────────
-    let applicationId: string;
-
     const paymentFields = {
       order_id:    orderId,
       payment_key: paymentKey,
@@ -111,7 +109,6 @@ export async function POST(req: NextRequest) {
     if (existing && existing.status === '취소') {
       // 취소 후 재신청 — UNIQUE 제약으로 insert 불가, 기존 행 업데이트
       await supa.from('applications').update({ status: '검토중', ...paymentFields }).eq('id', existing.id);
-      applicationId = existing.id;
     } else {
       const { data: application, error: appError } = await supa
         .from('applications')
@@ -119,7 +116,6 @@ export async function POST(req: NextRequest) {
         .select('id').single() as { data: { id: string } | null; error: { message: string } | null };
 
       if (appError) throw new Error(`신청 저장 실패: ${appError.message}`);
-      applicationId = application!.id;
     }
 
     // ── 약관 동의 저장 ────────────────────────────────────────────────────────
