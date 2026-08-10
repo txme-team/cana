@@ -706,7 +706,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
             )}
 
             {/* 참여자 명단 */}
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-2 gap-6">
               <ParticipantTable
                 title="남성 확정자"
                 accentBg="bg-blue-50"
