@@ -62,9 +62,8 @@ const SUGGESTED_QUESTIONS = {
 };
 
 const Q_COLUMNS: (keyof typeof SUGGESTED_QUESTIONS)[][] = [
-  ['처음 만났을 때', '일상'],
-  ['신앙', '연애'],
-  ['결혼', '가족', '가치관'],
+  ['처음 만났을 때', '일상', '신앙', '가족'],
+  ['연애', '결혼', '가치관'],
 ];
 
 export default function ProfileCardBackTemplate({ oppositeApps }: BackTemplateProps) {
@@ -114,21 +113,19 @@ export default function ProfileCardBackTemplate({ oppositeApps }: BackTemplatePr
                     <div className="opp-no-badge">{no}</div>
                     <div className="opp-content">
                       <div className="opp-line1">
+                        {p.job       && <span className="opp-chip">{p.job}</span>}
                         <span className="opp-chip">{displayYear}</span>
                         {p.mbti      && <span className="opp-chip">{p.mbti}</span>}
                         {p.height    && <span className="opp-chip">{p.height}cm</span>}
                         {p.education && <span className="opp-chip">{p.education}</span>}
                         {p.residence && <span className="opp-chip">{p.residence}</span>}
                       </div>
-                      <div className="opp-line2">
-                        {p.job              && <span className="opp-detail">{p.job}</span>}
-                        {p.faith_years      && <span className="opp-detail">신앙 {p.faith_years}년</span>}
-                        {(p.personality ?? []).slice(0, 3).map((t) => (
-                          <span key={t} className="opp-detail">{t}</span>
-                        ))}
-                        {(p.hobbies ?? []).slice(0, 4).map((h) => (
-                          <span key={h} className="opp-tag">{h}</span>
-                        ))}
+                      <div className="opp-line2-text">
+                        {[
+                          p.faith_years ? `신앙 ${p.faith_years}년` : null,
+                          ...(p.personality ?? []).slice(0, 3),
+                          ...(p.hobbies ?? []).slice(0, 4),
+                        ].filter(Boolean).join(' · ')}
                       </div>
                       {promise && <div className="opp-promise">&ldquo;{promise}&rdquo;</div>}
                     </div>

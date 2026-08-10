@@ -288,31 +288,11 @@ export const PRINT_CARD_STYLES = `
     white-space: nowrap;
   }
 
-  .opp-line2 {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .opp-detail {
+  .opp-line2-text {
     font-size: 9px;
     color: var(--ink-3);
-    white-space: nowrap;
-  }
-  .opp-detail + .opp-detail::before {
-    content: '·';
-    margin-right: 4px;
-    color: var(--rule);
-  }
-
-  .opp-tag {
-    font-size: 8.5px;
-    color: var(--ink-3);
-    background: var(--warm);
-    border-radius: 20px;
-    padding: 1px 5px;
-    white-space: nowrap;
+    line-height: 1.4;
+    word-break: keep-all;
   }
 
   .opp-promise {
