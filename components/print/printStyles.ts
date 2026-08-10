@@ -196,18 +196,17 @@ export const PRINT_CARD_STYLES = `
   }
 
   .q-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; flex: 1; }
-  .q-cols-3 { grid-template-columns: 1fr 1fr 1fr; gap: 0 16px; }
-  .q-group { margin-bottom: 10px; }
+  .q-group { margin-bottom: 12px; }
   .q-group-label {
-    font-size: 9px; font-weight: 600; letter-spacing: 0.2em; color: var(--rose);
-    text-transform: uppercase; margin-bottom: 5px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.18em; color: var(--rose);
+    text-transform: uppercase; margin-bottom: 6px;
     display: flex; align-items: center; gap: 5px;
   }
   .q-group-label::after { content: ''; flex: 1; height: 0.5px; background: var(--rose-lt); }
-  .q-row { display: flex; align-items: flex-start; gap: 6px; padding: 3.5px 0; border-bottom: 0.5px solid #f2e6ea; }
+  .q-row { display: flex; align-items: flex-start; gap: 7px; padding: 6px 0; border-bottom: 0.5px solid #f2e6ea; }
   .q-row:last-child { border-bottom: none; }
-  .q-dot { width: 3.5px; height: 3.5px; background: var(--rose-mid); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
-  .q-txt { font-size: 9px; color: var(--ink); line-height: 1.45; letter-spacing: -0.01em; word-break: keep-all; }
+  .q-dot { width: 4px; height: 4px; background: var(--rose-mid); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .q-txt { font-size: 10.5px; color: var(--ink); line-height: 1.5; letter-spacing: -0.01em; word-break: keep-all; }
   /* 메모 테이블 */
   .memo-section { flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
   .memo-table { width: 100%; border-collapse: collapse; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }

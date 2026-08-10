@@ -62,8 +62,8 @@ const SUGGESTED_QUESTIONS = {
 };
 
 const Q_COLUMNS: (keyof typeof SUGGESTED_QUESTIONS)[][] = [
-  ['처음 만났을 때', '일상', '신앙', '가족'],
-  ['연애', '결혼', '가치관'],
+  ['처음 만났을 때', '일상', '연애'],
+  ['신앙', '결혼', '가족', '가치관'],
 ];
 
 export default function ProfileCardBackTemplate({ oppositeApps }: BackTemplateProps) {
@@ -143,7 +143,7 @@ export default function ProfileCardBackTemplate({ oppositeApps }: BackTemplatePr
               <div className="panel-title">추천 질문</div>
             </div>
 
-            <div className="q-cols q-cols-3">
+            <div className="q-cols">
               {Q_COLUMNS.map((cats, i) => (
                 <div key={i}>
                   {cats.map((cat) => (
