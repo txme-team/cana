@@ -208,28 +208,30 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
             {requestAction === null && (
               <>
                 {/* Primary: 확정 / 반려 */}
-                <button
-                  onClick={() => handleStatusChange('확정')}
-                  disabled={updatingStatus || isConfirmed}
-                  className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${
-                    isConfirmed
-                      ? 'bg-gray-100 text-gray-300 cursor-default'
-                      : 'bg-cana text-white hover:opacity-90 active:scale-[0.98]'
-                  }`}
-                >
-                  확정
-                </button>
-                <button
-                  onClick={() => handleStatusChange('반려')}
-                  disabled={updatingStatus || isRejected}
-                  className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${
-                    isRejected
-                      ? 'bg-gray-100 text-gray-300 cursor-default'
-                      : 'border border-red-200 bg-white text-red-500 hover:bg-red-50 active:scale-[0.98]'
-                  }`}
-                >
-                  반려
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleStatusChange('확정')}
+                    disabled={updatingStatus || isConfirmed}
+                    className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
+                      isConfirmed
+                        ? 'bg-gray-100 text-gray-300 cursor-default'
+                        : 'bg-cana text-white hover:opacity-90 active:scale-[0.98]'
+                    }`}
+                  >
+                    확정
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange('반려')}
+                    disabled={updatingStatus || isRejected}
+                    className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
+                      isRejected
+                        ? 'bg-gray-100 text-gray-300 cursor-default'
+                        : 'border border-red-200 bg-white text-red-500 hover:bg-red-50 active:scale-[0.98]'
+                    }`}
+                  >
+                    반려
+                  </button>
+                </div>
 
                 {/* Secondary: 부가 액션 */}
                 {hasEventContext && (

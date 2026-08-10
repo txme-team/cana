@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import type { Profile } from '@/lib/types';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
@@ -41,11 +42,11 @@ function Chips({ label, items }: { label: string; items?: string[] }) {
   );
 }
 
-function Sec({ title }: { title: string }) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400">{title}</span>
-      <div className="h-px flex-1 bg-gray-100" />
+    <div className="rounded-2xl border border-gray-100 bg-white p-5">
+      <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-gray-400">{title}</p>
+      <div className="flex flex-col gap-5">{children}</div>
     </div>
   );
 }
@@ -111,55 +112,57 @@ export default function AdminProfileDetail({ profile: p }: { profile: Profile })
   const answeredEssays = ESSAY_META.filter((m) => essays[m.field]?.trim());
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
 
       {/* 기본 정보 — 좌 패널 중복 항목(년생·MBTI·연락처) 제외 */}
-      <Sec title="기본 정보" />
-      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-        <F label="키"        value={p.height ? `${p.height} cm` : null} />
-        <F label="학력"      value={p.education} />
-        <F label="직업"      value={p.job} />
-        <F label="직장"      value={p.company_name} />
-        <F label="근무지"    value={p.workplace} />
-        <F label="거주지"    value={p.residence} />
-        <F label="거주 형태" value={p.living_with ? LIVING_WITH[p.living_with] : null} />
-      </div>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-        <FBadge label="음주" value={p.drinking} />
-        <FBadge label="흡연" value={p.smoking} />
-      </div>
-      <Chips label="취미 / 관심사" items={p.hobbies} />
-      <Chips label="성격 / 스타일" items={p.personality} />
+      <Section title="기본 정보">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+          <F label="키"        value={p.height ? `${p.height} cm` : null} />
+          <F label="학력"      value={p.education} />
+          <F label="직업"      value={p.job} />
+          <F label="직장"      value={p.company_name} />
+          <F label="근무지"    value={p.workplace} />
+          <F label="거주지"    value={p.residence} />
+          <F label="거주 형태" value={p.living_with ? LIVING_WITH[p.living_with] : null} />
+        </div>
+        <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+          <FBadge label="음주" value={p.drinking} />
+          <FBadge label="흡연" value={p.smoking} />
+        </div>
+        <Chips label="취미 / 관심사" items={p.hobbies} />
+        <Chips label="성격 / 스타일" items={p.personality} />
+      </Section>
 
       {/* 신앙 */}
-      <Sec title="신앙" />
-      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-        <F label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : null} />
-        <F label="교회명"    value={p.church_name} />
-        <F label="신앙 단계" value={p.faith_level} />
-      </div>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-        <FBadge label="주일 예배"   value={p.worship_frequency} />
-        <FBadge label="섬기는 사역" value={p.ministry} />
-      </div>
+      <Section title="신앙">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+          <F label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : null} />
+          <F label="교회명"    value={p.church_name} />
+          <F label="신앙 단계" value={p.faith_level} />
+        </div>
+        <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+          <FBadge label="주일 예배"   value={p.worship_frequency} />
+          <FBadge label="섬기는 사역" value={p.ministry} />
+        </div>
+      </Section>
 
       {/* 사전 정보 */}
-      <Sec title="사전 정보" />
-      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-        <FBadge label="연락 선호도"   value={p.contact_preference} />
-        <FBadge label="데이트 빈도"   value={p.date_frequency} />
-        <FBadge label="결혼관"        value={p.marriage_view} />
-        <FBadge label="갈등 해결"     value={p.conflict_resolution} />
-        <FBadge label="쉬는 날"       value={p.day_off_style} />
-        <FBadge label="반려동물"      value={p.pet} />
-        <FBadge label="이성 친구"     value={p.opposite_friends} />
-        <FBadge label="데이트 스타일" value={p.date_style} />
-      </div>
+      <Section title="사전 정보">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+          <FBadge label="연락 선호도"   value={p.contact_preference} />
+          <FBadge label="데이트 빈도"   value={p.date_frequency} />
+          <FBadge label="결혼관"        value={p.marriage_view} />
+          <FBadge label="갈등 해결"     value={p.conflict_resolution} />
+          <FBadge label="쉬는 날"       value={p.day_off_style} />
+          <FBadge label="반려동물"      value={p.pet} />
+          <FBadge label="이성 친구"     value={p.opposite_friends} />
+          <FBadge label="데이트 스타일" value={p.date_style} />
+        </div>
+      </Section>
 
       {/* Q&A */}
       {answeredEssays.length > 0 && (
-        <>
-          <Sec title="Q&A" />
+        <Section title="Q&A">
           <div className="flex flex-col gap-3">
             {answeredEssays.map((e) => (
               <div key={e.field} className="rounded-lg bg-gray-50 px-3 py-2.5">
@@ -168,34 +171,36 @@ export default function AdminProfileDetail({ profile: p }: { profile: Profile })
               </div>
             ))}
           </div>
-        </>
+        </Section>
       )}
 
       {/* 인증 서류 */}
-      <Sec title="인증 서류" />
-      <div className="grid grid-cols-3 gap-3">
-        <div>
-          <p className="mb-1 text-[10px] text-gray-400">프로필 사진</p>
-          <FileLink url={p.photo_urls?.[0]} label="사진 보기" />
+      <Section title="인증 서류">
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <p className="mb-1 text-[10px] text-gray-400">프로필 사진</p>
+            <FileLink url={p.photo_urls?.[0]} label="사진 보기" />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] text-gray-400">직장 인증</p>
+            <FileLink url={p.job_cert_url} label="파일 보기" />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] text-gray-400">교인 인증</p>
+            <FileLink url={p.bulletin_url} label="파일 보기" />
+          </div>
         </div>
-        <div>
-          <p className="mb-1 text-[10px] text-gray-400">직장 인증</p>
-          <FileLink url={p.job_cert_url} label="파일 보기" />
-        </div>
-        <div>
-          <p className="mb-1 text-[10px] text-gray-400">교인 인증</p>
-          <FileLink url={p.bulletin_url} label="파일 보기" />
-        </div>
-      </div>
+      </Section>
 
       {/* 동의 항목 */}
-      <Sec title="동의 항목" />
-      <div className="flex flex-wrap gap-x-5 gap-y-2">
-        <Consent agreed={p.agree_privacy}       label="개인정보 수집 및 이용 (필수)" />
-        <Consent agreed={p.agree_attendance}    label="참여 시 주의 사항 확인 (필수)" />
-        <Consent agreed={p.agree_profile_share} label="자기소개 파일 전달 (선택)" />
-        <Consent agreed={p.agree_instagram}     label="인스타그램 자기 PR (선택)" />
-      </div>
+      <Section title="동의 항목">
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <Consent agreed={p.agree_privacy}       label="개인정보 수집 및 이용 (필수)" />
+          <Consent agreed={p.agree_attendance}    label="참여 시 주의 사항 확인 (필수)" />
+          <Consent agreed={p.agree_profile_share} label="자기소개 파일 전달 (선택)" />
+          <Consent agreed={p.agree_instagram}     label="인스타그램 자기 PR (선택)" />
+        </div>
+      </Section>
 
     </div>
   );
