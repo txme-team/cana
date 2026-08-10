@@ -166,34 +166,32 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
             )}
 
             {/* 이름 - 년생 - 상태 뱃지 */}
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex items-center gap-2">
-                <p className="text-base font-semibold text-gray-900">{pr.nickname}</p>
-                <span className="text-sm text-gray-400">{birthYear}년생</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-semibold text-gray-900">{pr.nickname}</p>
+              <span className="text-sm text-gray-400">{birthYear}년생</span>
               <StatusBadge status={status} />
             </div>
 
             {/* 핵심 정보 */}
             <div className="w-full space-y-2.5">
-              <div>
-                <p className="mb-0.5 text-[10px] text-gray-400">성별</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] text-gray-400">성별</p>
                 <p className="text-sm text-gray-800">{pr.gender === 'male' ? '남성' : '여성'}</p>
               </div>
-              <div>
-                <p className="mb-0.5 text-[10px] text-gray-400">MBTI</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] text-gray-400">MBTI</p>
                 <p className="text-sm text-gray-800">{pr.mbti ?? '—'}</p>
               </div>
               {pr.phone && (
-                <div>
-                  <p className="mb-0.5 text-[10px] text-gray-400">연락처</p>
-                  <p className="font-mono text-sm text-gray-800">{pr.phone}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] text-gray-400 shrink-0">연락처</p>
+                  <p className="font-mono text-sm text-gray-800 text-right">{pr.phone}</p>
                 </div>
               )}
               {pr.church_name && (
-                <div>
-                  <p className="mb-0.5 text-[10px] text-gray-400">교회</p>
-                  <p className="text-sm text-gray-800">{pr.church_name}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] text-gray-400 shrink-0">교회</p>
+                  <p className="text-sm text-gray-800 text-right">{pr.church_name}</p>
                 </div>
               )}
             </div>
