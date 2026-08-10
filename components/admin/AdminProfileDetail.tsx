@@ -115,7 +115,7 @@ export default function AdminProfileDetail({ profile: p }: { profile: Profile })
   const birthYear = p.birth_year < 100 ? 1900 + p.birth_year : p.birth_year;
   const LIVING_WITH: Record<string, string> = { family: '가족과', alone: '혼자', other: '기타' };
   const essays = (p.profile_essays ?? {}) as Record<string, string>;
-  const answeredEssays = ESSAY_META.filter((m) => essays[m.field]?.trim()).slice(0, 3);
+  const answeredEssays = ESSAY_META.filter((m) => essays[m.field]?.trim());
 
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(false);

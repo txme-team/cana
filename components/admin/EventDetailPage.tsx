@@ -155,17 +155,16 @@ function ParticipantTable({
       {participants.length === 0 ? (
         <p className="px-1 text-base text-gray-400">확정된 참여자가 없어요.</p>
       ) : (
-        <div className="overflow-x-auto overflow-hidden rounded-xl border border-gray-100 bg-white">
-          <table className="w-full text-base">
+        <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-sm text-gray-400">
-                <th className="px-4 py-2.5 text-left font-medium">이름</th>
-                <th className="px-4 py-2.5 text-left font-medium">출생연도</th>
-                <th className="px-4 py-2.5 text-left font-medium">연락처</th>
-                <th className="px-4 py-2.5 text-left font-medium">직업</th>
-                <th className="px-4 py-2.5 text-left font-medium">MBTI</th>
-                <th className="px-4 py-2.5 text-left font-medium">직장</th>
-                <th className="px-4 py-2.5 text-left font-medium">교회</th>
+              <tr className="border-b border-gray-100 bg-gray-50 text-xs text-gray-400">
+                <th className="px-3 py-2.5 text-left font-medium w-20">이름</th>
+                <th className="px-3 py-2.5 text-left font-medium w-16">출생연도</th>
+                <th className="px-3 py-2.5 text-left font-medium w-28">연락처</th>
+                <th className="px-3 py-2.5 text-left font-medium w-4">MBTI</th>
+                <th className="px-3 py-2.5 text-left font-medium">직업 / 직장</th>
+                <th className="px-3 py-2.5 text-left font-medium">교회</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -175,25 +174,26 @@ function ParticipantTable({
                 const hasDupChurch = !!(pr.church_name && dupChurches.has(pr.church_name));
                 const hasCrossCompany = !!(pr.company_name && crossCompanies.has(pr.company_name));
                 const hasCrossChurch = !!(pr.church_name && crossChurches.has(pr.church_name));
+                const companyColor = hasDupCompany ? 'text-amber-600 font-medium' : hasCrossCompany ? 'text-blue-500 font-medium' : 'text-gray-400';
                 return (
                   <tr
                     key={p.id}
                     className="cursor-pointer hover:bg-gray-50/80 transition"
                     onClick={() => onRowClick(p)}
                   >
-                    <td className="px-4 py-3 font-medium text-gray-800">{pr.nickname}</td>
-                    <td className="px-4 py-3 text-gray-500">{pr.birth_year}</td>
-                    <td className="px-4 py-3 text-gray-500 font-mono text-sm">{pr.phone || '-'}</td>
-                    <td className="px-4 py-3 text-gray-500">{pr.job || '-'}</td>
-                    <td className="px-4 py-3 text-gray-500">{pr.mbti || '-'}</td>
-                    <td className={`px-4 py-3 ${hasDupCompany ? 'font-medium text-amber-600' : hasCrossCompany ? 'font-medium text-blue-500' : 'text-gray-500'}`}>
-                      <span className="flex items-center gap-1">
+                    <td className="px-3 py-3 font-medium text-gray-800">{pr.nickname}</td>
+                    <td className="px-3 py-3 text-gray-500">{pr.birth_year}</td>
+                    <td className="px-3 py-3 text-gray-500 font-mono text-xs">{pr.phone || '-'}</td>
+                    <td className="px-3 py-3 text-gray-500">{pr.mbti || '-'}</td>
+                    <td className="px-3 py-3">
+                      <div className="text-gray-700">{pr.job || '-'}</div>
+                      <div className={`flex items-center gap-1 text-xs mt-0.5 ${companyColor}`}>
                         {pr.company_name || '-'}
                         {hasDupCompany && <WarnIcon />}
                         {!hasDupCompany && hasCrossCompany && <CrossIcon />}
-                      </span>
+                      </div>
                     </td>
-                    <td className={`px-4 py-3 ${hasDupChurch ? 'font-medium text-amber-600' : hasCrossChurch ? 'font-medium text-blue-500' : 'text-gray-500'}`}>
+                    <td className={`px-3 py-3 ${hasDupChurch ? 'font-medium text-amber-600' : hasCrossChurch ? 'font-medium text-blue-500' : 'text-gray-500'}`}>
                       <span className="flex items-center gap-1">
                         {pr.church_name || '-'}
                         {hasDupChurch && <WarnIcon />}
