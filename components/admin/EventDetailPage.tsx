@@ -160,11 +160,11 @@ function ParticipantTable({
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-xs text-gray-400">
                 <th className="px-3 py-2.5 text-left font-medium w-20">이름</th>
-                <th className="px-3 py-2.5 text-left font-medium w-16">출생연도</th>
-                <th className="px-3 py-2.5 text-left font-medium w-28">연락처</th>
+                <th className="px-3 py-2.5 text-left font-medium w-14">나이</th>
+                <th className="px-3 py-2.5 text-left font-medium w-36">연락처</th>
                 <th className="px-3 py-2.5 text-left font-medium w-4">MBTI</th>
-                <th className="px-3 py-2.5 text-left font-medium">직업 / 직장</th>
-                <th className="px-3 py-2.5 text-left font-medium">교회</th>
+                <th className="px-3 py-2.5 text-left font-medium w-36">직업 / 직장</th>
+                <th className="px-3 py-2.5 text-left font-medium w-24">교회</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -182,7 +182,7 @@ function ParticipantTable({
                     onClick={() => onRowClick(p)}
                   >
                     <td className="px-3 py-3 font-medium text-gray-800">{pr.nickname}</td>
-                    <td className="px-3 py-3 text-gray-500">{pr.birth_year}</td>
+                    <td className="px-3 py-3 text-gray-500">{pr.birth_year ? `${2026 - pr.birth_year}세` : '-'}</td>
                     <td className="px-3 py-3 text-gray-500 font-mono text-xs">{pr.phone || '-'}</td>
                     <td className="px-3 py-3 text-gray-500">{pr.mbti || '-'}</td>
                     <td className="px-3 py-3">

@@ -196,6 +196,7 @@ export const PRINT_CARD_STYLES = `
   }
 
   .q-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; flex: 1; }
+  .q-cols-3 { grid-template-columns: 1fr 1fr 1fr; gap: 0 16px; }
   .q-group { margin-bottom: 10px; }
   .q-group-label {
     font-size: 9px; font-weight: 600; letter-spacing: 0.2em; color: var(--rose);
@@ -203,10 +204,10 @@ export const PRINT_CARD_STYLES = `
     display: flex; align-items: center; gap: 5px;
   }
   .q-group-label::after { content: ''; flex: 1; height: 0.5px; background: var(--rose-lt); }
-  .q-row { display: flex; align-items: flex-start; gap: 7px; padding: 4.5px 0; border-bottom: 0.5px solid #f2e6ea; }
+  .q-row { display: flex; align-items: flex-start; gap: 6px; padding: 3.5px 0; border-bottom: 0.5px solid #f2e6ea; }
   .q-row:last-child { border-bottom: none; }
   .q-dot { width: 3.5px; height: 3.5px; background: var(--rose-mid); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
-  .q-txt { font-size: 10px; color: var(--ink); line-height: 1.5; letter-spacing: -0.01em; word-break: keep-all; }
+  .q-txt { font-size: 9px; color: var(--ink); line-height: 1.45; letter-spacing: -0.01em; word-break: keep-all; }
   /* 메모 테이블 */
   .memo-section { flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
   .memo-table { width: 100%; border-collapse: collapse; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
@@ -239,13 +240,36 @@ export const PRINT_CARD_STYLES = `
   }
 
   .opp-row {
-    padding: 6px 0;
+    padding: 8px 0;
     border-bottom: 0.5px solid var(--rule);
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    align-items: flex-start;
+    gap: 10px;
   }
   .opp-row:last-child { border-bottom: none; }
+
+  .opp-no-badge {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rose);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .opp-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 
   .opp-line1 {
     display: flex;
@@ -254,29 +278,13 @@ export const PRINT_CARD_STYLES = `
     gap: 4px;
   }
 
-  .opp-no {
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--rose);
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-  }
-
-  .opp-dot-sep {
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: var(--rose-lt);
-    flex-shrink: 0;
-  }
-
   .opp-chip {
-    font-size: 8.5px;
+    font-size: 9.5px;
     color: var(--ink-2);
     background: var(--rose-bg);
     border: 0.5px solid var(--rose-lt);
     border-radius: 20px;
-    padding: 1px 5px;
+    padding: 1.5px 6px;
     white-space: nowrap;
   }
 
@@ -285,11 +293,10 @@ export const PRINT_CARD_STYLES = `
     align-items: center;
     flex-wrap: wrap;
     gap: 4px;
-    padding-left: 2px;
   }
 
   .opp-detail {
-    font-size: 8px;
+    font-size: 9px;
     color: var(--ink-3);
     white-space: nowrap;
   }
@@ -300,12 +307,21 @@ export const PRINT_CARD_STYLES = `
   }
 
   .opp-tag {
-    font-size: 8px;
+    font-size: 8.5px;
     color: var(--ink-3);
     background: var(--warm);
     border-radius: 20px;
-    padding: 0.5px 4px;
+    padding: 1px 5px;
     white-space: nowrap;
+  }
+
+  .opp-promise {
+    font-size: 9.5px;
+    color: var(--ink);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* 인쇄 */
