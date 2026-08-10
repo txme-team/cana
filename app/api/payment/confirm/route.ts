@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       // 취소 후 재신청 — UNIQUE 제약으로 insert 불가, 기존 행 업데이트
       await supa.from('applications').update({ status: '검토중', ...paymentFields }).eq('id', existing.id);
     } else {
-      const { data: application, error: appError } = await supa
+      const { error: appError } = await supa
         .from('applications')
         .insert({ profile_id: profile.id, event_id: eventId, status: '검토중', ...paymentFields })
         .select('id').single() as { data: { id: string } | null; error: { message: string } | null };
