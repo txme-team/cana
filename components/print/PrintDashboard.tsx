@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { ApplicationWithProfile, ProfileStatus } from '@/lib/types';
 import StatusBadge from '@/components/admin/StatusBadge';
 import ProfileCardTemplate from './ProfileCardTemplate';
+import ProfileCardBackTemplate from './ProfileCardBackTemplate';
 import { PRINT_CARD_STYLES } from './printStyles';
 
 const FILTERS: { value: ProfileStatus | 'default'; label: string; query: string }[] = [
@@ -60,9 +61,24 @@ export default function PrintDashboard({ list, eventMap, currentStatus }: PrintD
 
     const cardsHtml = renderToStaticMarkup(
       <>
-        {apps.map((app) => (
-          <ProfileCardTemplate key={app.id} profile={app.profiles} />
-        ))}
+        {apps.map((app) => {
+          // 동일 이벤트의 이성 참석자 (display_no 순 정렬)
+          const oppositeApps = list
+            .filter(
+              (a) =>
+                a.event_id === app.event_id &&
+                a.profiles?.gender !== app.profiles?.gender &&
+                a.profiles != null,
+            )
+            .sort((a, b) => (a.display_no ?? 99) - (b.display_no ?? 99));
+
+          return (
+            <>
+              <ProfileCardTemplate key={`front-${app.id}`} profile={app.profiles} />
+              <ProfileCardBackTemplate key={`back-${app.id}`} oppositeApps={oppositeApps} />
+            </>
+          );
+        })}
       </>
     );
 
@@ -246,11 +262,30 @@ export default function PrintDashboard({ list, eventMap, currentStatus }: PrintD
                 </button>
               </div>
             </div>
-            <div style={{ width: '673px', height: '476px', overflow: 'hidden' }}>
-              <div style={{ width: '297mm', height: '210mm', transform: 'scale(0.6)', transformOrigin: 'top left' }}>
-                <ProfileCardTemplate profile={previewApp.profiles} />
-              </div>
-            </div>
+            {(() => {
+              const oppositeApps = list
+                .filter(
+                  (a) =>
+                    a.event_id === previewApp.event_id &&
+                    a.profiles?.gender !== previewApp.profiles?.gender &&
+                    a.profiles != null,
+                )
+                .sort((a, b) => (a.display_no ?? 99) - (b.display_no ?? 99));
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ width: '673px', height: '476px', overflow: 'hidden' }}>
+                    <div style={{ width: '297mm', height: '210mm', transform: 'scale(0.6)', transformOrigin: 'top left' }}>
+                      <ProfileCardTemplate profile={previewApp.profiles} />
+                    </div>
+                  </div>
+                  <div style={{ width: '673px', height: '476px', overflow: 'hidden' }}>
+                    <div style={{ width: '297mm', height: '210mm', transform: 'scale(0.6)', transformOrigin: 'top left' }}>
+                      <ProfileCardBackTemplate oppositeApps={oppositeApps} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

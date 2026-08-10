@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import type { Profile } from '@/lib/types';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
@@ -52,10 +51,8 @@ function Sec({ title }: { title: string }) {
 }
 
 function FileLink({ url, label }: { url?: string; label: string }) {
-  const [loading, setLoading] = useState(false);
   if (!url) return <span className="text-sm text-gray-300">미제출</span>;
   const handleOpen = async () => {
-    setLoading(true);
     try {
       const res = await fetch(`/api/admin/signed-url?url=${encodeURIComponent(url)}`);
       const { signedUrl, error } = await res.json();
@@ -63,17 +60,14 @@ function FileLink({ url, label }: { url?: string; label: string }) {
       window.open(signedUrl, '_blank', 'noopener,noreferrer');
     } catch {
       alert('파일을 불러올 수 없어요.');
-    } finally {
-      setLoading(false);
     }
   };
   return (
     <button
       onClick={handleOpen}
-      disabled={loading}
-      className="text-sm font-medium text-cana underline underline-offset-2 disabled:opacity-50"
+      className="text-sm font-medium text-cana underline underline-offset-2"
     >
-      {loading ? '불러오는 중...' : `${label} →`}
+      {label} →
     </button>
   );
 }
@@ -87,7 +81,7 @@ function Consent({ agreed, label }: { agreed?: boolean; label: string }) {
   );
 }
 
-// ─── 에세이 메타 (ProfileCardTemplate과 동일) ─────────────────────────────────
+// ─── 에세이 메타 ──────────────────────────────────────────────────────────────
 
 const ESSAY_META: { field: string; label: string }[] = [
   { field: 'prayerRequest',       label: '요즘 나의 기도제목은요' },
@@ -112,166 +106,97 @@ const ESSAY_META: { field: string; label: string }[] = [
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 
 export default function AdminProfileDetail({ profile: p }: { profile: Profile }) {
-  const birthYear = p.birth_year < 100 ? 1900 + p.birth_year : p.birth_year;
   const LIVING_WITH: Record<string, string> = { family: '가족과', alone: '혼자', other: '기타' };
   const essays = (p.profile_essays ?? {}) as Record<string, string>;
   const answeredEssays = ESSAY_META.filter((m) => essays[m.field]?.trim());
 
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [photoLoading, setPhotoLoading] = useState(false);
-
-  // 프로필 사진 미리 로드
-  useEffect(() => {
-    const raw = p.photo_urls?.[0];
-    if (!raw) return;
-    setPhotoLoading(true);
-    fetch(`/api/admin/signed-url?url=${encodeURIComponent(raw)}`)
-      .then((r) => r.json())
-      .then(({ signedUrl }) => { if (signedUrl) setPhotoUrl(signedUrl); })
-      .catch(() => {})
-      .finally(() => setPhotoLoading(false));
-  }, [p.photo_urls]);
-
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
 
-      {/* ── 프로필 헤더 영역 ── */}
-      <div className="flex gap-5 rounded-xl bg-gray-50 p-4">
-        {/* 사진 */}
-        <div className="flex-shrink-0">
-          {photoLoading ? (
-            <div className="h-24 w-24 rounded-xl bg-gray-200 animate-pulse" />
-          ) : photoUrl ? (
-            <img
-              src={photoUrl}
-              alt={p.nickname}
-              className="h-24 w-24 rounded-xl object-cover border border-gray-200"
-            />
-          ) : (
-            <div className="h-24 w-24 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 text-2xl">
-              👤
-            </div>
-          )}
-        </div>
-        {/* 핵심 정보 */}
-        <div className="flex flex-1 flex-col justify-center gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-lg font-semibold text-gray-900">{p.nickname}</span>
-            <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600">
-              {p.gender === 'male' ? '남성' : '여성'}
-            </span>
-            {p.mbti && (
-              <span className="rounded-full bg-cana/10 px-2 py-0.5 text-xs font-medium text-cana">{p.mbti}</span>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
-            <span>{birthYear}년생</span>
-            {p.height && <span>{p.height} cm</span>}
-            {p.job && <span>{p.job}</span>}
-            {p.residence && <span>{p.residence}</span>}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
-            {p.phone && <span className="font-mono">{p.phone}</span>}
-            {p.church_name && <span>⛪ {p.church_name}</span>}
-          </div>
-        </div>
+      {/* 기본 정보 — 좌 패널 중복 항목(년생·MBTI·연락처) 제외 */}
+      <Sec title="기본 정보" />
+      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+        <F label="키"        value={p.height ? `${p.height} cm` : null} />
+        <F label="학력"      value={p.education} />
+        <F label="직업"      value={p.job} />
+        <F label="직장"      value={p.company_name} />
+        <F label="근무지"    value={p.workplace} />
+        <F label="거주지"    value={p.residence} />
+        <F label="거주 형태" value={p.living_with ? LIVING_WITH[p.living_with] : null} />
+      </div>
+      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+        <FBadge label="음주" value={p.drinking} />
+        <FBadge label="흡연" value={p.smoking} />
+      </div>
+      <Chips label="취미 / 관심사" items={p.hobbies} />
+      <Chips label="성격 / 스타일" items={p.personality} />
+
+      {/* 신앙 */}
+      <Sec title="신앙" />
+      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+        <F label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : null} />
+        <F label="교회명"    value={p.church_name} />
+        <F label="신앙 단계" value={p.faith_level} />
+      </div>
+      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+        <FBadge label="주일 예배"   value={p.worship_frequency} />
+        <FBadge label="섬기는 사역" value={p.ministry} />
       </div>
 
-      {/* ── 2컬럼 본문 ── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* 사전 정보 */}
+      <Sec title="사전 정보" />
+      <div className="grid grid-cols-2 gap-x-5 gap-y-3">
+        <FBadge label="연락 선호도"   value={p.contact_preference} />
+        <FBadge label="데이트 빈도"   value={p.date_frequency} />
+        <FBadge label="결혼관"        value={p.marriage_view} />
+        <FBadge label="갈등 해결"     value={p.conflict_resolution} />
+        <FBadge label="쉬는 날"       value={p.day_off_style} />
+        <FBadge label="반려동물"      value={p.pet} />
+        <FBadge label="이성 친구"     value={p.opposite_friends} />
+        <FBadge label="데이트 스타일" value={p.date_style} />
+      </div>
 
-        {/* 왼쪽 컬럼 */}
-        <div className="flex flex-col gap-5">
-          <Sec title="기본 정보" />
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-            <F label="출생연도"  value={`${birthYear}년`} />
-            <F label="MBTI"      value={p.mbti} />
-            <F label="키"        value={p.height ? `${p.height} cm` : null} />
-            <F label="학력"      value={p.education} />
-            <F label="직업"      value={p.job} />
-            <F label="회사"      value={p.company_name} />
-            <F label="근무지"    value={p.workplace} />
-            <F label="연락처"    value={p.phone} />
-            <F label="거주지"    value={p.residence} />
-            <F label="거주 형태" value={p.living_with ? LIVING_WITH[p.living_with] : null} />
-          </div>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-            <FBadge label="음주" value={p.drinking} />
-            <FBadge label="흡연" value={p.smoking} />
-          </div>
-          <Chips label="취미 / 관심사" items={p.hobbies} />
-          <Chips label="성격 / 스타일" items={p.personality} />
-
-          {/* 신앙 */}
-          <Sec title="신앙" />
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-            <F label="신앙 연수" value={p.faith_years ? `${p.faith_years}년` : null} />
-            <F label="교회명"    value={p.church_name} />
-            <F label="신앙 단계" value={p.faith_level} />
-          </div>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-            <FBadge label="주일 예배"   value={p.worship_frequency} />
-            <FBadge label="섬기는 사역" value={p.ministry} />
-          </div>
-        </div>
-
-        {/* 오른쪽 컬럼 */}
-        <div className="flex flex-col gap-5">
-          <Sec title="사전 정보" />
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-            <FBadge label="연락 선호도"   value={p.contact_preference} />
-            <FBadge label="데이트 빈도"   value={p.date_frequency} />
-            <FBadge label="결혼관"        value={p.marriage_view} />
-            <FBadge label="갈등 해결"     value={p.conflict_resolution} />
-            <FBadge label="쉬는 날"       value={p.day_off_style} />
-            <FBadge label="반려동물"      value={p.pet} />
-            <FBadge label="이성 친구"     value={p.opposite_friends} />
-            <FBadge label="데이트 스타일" value={p.date_style} />
-          </div>
-
-          {/* Q&A — 최대 3개 */}
-          {answeredEssays.length > 0 && (
-            <>
-              <Sec title="Q&A" />
-              <div className="flex flex-col gap-3">
-                {answeredEssays.map((e) => (
-                  <div key={e.field} className="rounded-lg bg-gray-50 px-3 py-2.5">
-                    <p className="mb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">{e.label}</p>
-                    <p className="text-sm text-gray-800 leading-relaxed">{essays[e.field]}</p>
-                  </div>
-                ))}
+      {/* Q&A */}
+      {answeredEssays.length > 0 && (
+        <>
+          <Sec title="Q&A" />
+          <div className="flex flex-col gap-3">
+            {answeredEssays.map((e) => (
+              <div key={e.field} className="rounded-lg bg-gray-50 px-3 py-2.5">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">{e.label}</p>
+                <p className="text-sm leading-relaxed text-gray-800">{essays[e.field]}</p>
               </div>
-            </>
-          )}
-
-          {/* 인증 서류 */}
-          <Sec title="인증 서류" />
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <p className="mb-1 text-[10px] text-gray-400">프로필 사진</p>
-              <FileLink url={p.photo_urls?.[0]} label="사진 보기" />
-            </div>
-            <div>
-              <p className="mb-1 text-[10px] text-gray-400">직장 인증</p>
-              <FileLink url={p.job_cert_url} label="파일 보기" />
-            </div>
-            <div>
-              <p className="mb-1 text-[10px] text-gray-400">교인 인증</p>
-              <FileLink url={p.bulletin_url} label="파일 보기" />
-            </div>
+            ))}
           </div>
+        </>
+      )}
 
-          {/* 동의 항목 */}
-          <Sec title="동의 항목" />
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <Consent agreed={p.agree_privacy}       label="개인정보 수집 및 이용 (필수)" />
-            <Consent agreed={p.agree_attendance}    label="참여 시 주의 사항 확인 (필수)" />
-            <Consent agreed={p.agree_profile_share} label="자기소개 파일 전달 (선택)" />
-            <Consent agreed={p.agree_instagram}     label="인스타그램 자기 PR (선택)" />
-          </div>
+      {/* 인증 서류 */}
+      <Sec title="인증 서류" />
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <p className="mb-1 text-[10px] text-gray-400">프로필 사진</p>
+          <FileLink url={p.photo_urls?.[0]} label="사진 보기" />
         </div>
-
+        <div>
+          <p className="mb-1 text-[10px] text-gray-400">직장 인증</p>
+          <FileLink url={p.job_cert_url} label="파일 보기" />
+        </div>
+        <div>
+          <p className="mb-1 text-[10px] text-gray-400">교인 인증</p>
+          <FileLink url={p.bulletin_url} label="파일 보기" />
+        </div>
       </div>
+
+      {/* 동의 항목 */}
+      <Sec title="동의 항목" />
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
+        <Consent agreed={p.agree_privacy}       label="개인정보 수집 및 이용 (필수)" />
+        <Consent agreed={p.agree_attendance}    label="참여 시 주의 사항 확인 (필수)" />
+        <Consent agreed={p.agree_profile_share} label="자기소개 파일 전달 (선택)" />
+        <Consent agreed={p.agree_instagram}     label="인스타그램 자기 PR (선택)" />
+      </div>
+
     </div>
   );
 }

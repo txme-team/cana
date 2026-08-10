@@ -2,18 +2,11 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL!;
 
 interface SlackMessage {
   text: string;
-  blocks?: SlackBlock[];
-}
-
-interface SlackBlock {
-  type: string;
-  text?: { type: string; text: string };
-  fields?: { type: string; text: string }[];
+  blocks?: object[];
 }
 
 async function send(payload: SlackMessage) {
   if (!SLACK_WEBHOOK_URL) return;
-
   await fetch(SLACK_WEBHOOK_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -21,63 +14,62 @@ async function send(payload: SlackMessage) {
   });
 }
 
-export async function notifyNewProfile(nickname: string, profileId: string) {
+export interface SlackProfileInfo {
+  nickname: string;
+  birthYear?: number | null;
+  job?: string | null;
+  company?: string | null;
+  eventTitle?: string | null;
+  eventDate?: string | null; // 'YYYY-MM-DD'
+}
+
+function formatEventDate(date?: string | null) {
+  if (!date) return '';
+  // 2026-08-12 → 26-08-12
+  return date.slice(2).replace(/-/g, '-');
+}
+
+function profileBlocks(emoji: string, title: string, info: SlackProfileInfo): object[] {
+  const { nickname, birthYear, job, company, eventTitle, eventDate } = info;
+
+  const birthDisplay = birthYear
+    ? `${String(birthYear < 100 ? 1900 + birthYear : birthYear).slice(2)}년생`
+    : '—';
+
+  const jobLine = [job, company].filter(Boolean).join('\n') || '—';
+
+  const eventLine = eventTitle
+    ? `${eventTitle}${eventDate ? ` (${formatEventDate(eventDate)})` : ''}`
+    : '—';
+
+  return [
+    {
+      type: 'section',
+      text: { type: 'mrkdwn', text: `${emoji} *${title}*` },
+    },
+    {
+      type: 'section',
+      fields: [
+        { type: 'mrkdwn', text: `*이름*\n${nickname}` },
+        { type: 'mrkdwn', text: `*나이*\n${birthDisplay}` },
+        { type: 'mrkdwn', text: `*직업/회사*\n${jobLine}` },
+        { type: 'mrkdwn', text: `*신청 회차*\n${eventLine}` },
+      ],
+    },
+  ];
+}
+
+export async function notifyPaymentComplete(info: SlackProfileInfo) {
   await send({
-    text: `새 프로필 등록: ${nickname}`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*새 프로필이 등록됐어요* :tada:\n이름: *${nickname}*\nID: \`${profileId}\``,
-        },
-      },
-    ],
+    text: `결제 완료: ${info.nickname}`,
+    blocks: profileBlocks('💳', '결제가 완료됐어요', info),
   });
 }
 
-export async function notifyPaymentComplete(nickname: string, applicationId: string) {
+export async function notifyApplicationCancelled(info: SlackProfileInfo) {
   await send({
-    text: `결제 완료: ${nickname}`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*결제가 완료됐어요* :moneybag:\n이름: *${nickname}*\n신청 ID: \`${applicationId}\``,
-        },
-      },
-    ],
-  });
-}
-
-export async function notifyApplicationCancelled(nickname: string, applicationId: string) {
-  await send({
-    text: `신청 취소: ${nickname}`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*신청이 취소됐어요* :x:\n이름: *${nickname}*\n신청 ID: \`${applicationId}\``,
-        },
-      },
-    ],
-  });
-}
-
-export async function notifyNewMeeting(profileNickname: string, meetingId: string) {
-  await send({
-    text: `미팅 카드 생성: ${profileNickname}`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*미팅 카드가 생성됐어요* :handshake:\n프로필: *${profileNickname}*\n미팅 ID: \`${meetingId}\``,
-        },
-      },
-    ],
+    text: `신청 취소: ${info.nickname}`,
+    blocks: profileBlocks('❌', '신청이 취소됐어요', info),
   });
 }
 

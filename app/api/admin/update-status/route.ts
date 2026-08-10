@@ -105,13 +105,13 @@ export async function PATCH(req: NextRequest) {
       const supa = serviceClient as any;
       const { data: cancelledApp } = await supa
         .from('applications')
-        .select('event_id, profiles ( gender, nickname ), events ( title )')
+        .select('event_id, profiles ( gender, nickname, birth_year, job, company_name ), events ( title, event_date )')
         .eq('id', body.id)
         .single() as {
           data: {
             event_id: string;
-            profiles: { gender: string; nickname: string } | null;
-            events: { title: string } | null;
+            profiles: { gender: string; nickname: string; birth_year: number | null; job: string | null; company_name: string | null } | null;
+            events: { title: string; event_date: string } | null;
           } | null;
         };
 
@@ -120,10 +120,14 @@ export async function PATCH(req: NextRequest) {
       const eventTitle = cancelledApp?.events?.title ?? '이벤트';
 
       // 슬랙 알림 — 신청 취소 (어드민 처리)
-      await notifyApplicationCancelled(
-        cancelledApp?.profiles?.nickname ?? '알 수 없음',
-        body.id
-      ).catch(() => {});
+      await notifyApplicationCancelled({
+        nickname: cancelledApp?.profiles?.nickname ?? '알 수 없음',
+        birthYear: cancelledApp?.profiles?.birth_year,
+        job: cancelledApp?.profiles?.job,
+        company: cancelledApp?.profiles?.company_name,
+        eventTitle: cancelledApp?.events?.title,
+        eventDate: cancelledApp?.events?.event_date,
+      }).catch(() => {});
 
       if (gender && eventId) {
         const { data: waitlistEntries } = await supa

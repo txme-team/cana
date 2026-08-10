@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { notifyNewProfile, notifyError } from '@/lib/slack';
+import { notifyError } from '@/lib/slack';
 
 // ─── GET: 결제 전 적격 검사 (레코드 생성 없음) ──────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -160,8 +160,6 @@ export async function POST(req: NextRequest) {
 
     const applicationId = application!.id;
 
-    // ── 슬랙 알림 ──────────────────────────────────────────────────────────────
-    await notifyNewProfile(profile.nickname, applicationId);
 
     return NextResponse.json({ id: applicationId }, { status: 201 });
   } catch (err) {

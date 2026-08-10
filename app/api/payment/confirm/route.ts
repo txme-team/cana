@@ -46,9 +46,9 @@ export async function POST(req: NextRequest) {
 
     // ── 프로필 조회 ──────────────────────────────────────────────────────────
     const { data: profile, error: profileLookupError } = await supa
-      .from('profiles').select('id, nickname, phone')
+      .from('profiles').select('id, nickname, phone, birth_year, job, company_name')
       .eq('user_id', user.id).maybeSingle() as
-      { data: { id: string; nickname: string; phone: string | null } | null; error: { message: string } | null };
+      { data: { id: string; nickname: string; phone: string | null; birth_year: number | null; job: string | null; company_name: string | null } | null; error: { message: string } | null };
 
     if (!profile) {
       console.error('[payment/confirm] profile not found for user_id=', user.id, 'error:', profileLookupError);
@@ -163,11 +163,11 @@ export async function POST(req: NextRequest) {
       console.error('[waitlist restore error]', waitErr);
     }
 
-    // ── 신청 완료 SMS ─────────────────────────────────────────────────────────
+    // ── 신청 완료 SMS + 슬랙 알림 ────────────────────────────────────────────
     try {
       const { data: evtData } = await supa
-        .from('events').select('event_date').eq('id', eventId).maybeSingle() as
-        { data: { event_date: string } | null };
+        .from('events').select('event_date, title').eq('id', eventId).maybeSingle() as
+        { data: { event_date: string; title: string } | null };
 
       if (profile.phone && evtData?.event_date) {
         const displayName = profile.nickname;
@@ -177,12 +177,18 @@ export async function POST(req: NextRequest) {
           await sendSMS([profile.phone], text);
         }
       }
+
+      await notifyPaymentComplete({
+        nickname: profile.nickname,
+        birthYear: profile.birth_year,
+        job: profile.job,
+        company: profile.company_name,
+        eventTitle: evtData?.title,
+        eventDate: evtData?.event_date,
+      }).catch(() => {});
     } catch (smsErr) {
       console.error('[신청완료 SMS error]', smsErr);
     }
-
-    // ── 슬랙 알림 ─────────────────────────────────────────────────────────────
-    await notifyPaymentComplete(profile.nickname, applicationId).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (err) {

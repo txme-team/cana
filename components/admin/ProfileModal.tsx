@@ -18,14 +18,6 @@ interface ProfileModalProps {
   onUpdate?: () => void;
 }
 
-const STATUS_OPTIONS: { value: ProfileStatus; label: string }[] = [
-  { value: '검토중', label: '검토중' },
-  { value: '대기',   label: '대기'   },
-  { value: '확정',   label: '확정'   },
-  { value: '반려',   label: '반려'   },
-  { value: '취소',   label: '취소'   },
-];
-
 function formatEventDate(dateStr: string) {
   const d = new Date(dateStr);
   const days = ['일', '월', '화', '수', '목', '금', '토'];
@@ -35,12 +27,13 @@ function formatEventDate(dateStr: string) {
 export default function ProfileModal({ profile, onClose, onStatusChange, onUpdate }: ProfileModalProps) {
   const pr = profile.profiles;
 
-  const [status, setStatus]               = useState<ProfileStatus>(profile.status ?? '검토중');
+  const [status, setStatus]                 = useState<ProfileStatus>(profile.status ?? '검토중');
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [requestAction, setRequestAction]   = useState<'cancel' | 'reschedule' | null>(null);
-  const [events, setEvents]               = useState<EventOption[]>([]);
-  const [targetEventId, setTargetEventId] = useState('');
-  const [processing, setProcessing]       = useState(false);
+  const [events, setEvents]                 = useState<EventOption[]>([]);
+  const [targetEventId, setTargetEventId]   = useState('');
+  const [processing, setProcessing]         = useState(false);
+  const [photoUrl, setPhotoUrl]             = useState<string | null>(null);
 
   // ESC 닫기
   useEffect(() => {
@@ -55,7 +48,17 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  // 일정 변경 패널 열릴 때 이벤트 목록 로드
+  // 프로필 사진
+  useEffect(() => {
+    const raw = pr?.photo_urls?.[0];
+    if (!raw) return;
+    fetch(`/api/admin/signed-url?url=${encodeURIComponent(raw)}`)
+      .then((r) => r.json())
+      .then(({ signedUrl }) => { if (signedUrl) setPhotoUrl(signedUrl); })
+      .catch(() => {});
+  }, [pr?.photo_urls]);
+
+  // 일정 변경 이벤트 목록
   useEffect(() => {
     if (requestAction !== 'reschedule') return;
     fetch('/api/admin/events')
@@ -66,6 +69,11 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
   }, [requestAction, profile.event_id]);
 
   if (!pr) return null;
+
+  const birthYear = pr.birth_year < 100 ? 1900 + pr.birth_year : pr.birth_year;
+  const hasEventContext = !!profile.event_id;
+  const isConfirmed = status === '확정';
+  const isRejected  = status === '반려';
 
   const handleStatusChange = async (next: ProfileStatus) => {
     setUpdatingStatus(true);
@@ -112,157 +120,222 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
     setProcessing(false);
   };
 
-  const hasEventContext = !!profile.event_id;
-  const birthYear = pr.birth_year < 100 ? 1900 + pr.birth_year : pr.birth_year;
-  const displayYear = String(birthYear).slice(2) + '년생';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm">
-      <div className="relative my-6 w-full max-w-5xl rounded-2xl bg-white shadow-2xl mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-6"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-5xl rounded-2xl bg-white shadow-2xl flex overflow-hidden"
+        style={{ maxHeight: 'calc(100vh - 48px)' }}
+      >
 
-        {/* ── 헤더 ── */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="text-sm font-semibold text-gray-900">{pr.nickname}</span>
-            <span className="text-sm text-gray-400">
-              {pr.gender === 'male' ? '남' : '여'} · {displayYear} · {pr.job ?? '—'}
-            </span>
-            <StatusBadge status={status} />
+        {/* ── 좌 패널 ── */}
+        <div className="w-52 flex-shrink-0 border-r border-gray-100 flex flex-col overflow-y-auto bg-gray-50/40">
+
+          {/* 닫기 버튼 */}
+          <div className="flex justify-end p-3 flex-shrink-0">
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
 
-        {/* ── 액션 바 ── */}
-        <div className="border-b border-gray-100 bg-gray-50 px-6 py-3">
-          {requestAction === null && (
-            <div className="flex items-center gap-3">
-              {/* 상태 변경 */}
-              <select
-                value={status}
-                onChange={(e) => handleStatusChange(e.target.value as ProfileStatus)}
-                disabled={updatingStatus}
-                className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 outline-none focus:border-cana disabled:opacity-60"
-              >
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+          {/* 사진 + 신원 */}
+          <div className="flex flex-col items-center gap-4 px-5 pb-5 flex-shrink-0">
+            {/* 사진 */}
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt={pr.nickname}
+                className="h-28 w-28 rounded-2xl object-cover border border-gray-200 shadow-sm"
+              />
+            ) : (
+              <div className="h-28 w-28 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-300 text-3xl border border-gray-200">
+                👤
+              </div>
+            )}
 
-              {/* 취소·일정변경 버튼 (이벤트 연결된 경우만) */}
-              {hasEventContext && (
-                <div className="ml-auto flex items-center gap-2">
-                  <button
-                    onClick={() => setRequestAction('reschedule')}
-                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 3M21 7.5H7.5" />
-                    </svg>
-                    일정 변경
-                  </button>
-                  <button
-                    onClick={() => setRequestAction('cancel')}
-                    className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm text-red-500 transition hover:bg-red-50"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    취소 처리
-                  </button>
+            {/* 이름 */}
+            <div className="text-center">
+              <p className="text-base font-semibold text-gray-900">{pr.nickname}</p>
+              <div className="mt-1.5 flex items-center justify-center gap-1.5 flex-wrap">
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[11px] text-gray-600">
+                  {pr.gender === 'male' ? '남성' : '여성'}
+                </span>
+                {pr.mbti && (
+                  <span className="rounded-full bg-cana/10 px-2 py-0.5 text-[11px] font-medium text-cana">
+                    {pr.mbti}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* 핵심 정보 */}
+            <div className="w-full space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-400">년생</span>
+                <span className="text-gray-700 font-medium">{birthYear}년</span>
+              </div>
+              {pr.phone && (
+                <div className="flex justify-between text-xs gap-2">
+                  <span className="text-gray-400 shrink-0">연락처</span>
+                  <span className="font-mono text-gray-700 text-right">{pr.phone}</span>
+                </div>
+              )}
+              {pr.church_name && (
+                <div className="flex justify-between text-xs gap-2">
+                  <span className="text-gray-400 shrink-0">교회</span>
+                  <span className="text-gray-700 text-right">{pr.church_name}</span>
                 </div>
               )}
             </div>
-          )}
 
-          {/* 취소 확인 */}
-          {requestAction === 'cancel' && (
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-800">취소 처리하시겠어요?</p>
-                <p className="text-xs text-gray-400 mt-0.5">상태가 <span className="font-medium text-gray-600">취소</span>로 변경되며 해당 이벤트 명단에서 제외돼요.</p>
-              </div>
-              <div className="flex shrink-0 gap-2">
+            {/* 현재 상태 */}
+            <div className="w-full">
+              <StatusBadge status={status} />
+            </div>
+          </div>
+
+          {/* 구분선 */}
+          <div className="mx-4 border-t border-gray-200 flex-shrink-0" />
+
+          {/* ── CTA 영역 ── */}
+          <div className="flex flex-col gap-2 p-4 flex-shrink-0">
+
+            {requestAction === null && (
+              <>
+                {/* Primary: 확정 / 반려 */}
                 <button
-                  onClick={() => setRequestAction(null)}
-                  disabled={processing}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100 disabled:opacity-50"
+                  onClick={() => handleStatusChange('확정')}
+                  disabled={updatingStatus || isConfirmed}
+                  className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${
+                    isConfirmed
+                      ? 'bg-gray-100 text-gray-300 cursor-default'
+                      : 'bg-cana text-white hover:opacity-90 active:scale-[0.98]'
+                  }`}
                 >
-                  돌아가기
+                  확정
                 </button>
+                <button
+                  onClick={() => handleStatusChange('반려')}
+                  disabled={updatingStatus || isRejected}
+                  className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${
+                    isRejected
+                      ? 'bg-gray-100 text-gray-300 cursor-default'
+                      : 'border border-red-200 bg-white text-red-500 hover:bg-red-50 active:scale-[0.98]'
+                  }`}
+                >
+                  반려
+                </button>
+
+                {/* Secondary: 부가 액션 */}
+                {hasEventContext && (
+                  <div className="mt-1 flex flex-col gap-0.5">
+                    <div className="mb-1 border-t border-gray-100" />
+                    <button
+                      onClick={() => handleStatusChange('대기')}
+                      disabled={updatingStatus || status === '대기'}
+                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
+                    >
+                      대기 처리
+                    </button>
+                    <button
+                      onClick={() => setRequestAction('reschedule')}
+                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                    >
+                      일정 변경
+                    </button>
+                    <button
+                      onClick={() => setRequestAction('cancel')}
+                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-red-300 transition hover:bg-red-50 hover:text-red-500"
+                    >
+                      취소 처리
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* 취소 확인 */}
+            {requestAction === 'cancel' && (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-medium text-gray-700">취소 처리하시겠어요?</p>
+                <p className="text-[11px] leading-relaxed text-gray-400">
+                  상태가 <span className="font-medium text-gray-600">취소</span>로 변경되며 이벤트 명단에서 제외돼요.
+                </p>
                 <button
                   onClick={handleCancel}
                   disabled={processing}
-                  className="rounded-lg bg-red-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-50"
+                  className="w-full rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
                 >
                   {processing ? '처리 중...' : '취소 확정'}
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* 일정 변경 */}
-          {requestAction === 'reschedule' && (
-            <div className="flex flex-col gap-3">
-              <p className="text-sm font-medium text-gray-800">
-                이동할 이벤트를 선택해주세요
-                <span className="ml-2 text-xs font-normal text-gray-400">현재 상태({status})가 그대로 유지돼요.</span>
-              </p>
-              {events.length === 0 ? (
-                <p className="text-sm text-gray-400">이동 가능한 이벤트가 없어요.</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {events.map((ev) => (
-                    <label
-                      key={ev.id}
-                      className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
-                        targetEventId === ev.id
-                          ? 'border-cana bg-cana/5 text-cana'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="target-event"
-                        value={ev.id}
-                        checked={targetEventId === ev.id}
-                        onChange={() => setTargetEventId(ev.id)}
-                        className="sr-only"
-                      />
-                      <span className="font-medium">{ev.title}</span>
-                      <span className="text-xs text-gray-400">{formatEventDate(ev.event_date)}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => { setRequestAction(null); setTargetEventId(''); }}
+                  onClick={() => setRequestAction(null)}
                   disabled={processing}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100 disabled:opacity-50"
+                  className="w-full text-xs text-gray-400 transition hover:text-gray-600"
                 >
                   돌아가기
                 </button>
+              </div>
+            )}
+
+            {/* 일정 변경 */}
+            {requestAction === 'reschedule' && (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-medium text-gray-700">이동할 이벤트 선택</p>
+                {events.length === 0 ? (
+                  <p className="text-xs text-gray-400">이동 가능한 이벤트가 없어요.</p>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    {events.map((ev) => (
+                      <label
+                        key={ev.id}
+                        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition ${
+                          targetEventId === ev.id
+                            ? 'border-cana bg-cana/5 text-cana'
+                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="target-event"
+                          value={ev.id}
+                          checked={targetEventId === ev.id}
+                          onChange={() => setTargetEventId(ev.id)}
+                          className="sr-only"
+                        />
+                        <span className="font-medium">{ev.title}</span>
+                        <span className="ml-auto text-gray-400">{formatEventDate(ev.event_date)}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 <button
                   onClick={handleReschedule}
                   disabled={processing || !targetEventId}
-                  className="rounded-lg bg-cana px-3 py-1.5 text-sm font-medium text-white transition hover:bg-cana-dark disabled:opacity-50"
+                  className="w-full rounded-xl bg-cana py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
                 >
                   {processing ? '처리 중...' : '이동 확정'}
                 </button>
+                <button
+                  onClick={() => { setRequestAction(null); setTargetEventId(''); }}
+                  className="w-full text-xs text-gray-400 transition hover:text-gray-600"
+                >
+                  돌아가기
+                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* ── 프로필 본문 ── */}
-        <div className="overflow-y-auto px-6 py-5" style={{ maxHeight: 'calc(80vh - 120px)' }}>
+        {/* ── 우 패널 ── */}
+        <div className="flex-1 overflow-y-auto px-7 py-6">
           <AdminProfileDetail profile={pr} />
         </div>
 

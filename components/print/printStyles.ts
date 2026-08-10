@@ -230,6 +230,84 @@ export const PRINT_CARD_STYLES = `
   .qa-a { font-size: 10px; color: var(--ink); line-height: 1.55; word-break: keep-all; white-space: pre-wrap; }
   .qa-empty { font-size: 12px; color: var(--ink-3); padding: 16px 0; }
 
+  /* 뒷면: 이성 참석자 목록 */
+  .opp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 6px;
+  }
+
+  .opp-row {
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .opp-row:last-child { border-bottom: none; }
+
+  .opp-line1 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .opp-no {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--rose);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .opp-dot-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--rose-lt);
+    flex-shrink: 0;
+  }
+
+  .opp-chip {
+    font-size: 8.5px;
+    color: var(--ink-2);
+    background: var(--rose-bg);
+    border: 0.5px solid var(--rose-lt);
+    border-radius: 20px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+
+  .opp-line2 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-left: 2px;
+  }
+
+  .opp-detail {
+    font-size: 8px;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .opp-detail + .opp-detail::before {
+    content: '·';
+    margin-right: 4px;
+    color: var(--rule);
+  }
+
+  .opp-tag {
+    font-size: 8px;
+    color: var(--ink-3);
+    background: var(--warm);
+    border-radius: 20px;
+    padding: 0.5px 4px;
+    white-space: nowrap;
+  }
+
   /* 인쇄 */
   @page { size: A4 landscape; margin: 0; }
 

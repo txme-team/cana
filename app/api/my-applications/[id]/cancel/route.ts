@@ -76,23 +76,27 @@ export async function POST(
     // 상태 → 취소
     const { data: cancelledApp } = await supa
       .from('applications')
-      .select('event_id, profiles ( gender, nickname ), events ( title )')
+      .select('event_id, profiles ( gender, nickname, birth_year, job, company_name ), events ( title, event_date )')
       .eq('id', params.id)
       .single() as {
         data: {
           event_id: string;
-          profiles: { gender: string; nickname: string } | null;
-          events: { title: string } | null;
+          profiles: { gender: string; nickname: string; birth_year: number | null; job: string | null; company_name: string | null } | null;
+          events: { title: string; event_date: string } | null;
         } | null;
       };
 
     await supa.from('applications').update({ status: '취소' }).eq('id', params.id);
 
     // 슬랙 알림 — 신청 취소
-    await notifyApplicationCancelled(
-      cancelledApp?.profiles?.nickname ?? '알 수 없음',
-      params.id
-    ).catch(() => {});
+    await notifyApplicationCancelled({
+      nickname: cancelledApp?.profiles?.nickname ?? '알 수 없음',
+      birthYear: cancelledApp?.profiles?.birth_year,
+      job: cancelledApp?.profiles?.job,
+      company: cancelledApp?.profiles?.company_name,
+      eventTitle: cancelledApp?.events?.title,
+      eventDate: cancelledApp?.events?.event_date,
+    }).catch(() => {});
 
     // waitlist SMS 트리거 (취소로 빈자리 발생 시)
     try {
