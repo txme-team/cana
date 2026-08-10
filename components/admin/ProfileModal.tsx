@@ -118,7 +118,7 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm">
-      <div className="relative my-6 w-full max-w-3xl rounded-2xl bg-white shadow-2xl mx-4">
+      <div className="relative my-6 w-full max-w-5xl rounded-2xl bg-white shadow-2xl mx-4">
 
         {/* ── 헤더 ── */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">

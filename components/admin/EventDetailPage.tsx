@@ -91,7 +91,35 @@ function getDuplicates(items: Participant[], field: keyof Participant['profiles'
   return new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([k]) => k));
 }
 
+// 두 그룹(남/여) 간 공통 값 반환
+function getCrossGenderOverlap(a: Participant[], b: Participant[], field: keyof Participant['profiles']): Set<string> {
+  const setA = new Set(a.map((p) => p.profiles[field] as string | undefined).filter(Boolean) as string[]);
+  const result = new Set<string>();
+  b.forEach((p) => {
+    const val = p.profiles[field] as string | undefined;
+    if (val && setA.has(val)) result.add(val);
+  });
+  return result;
+}
+
 // ─── 참여자 테이블 ─────────────────────────────────────────────────────────────
+
+function WarnIcon() {
+  return (
+    <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+function CrossIcon() {
+  // 남녀 교차 겹침 표시 — 파란색 계열
+  return (
+    <svg className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+    </svg>
+  );
+}
 
 function ParticipantTable({
   title,
@@ -100,6 +128,8 @@ function ParticipantTable({
   participants,
   dupCompanies,
   dupChurches,
+  crossCompanies,
+  crossChurches,
   onRowClick,
 }: {
   title: string;
@@ -108,6 +138,8 @@ function ParticipantTable({
   participants: Participant[];
   dupCompanies: Set<string>;
   dupChurches: Set<string>;
+  crossCompanies: Set<string>;
+  crossChurches: Set<string>;
   onRowClick: (p: Participant) => void;
 }) {
   return (
@@ -123,12 +155,15 @@ function ParticipantTable({
       {participants.length === 0 ? (
         <p className="px-1 text-base text-gray-400">확정된 참여자가 없어요.</p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
+        <div className="overflow-x-auto overflow-hidden rounded-xl border border-gray-100 bg-white">
           <table className="w-full text-base">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-sm text-gray-400">
                 <th className="px-4 py-2.5 text-left font-medium">이름</th>
                 <th className="px-4 py-2.5 text-left font-medium">출생연도</th>
+                <th className="px-4 py-2.5 text-left font-medium">연락처</th>
+                <th className="px-4 py-2.5 text-left font-medium">직업</th>
+                <th className="px-4 py-2.5 text-left font-medium">MBTI</th>
                 <th className="px-4 py-2.5 text-left font-medium">직장</th>
                 <th className="px-4 py-2.5 text-left font-medium">교회</th>
               </tr>
@@ -138,6 +173,8 @@ function ParticipantTable({
                 const pr = p.profiles;
                 const hasDupCompany = !!(pr.company_name && dupCompanies.has(pr.company_name));
                 const hasDupChurch = !!(pr.church_name && dupChurches.has(pr.church_name));
+                const hasCrossCompany = !!(pr.company_name && crossCompanies.has(pr.company_name));
+                const hasCrossChurch = !!(pr.church_name && crossChurches.has(pr.church_name));
                 return (
                   <tr
                     key={p.id}
@@ -146,24 +183,21 @@ function ParticipantTable({
                   >
                     <td className="px-4 py-3 font-medium text-gray-800">{pr.nickname}</td>
                     <td className="px-4 py-3 text-gray-500">{pr.birth_year}</td>
-                    <td className={`px-4 py-3 ${hasDupCompany ? 'font-medium text-amber-600' : 'text-gray-500'}`}>
+                    <td className="px-4 py-3 text-gray-500 font-mono text-sm">{pr.phone || '-'}</td>
+                    <td className="px-4 py-3 text-gray-500">{pr.job || '-'}</td>
+                    <td className="px-4 py-3 text-gray-500">{pr.mbti || '-'}</td>
+                    <td className={`px-4 py-3 ${hasDupCompany ? 'font-medium text-amber-600' : hasCrossCompany ? 'font-medium text-blue-500' : 'text-gray-500'}`}>
                       <span className="flex items-center gap-1">
                         {pr.company_name || '-'}
-                        {hasDupCompany && (
-                          <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                          </svg>
-                        )}
+                        {hasDupCompany && <WarnIcon />}
+                        {!hasDupCompany && hasCrossCompany && <CrossIcon />}
                       </span>
                     </td>
-                    <td className={`px-4 py-3 ${hasDupChurch ? 'font-medium text-amber-600' : 'text-gray-500'}`}>
+                    <td className={`px-4 py-3 ${hasDupChurch ? 'font-medium text-amber-600' : hasCrossChurch ? 'font-medium text-blue-500' : 'text-gray-500'}`}>
                       <span className="flex items-center gap-1">
                         {pr.church_name || '-'}
-                        {hasDupChurch && (
-                          <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                          </svg>
-                        )}
+                        {hasDupChurch && <WarnIcon />}
+                        {!hasDupChurch && hasCrossChurch && <CrossIcon />}
                       </span>
                     </td>
                   </tr>
@@ -360,9 +394,12 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   const maleDupChurches = getDuplicates(males, 'church_name');
   const femaleDupCompanies = getDuplicates(females, 'company_name');
   const femaleDupChurches = getDuplicates(females, 'church_name');
+  const crossCompanies = getCrossGenderOverlap(males, females, 'company_name');
+  const crossChurches = getCrossGenderOverlap(males, females, 'church_name');
   const hasDuplicates =
     maleDupCompanies.size > 0 || maleDupChurches.size > 0 ||
-    femaleDupCompanies.size > 0 || femaleDupChurches.size > 0;
+    femaleDupCompanies.size > 0 || femaleDupChurches.size > 0 ||
+    crossCompanies.size > 0 || crossChurches.size > 0;
 
   return (
     <main className="px-6 py-8">
@@ -654,18 +691,22 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
 
             {/* 중복 경고 */}
             {hasDuplicates && (
-              <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3">
-                <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                </svg>
-                <p className="text-base text-amber-700">
-                  동일 직장 또는 교회 출신 참여자가 있어요. <span className="font-medium">주황색</span>으로 표시된 항목을 확인해 주세요.
-                </p>
+              <div className="mb-4 flex flex-col gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
+                <div className="flex items-start gap-2">
+                  <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-base text-amber-700">겹치는 직장 또는 교회가 있어요.</p>
+                </div>
+                <div className="flex flex-wrap gap-x-5 gap-y-1 pl-6 text-xs text-gray-500">
+                  <span className="flex items-center gap-1"><span className="font-medium text-amber-600">주황색 ▲</span> 동성 내 겹침</span>
+                  <span className="flex items-center gap-1"><span className="font-medium text-blue-500">파란색 ●</span> 남녀 간 겹침</span>
+                </div>
               </div>
             )}
 
             {/* 참여자 명단 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="flex flex-col gap-6">
               <ParticipantTable
                 title="남성 확정자"
                 accentBg="bg-blue-50"
@@ -673,6 +714,8 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                 participants={males}
                 dupCompanies={maleDupCompanies}
                 dupChurches={maleDupChurches}
+                crossCompanies={crossCompanies}
+                crossChurches={crossChurches}
                 onRowClick={setSelectedProfile}
               />
               <ParticipantTable
@@ -682,6 +725,8 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                 participants={females}
                 dupCompanies={femaleDupCompanies}
                 dupChurches={femaleDupChurches}
+                crossCompanies={crossCompanies}
+                crossChurches={crossChurches}
                 onRowClick={setSelectedProfile}
               />
             </div>

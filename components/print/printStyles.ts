@@ -20,9 +20,9 @@ export const PRINT_CARD_STYLES = `
 
   .card-wrap {
     width: 297mm;
-    height: 210mm;
+    min-height: 210mm;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     background: var(--cream);
     page-break-after: always;
@@ -31,12 +31,11 @@ export const PRINT_CARD_STYLES = `
 
   .card {
     width: 297mm;
-    height: 210mm;
+    min-height: 210mm;
     background: var(--cream);
     border-radius: 0;
     display: grid;
     grid-template-rows: 34px 1fr;
-    overflow: hidden;
     position: relative;
     box-shadow: none;
     font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
@@ -224,11 +223,11 @@ export const PRINT_CARD_STYLES = `
   .panel-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; line-height: 1; word-break: keep-all; }
 
   /* Q&A */
-  .section-qa { flex: 1; overflow: hidden; }
-  .qa-grid { columns: 2; column-gap: 8px; }
-  .qa-item { break-inside: avoid; margin-bottom: 6px; background: var(--cream); border: 0.5px solid var(--rose-lt); border-radius: 5px; padding: 6px 9px; }
+  .section-qa { flex: 1; }
+  .qa-grid { display: flex; flex-direction: column; gap: 6px; }
+  .qa-item { break-inside: avoid; background: var(--cream); border: 0.5px solid var(--rose-lt); border-radius: 5px; padding: 6px 9px; }
   .qa-q { font-size: 9px; font-weight: 600; color: var(--rose-mid); margin-bottom: 3px; word-break: keep-all; line-height: 1.3; }
-  .qa-a { font-size: 10px; color: var(--ink); line-height: 1.55; word-break: keep-all; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .qa-a { font-size: 10px; color: var(--ink); line-height: 1.55; word-break: keep-all; white-space: pre-wrap; }
   .qa-empty { font-size: 12px; color: var(--ink-3); padding: 16px 0; }
 
   /* 인쇄 */
