@@ -25,8 +25,12 @@ export interface SlackProfileInfo {
 
 function formatEventDate(date?: string | null) {
   if (!date) return '';
-  // 2026-08-12 → 26-08-12
-  return date.slice(2).replace(/-/g, '-');
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
 }
 
 function profileBlocks(emoji: string, title: string, info: SlackProfileInfo): object[] {
@@ -39,7 +43,7 @@ function profileBlocks(emoji: string, title: string, info: SlackProfileInfo): ob
   const jobLine = [job, company].filter(Boolean).join('\n') || '—';
 
   const eventLine = eventTitle
-    ? `${eventTitle}${eventDate ? ` (${formatEventDate(eventDate)})` : ''}`
+    ? `${eventTitle}${eventDate ? `\n${formatEventDate(eventDate)}` : ''}`
     : '—';
 
   return [
