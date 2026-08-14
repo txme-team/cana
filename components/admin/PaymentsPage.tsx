@@ -244,13 +244,12 @@ export default function PaymentsPage({
             onClick={(e) => e.stopPropagation()}
           >
             <p className="mb-1 text-base font-semibold text-gray-900">결제를 취소할까요?</p>
-            <p className="text-sm text-gray-400">{cancelTarget.nickname}님 · {cancelTarget.event_title}</p>
 
             {(() => {
               const refund = calcRefund(cancelTarget.amount, cancelTarget.event_date);
               return (
                 <>
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="text-sm text-gray-600">
                     환불 규정상 <span className="font-medium text-gray-900">{refund.label}</span>
                     {refund.rate > 0 && (
                       <> (<span className="font-medium text-gray-900">{refund.amount.toLocaleString('ko-KR')}원</span>)</>
