@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { ApplicationWithProfile, ProfileStatus } from '@/lib/types';
 import AdminProfileDetail from './AdminProfileDetail';
 import StatusBadge from './StatusBadge';
+import { calcRefund, REFUND_POLICY_TEXT } from '@/lib/refund-policy';
 
 interface EventOption {
   id: string;
@@ -13,6 +14,7 @@ interface EventOption {
 
 interface ProfileModalProps {
   profile: ApplicationWithProfile;
+  eventDate?: string | null;
   onClose: () => void;
   onStatusChange: (id: string, status: ProfileStatus) => void;
   onUpdate?: () => void;
@@ -24,7 +26,7 @@ function formatEventDate(dateStr: string) {
   return `${d.getMonth() + 1}/${d.getDate()}(${days[d.getDay()]})`;
 }
 
-export default function ProfileModal({ profile, onClose, onStatusChange, onUpdate }: ProfileModalProps) {
+export default function ProfileModal({ profile, eventDate, onClose, onStatusChange, onUpdate }: ProfileModalProps) {
   const pr = profile.profiles;
 
   const [status, setStatus]                 = useState<ProfileStatus>(profile.status ?? '검토중');
@@ -266,6 +268,23 @@ export default function ProfileModal({ profile, onClose, onStatusChange, onUpdat
                 <p className="text-[11px] leading-relaxed text-gray-400">
                   상태가 <span className="font-medium text-gray-600">취소</span>로 변경되며 이벤트 명단에서 제외돼요.
                 </p>
+                {profile.amount != null ? (() => {
+                  const refund = calcRefund(profile.amount, eventDate);
+                  return (
+                    <div className="rounded-lg bg-gray-50 px-2.5 py-2">
+                      <p className="text-[11px] leading-relaxed text-gray-600">
+                        환불 규정상 <span className="font-medium text-gray-800">{refund.label}</span>
+                        {refund.rate > 0 && (
+                          <> (<span className="font-medium text-gray-800">{refund.amount.toLocaleString('ko-KR')}원</span>)</>
+                        )}
+                        됩니다.
+                      </p>
+                      <ul className="mt-1.5 list-disc space-y-0.5 pl-3.5 text-[10px] text-gray-400">
+                        {REFUND_POLICY_TEXT.map((t) => <li key={t}>{t}</li>)}
+                      </ul>
+                    </div>
+                  );
+                })() : null}
                 <button
                   onClick={handleCancel}
                   disabled={processing}

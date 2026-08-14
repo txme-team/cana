@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { sendSMS } from '@/lib/sms';
 import { notifyApplicationCancelled, notifyError } from '@/lib/slack';
+import { calcRefund, refundNoticeText } from '@/lib/refund-policy';
+import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 
 const CANCELLABLE_STATUSES = ['검토중', '대기'];
 
@@ -29,14 +31,27 @@ export async function POST(
 
     if (!profile) return NextResponse.json({ error: '프로필이 없어요.' }, { status: 400 });
 
-    // 신청 조회 (본인 소유인지 확인)
+    // 신청 조회 (본인 소유인지 확인) — 환불 계산에 필요한 정보를 한 번에 조회
     const { data: application } = await supa
       .from('applications')
-      .select('id, status, payment_key, amount')
+      .select(`
+        id, status, payment_key, amount, event_id,
+        profiles ( phone, gender, nickname, birth_year, job, company_name ),
+        events ( title, event_date )
+      `)
       .eq('id', params.id)
       .eq('profile_id', profile.id)
-      .maybeSingle() as
-      { data: { id: string; status: string; payment_key: string | null; amount: number | null } | null };
+      .maybeSingle() as {
+        data: {
+          id: string;
+          status: string;
+          payment_key: string | null;
+          amount: number | null;
+          event_id: string;
+          profiles: { phone: string | null; gender: string; nickname: string; birth_year: number | null; job: string | null; company_name: string | null } | null;
+          events: { title: string; event_date: string } | null;
+        } | null;
+      };
 
     if (!application) {
       return NextResponse.json({ error: '신청 내역을 찾을 수 없어요.' }, { status: 404 });
@@ -46,10 +61,19 @@ export async function POST(
       return NextResponse.json({ error: '현재 상태에서는 취소할 수 없어요.' }, { status: 400 });
     }
 
-    // Toss 환불 (결제된 경우)
-    if (application.payment_key) {
+    // 날짜 기반 환불 정책 계산
+    const eventDate = application.events?.event_date;
+    const refund = calcRefund(application.amount, eventDate);
+
+    // Toss 환불 (결제됐고, 환불 대상 금액이 있을 때만)
+    if (application.payment_key && refund.rate > 0) {
       const secretKey = process.env.TOSS_SECRET_KEY!;
       const token = Buffer.from(`${secretKey}:`).toString('base64');
+
+      const cancelBody: { cancelReason: string; cancelAmount?: number } = {
+        cancelReason: '고객 요청 취소',
+      };
+      if (refund.rate < 1) cancelBody.cancelAmount = refund.amount;
 
       const refundRes = await fetch(
         `https://api.tosspayments.com/v1/payments/${application.payment_key}/cancel`,
@@ -59,7 +83,7 @@ export async function POST(
             Authorization: `Basic ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ cancelReason: '고객 요청 취소' }),
+          body: JSON.stringify(cancelBody),
           cache: 'no-store',
         }
       );
@@ -74,19 +98,9 @@ export async function POST(
     }
 
     // 상태 → 취소
-    const { data: cancelledApp } = await supa
-      .from('applications')
-      .select('event_id, profiles ( gender, nickname, birth_year, job, company_name ), events ( title, event_date )')
-      .eq('id', params.id)
-      .single() as {
-        data: {
-          event_id: string;
-          profiles: { gender: string; nickname: string; birth_year: number | null; job: string | null; company_name: string | null } | null;
-          events: { title: string; event_date: string } | null;
-        } | null;
-      };
-
     await supa.from('applications').update({ status: '취소' }).eq('id', params.id);
+
+    const cancelledApp = application;
 
     // 슬랙 알림 — 신청 취소
     await notifyApplicationCancelled({
@@ -97,6 +111,25 @@ export async function POST(
       eventTitle: cancelledApp?.events?.title,
       eventDate: cancelledApp?.events?.event_date,
     }).catch(() => {});
+
+    // 본인 취소 안내 SMS
+    try {
+      const phone = cancelledApp?.profiles?.phone;
+      const displayName = cancelledApp?.profiles?.nickname;
+      if (phone && displayName && eventDate) {
+        const { content, enabled } = await getTemplateConfig(supa, 'application_cancelled');
+        if (enabled) {
+          const text = substituteVars(content, {
+            name: displayName,
+            refund_text: refundNoticeText(refund),
+            ...buildEventVars({ event_date: eventDate }),
+          });
+          await sendSMS([phone], text);
+        }
+      }
+    } catch (smsErr) {
+      console.error('[취소 SMS error — user cancel]', smsErr);
+    }
 
     // waitlist SMS 트리거 (취소로 빈자리 발생 시)
     try {

@@ -790,6 +790,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
       {selectedProfile && (
         <ProfileModal
           profile={selectedProfile}
+          eventDate={data?.event.event_date}
           onClose={() => setSelectedProfile(null)}
           onStatusChange={(id, status) => {
             setSelectedProfile((prev) =>

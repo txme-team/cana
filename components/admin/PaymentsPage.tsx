@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Pagination from './Pagination';
+import { calcRefund, REFUND_POLICY_TEXT } from '@/lib/refund-policy';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,7 @@ export interface PaymentItem {
   pay_method: string | null;
   event_id: string;
   event_title: string;
+  event_date: string | null;
   profile_id: string;
   nickname: string;
 }
@@ -74,6 +76,7 @@ export default function PaymentsPage({
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [payments, setPayments]     = useState<PaymentItem[]>(initial);
   const [error, setError]           = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<PaymentItem | null>(null);
 
   useEffect(() => setPayments(initial), [initial]);
 
@@ -98,9 +101,9 @@ export default function PaymentsPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const handleCancel = async (p: PaymentItem) => {
-    if (!p.payment_key) return;
-    if (!confirm(`${p.nickname}님의 결제를 취소하시겠어요?\n${fmtAmount(p.amount)}`)) return;
+  const handleCancelConfirm = async () => {
+    const p = cancelTarget;
+    if (!p || !p.payment_key) return;
 
     setCancelling(p.id);
     setError(null);
@@ -118,6 +121,7 @@ export default function PaymentsPage({
       setPayments((prev) =>
         prev.map((item) => item.id === p.id ? { ...item, status: '취소' } : item)
       );
+      setCancelTarget(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : '오류가 발생했어요.');
     } finally {
@@ -209,7 +213,7 @@ export default function PaymentsPage({
                     <td className="px-4 py-3 text-center">
                       {SUCCESS_STATUSES.includes(p.status) && p.payment_key ? (
                         <button
-                          onClick={() => handleCancel(p)}
+                          onClick={() => setCancelTarget(p)}
                           disabled={cancelling === p.id}
                           className="rounded-lg border border-red-200 px-2.5 py-1 text-xs text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                         >
@@ -228,6 +232,57 @@ export default function PaymentsPage({
       </div>
 
       <Pagination page={page} totalPages={totalPages} paramName="page" />
+
+      {/* 취소 확인 모달 */}
+      {cancelTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6"
+          onClick={() => !cancelling && setCancelTarget(null)}
+        >
+          <div
+            className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-base font-semibold text-gray-900">결제를 취소할까요?</p>
+            <p className="text-sm text-gray-400">{cancelTarget.nickname}님 · {cancelTarget.event_title}</p>
+
+            {(() => {
+              const refund = calcRefund(cancelTarget.amount, cancelTarget.event_date);
+              return (
+                <>
+                  <p className="mt-2 text-sm text-gray-600">
+                    환불 규정상 <span className="font-medium text-gray-900">{refund.label}</span>
+                    {refund.rate > 0 && (
+                      <> (<span className="font-medium text-gray-900">{refund.amount.toLocaleString('ko-KR')}원</span>)</>
+                    )}
+                    됩니다.
+                  </p>
+                  <ul className="mt-2 list-disc space-y-0.5 pl-4 text-xs text-gray-400">
+                    {REFUND_POLICY_TEXT.map((t) => <li key={t}>{t}</li>)}
+                  </ul>
+                </>
+              );
+            })()}
+
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setCancelTarget(null)}
+                disabled={!!cancelling}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-40"
+              >
+                닫기
+              </button>
+              <button
+                onClick={handleCancelConfirm}
+                disabled={!!cancelling}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-40"
+              >
+                {cancelling ? '처리 중...' : '취소하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

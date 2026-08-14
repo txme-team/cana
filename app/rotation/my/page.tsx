@@ -7,6 +7,7 @@ import Footer from '@/components/landing/Footer';
 import BackButton from '@/components/landing/BackButton';
 import type { Profile } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
+import { calcRefund, REFUND_POLICY_TEXT } from '@/lib/refund-policy';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -585,11 +586,23 @@ export default function MyPage() {
             <p className="mb-1 text-base font-semibold text-cana-ink">신청을 취소할까요?</p>
             <p className="text-sm text-cana-ink3">{cancelTarget.event_title}</p>
 
-            {cancelTarget.amount != null ? (
-              <p className="mt-2 text-sm text-cana-ink3">
-                결제하신 <span className="font-medium text-cana-ink">{cancelTarget.amount.toLocaleString('ko-KR')}원</span>이 전액 환불돼요.
-              </p>
-            ) : (
+            {cancelTarget.amount != null ? (() => {
+              const refund = calcRefund(cancelTarget.amount, cancelTarget.event_date);
+              return (
+                <>
+                  <p className="mt-2 text-sm text-cana-ink3">
+                    환불 규정상 <span className="font-medium text-cana-ink">{refund.label}</span>
+                    {refund.rate > 0 && (
+                      <> (<span className="font-medium text-cana-ink">{refund.amount.toLocaleString('ko-KR')}원</span>)</>
+                    )}
+                    돼요.
+                  </p>
+                  <ul className="mt-2 list-disc space-y-0.5 pl-4 text-xs text-cana-ink3">
+                    {REFUND_POLICY_TEXT.map((t) => <li key={t}>{t}</li>)}
+                  </ul>
+                </>
+              );
+            })() : (
               <p className="mt-2 text-sm text-cana-ink3">취소 후 되돌릴 수 없어요.</p>
             )}
 

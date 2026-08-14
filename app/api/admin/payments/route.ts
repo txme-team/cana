@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { sendSMS } from '@/lib/sms';
+import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
+import { calcRefund, refundNoticeText } from '@/lib/refund-policy';
 
 async function requireAdmin() {
   const supabase = createClient();
@@ -30,7 +32,7 @@ export async function GET() {
         event_id,
         profile_id,
         profiles ( nickname ),
-        events   ( title )
+        events   ( title, event_date )
       `)
       .not('paid_at', 'is', null)
       .order('paid_at', { ascending: false });
@@ -48,6 +50,7 @@ export async function GET() {
       pay_method:  row.pay_method,
       event_id:    row.event_id,
       event_title: row.events?.title ?? '—',
+      event_date:  row.events?.event_date ?? null,
       profile_id:  row.profile_id,
       nickname:    row.profiles?.nickname ?? '—',
     }));
@@ -71,53 +74,89 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '필수 파라미터 누락' }, { status: 400 });
     }
 
-    // Toss 결제 취소 API 호출
-    const secretKey = process.env.TOSS_SECRET_KEY!;
-    const token = Buffer.from(`${secretKey}:`).toString('base64');
-
-    const tossRes = await fetch(
-      `https://api.tosspayments.com/v1/payments/${paymentKey}/cancel`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cancelReason: '관리자 요청 취소' }),
-        cache: 'no-store',
-      }
-    );
-
-    if (!tossRes.ok) {
-      const err = await tossRes.json().catch(() => ({})) as { message?: string };
-      return NextResponse.json(
-        { error: err.message ?? '결제 취소에 실패했어요.' },
-        { status: 400 }
-      );
-    }
-
-    // applications 상태를 '취소'로 업데이트
     const supabase = createServiceClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supa = supabase as any;
 
+    // 환불 계산에 필요한 정보 조회 (DB 값을 신뢰 — 클라이언트 입력값 사용 안 함)
+    const { data: appRow } = await supa
+      .from('applications')
+      .select('amount, events ( event_date )')
+      .eq('id', applicationId)
+      .maybeSingle() as { data: { amount: number | null; events: { event_date: string } | null } | null };
+
+    if (!appRow) {
+      return NextResponse.json({ error: '신청 내역을 찾을 수 없어요.' }, { status: 404 });
+    }
+
+    const eventDate = appRow.events?.event_date;
+    const refund = calcRefund(appRow.amount, eventDate);
+
+    // Toss 결제 취소 API 호출 (환불 대상 금액이 있을 때만)
+    if (refund.rate > 0) {
+      const secretKey = process.env.TOSS_SECRET_KEY!;
+      const token = Buffer.from(`${secretKey}:`).toString('base64');
+
+      const cancelBody: { cancelReason: string; cancelAmount?: number } = {
+        cancelReason: '관리자 요청 취소',
+      };
+      if (refund.rate < 1) cancelBody.cancelAmount = refund.amount;
+
+      const tossRes = await fetch(
+        `https://api.tosspayments.com/v1/payments/${paymentKey}/cancel`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cancelBody),
+          cache: 'no-store',
+        }
+      );
+
+      if (!tossRes.ok) {
+        const err = await tossRes.json().catch(() => ({})) as { message?: string };
+        return NextResponse.json(
+          { error: err.message ?? '결제 취소에 실패했어요.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // applications 상태를 '취소'로 업데이트
     await supa.from('applications').update({ status: '취소' }).eq('id', applicationId);
 
-    // ── 대기자 SMS 자동 발송 ────────────────────────────────────────────────────
-    // 취소된 신청의 이벤트 + 성별 파악 → 동일 성별 대기자 전원에게 SMS
+    // ── 취소 당사자 안내 SMS ────────────────────────────────────────────────────
     try {
       const { data: cancelledApp } = await supa
         .from('applications')
-        .select('event_id, profiles ( gender ), events ( title )')
+        .select('event_id, profiles ( phone, gender, nickname ), events ( title, event_date )')
         .eq('id', applicationId)
         .maybeSingle() as {
           data: {
             event_id: string;
-            profiles: { gender: string } | null;
-            events:   { title: string }  | null;
+            profiles: { phone: string | null; gender: string; nickname: string } | null;
+            events:   { title: string; event_date: string }  | null;
           } | null;
         };
 
+      const phone       = cancelledApp?.profiles?.phone;
+      const displayName = cancelledApp?.profiles?.nickname;
+      if (phone && displayName && eventDate) {
+        const { content, enabled } = await getTemplateConfig(supa, 'application_cancelled');
+        if (enabled) {
+          const text = substituteVars(content, {
+            name: displayName,
+            refund_text: refundNoticeText(refund),
+            ...buildEventVars({ event_date: eventDate }),
+          });
+          await sendSMS([phone], text);
+        }
+      }
+
+      // ── 대기자 SMS 자동 발송 ──────────────────────────────────────────────────
+      // 취소된 신청의 이벤트 + 성별 파악 → 동일 성별 대기자 전원에게 SMS
       const gender    = cancelledApp?.profiles?.gender;
       const eventId   = cancelledApp?.event_id;
       const eventTitle = cancelledApp?.events?.title ?? '이벤트';

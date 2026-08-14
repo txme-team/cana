@@ -69,6 +69,18 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     ],
   },
   {
+    key: 'application_cancelled',
+    name: '신청 취소',
+    content: '[카나] {{name}}님 {{event_date}} 소개팅 신청이 취소 처리되었습니다. {{refund_text}}',
+    trigger_type: 'auto',
+    trigger_desc: '신청 취소 처리 시 즉시 (본인 취소·운영진 취소 공통)',
+    variables: [
+      { key: 'name',        label: '신청자 이름', desc: '프로필 이름' },
+      { key: 'event_date',  label: '행사일',       desc: '예: 6월 14일' },
+      { key: 'refund_text', label: '환불 안내',    desc: '환불 금액/비율 자동 삽입' },
+    ],
+  },
+  {
     key: 'profile_card',
     name: '프로필 카드 발송',
     content: '[카나] {{name}}님 {{event_date}} 소개팅 참가자 프로필 카드를 보내드립니다.\n\n내일 만나실 분들을 미리 살펴보고 오시면, 당일 훨씬 깊은 대화를 나누실 수 있어요.\n\n프로필 카드 확인하기: {{profile_card_url}}\n(링크는 행사 종료 후 만료됩니다)',

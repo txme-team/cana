@@ -41,7 +41,7 @@ export default async function AdminPaymentsPage({ searchParams }: PageProps) {
       event_id,
       profile_id,
       profiles!inner ( nickname ),
-      events ( title )
+      events ( title, event_date )
     `, { count: 'exact' })
     .not('paid_at', 'is', null)
     .order('paid_at', { ascending: false });
@@ -66,6 +66,7 @@ export default async function AdminPaymentsPage({ searchParams }: PageProps) {
     pay_method:  row.pay_method,
     event_id:    row.event_id,
     event_title: row.events?.title ?? '—',
+    event_date:  row.events?.event_date ?? null,
     profile_id:  row.profile_id,
     nickname:    row.profiles?.nickname ?? '—',
   }));
