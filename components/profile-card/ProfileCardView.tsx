@@ -26,7 +26,7 @@ export default function ProfileCardView({
         {/* 헤더 */}
         <div className="mb-6 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/logo_black.svg" alt="CANA" className="mx-auto h-5" />
+          <img src="/txme-assets/logos/logo_black.svg" alt="CANA" className="mx-auto h-5" />
           <h1 className="mt-2 text-xl font-semibold text-cana-ink">
             내일 만날 분들의 프로필이에요
           </h1>

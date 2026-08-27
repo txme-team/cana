@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const images = ["/hero/bg1.png", "/hero/bg2.png", "/hero/bg3.png", "/hero/bg4.png"];
+const images = ["/txme-assets/hero/bg1.png", "/txme-assets/hero/bg2.png", "/txme-assets/hero/bg3.png", "/txme-assets/hero/bg4.png"];
 const INTERVAL = 4000;
 
 export default function Hero() {
@@ -58,9 +58,7 @@ export default function Hero() {
         </motion.h1>
 
         <motion.a
-          href="https://cana.im/home"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/home"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}

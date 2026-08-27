@@ -348,7 +348,7 @@ export default function ApplyPage() {
   }>({ open: false, event: null, loading: false, done: false, error: null });
 
   useEffect(() => {
-    fetch('/api/profile')
+    fetch('/api/rotation/profile')
       .then((r) => r.json())
       .then((data) => {
         if (data && !data.error) setProfile(data as Profile);
@@ -402,7 +402,7 @@ export default function ApplyPage() {
       return;
     }
     let cancelled = false;
-    fetch('/api/events')
+    fetch('/api/rotation/events')
       .then((r) => r.json())
       .then((events) => {
         if (cancelled || !Array.isArray(events)) return;
@@ -439,7 +439,7 @@ export default function ApplyPage() {
         const { eventId } = values;
 
         // 적격 검사 (중복 신청 등 — 레코드 생성 없음)
-        const checkRes = await fetch(`/api/apply?eventId=${eventId}`);
+        const checkRes = await fetch(`/api/rotation/apply?eventId=${eventId}`);
         if (!checkRes.ok) {
           const err = await checkRes.json().catch(() => ({})) as { error?: string };
           throw new Error(err.error ?? '신청 자격 확인에 실패했어요.');
@@ -492,7 +492,7 @@ export default function ApplyPage() {
     if (!waitlistModal.event) return;
     setWaitlistModal((m) => ({ ...m, loading: true, error: null }));
     try {
-      const res = await fetch('/api/waitlist', {
+      const res = await fetch('/api/rotation/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: waitlistModal.event.id }),

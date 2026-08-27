@@ -43,8 +43,8 @@ export default function Step0({ onWaitlist }: Step0Props) {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/events').then((r) => r.json()),
-      fetch('/api/my-applications').then((r) => r.json()),
+      fetch('/api/rotation/events').then((r) => r.json()),
+      fetch('/api/rotation/my-applications').then((r) => r.json()),
     ]).then(([eventsData, appliedData]) => {
       setEvents(Array.isArray(eventsData) ? eventsData : []);
       // 취소만 재신청 허용 — 검토중·확정·반려 등은 disabled
@@ -153,11 +153,11 @@ export default function Step0({ onWaitlist }: Step0Props) {
                         {/* 날짜 · 장소 */}
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                            <img src="/icons/calander.svg" alt="" className="h-4 w-4 flex-shrink-0" />
+                            <img src="/txme-assets/icons/calander.svg" alt="" className="h-4 w-4 flex-shrink-0" />
                             <span>{formatEventDate(event.event_date)}</span>
                           </div>
                           <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                            <img src="/icons/location.svg" alt="" className="h-4 w-4 flex-shrink-0" />
+                            <img src="/txme-assets/icons/location.svg" alt="" className="h-4 w-4 flex-shrink-0" />
                             <span>{event.location}</span>
                           </div>
                         </div>

@@ -16,9 +16,7 @@ export default function CanaPromo() {
               바른 신앙관은 물론, 단정한 외모와 탄탄한 커리어까지. 교회 안에서는 마주치기 어려웠던 매력적인 선남선녀 크리스천들이 지금 카나에서 기다리고 있어요.
             </p>
             <a
-              href="https://cana.im/"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/home"
               className="inline-flex items-center justify-center rounded-xl bg-cana px-8 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-cana/25 transition-colors duration-200 hover:bg-cana-dark"
             >
               카나 1:1 소개팅 보러가기 →

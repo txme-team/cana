@@ -11,7 +11,7 @@ function TinderCard() {
     <div className="w-[38%]">
       <p className="text-[11px] text-[rgba(28,27,26,0.35)] uppercase tracking-widest mb-2 text-center">일반 앱</p>
       <div className="relative rounded-2xl overflow-hidden h-[260px] shadow-sm opacity-80">
-        <Image src="/images/model.png" alt="준혁" fill className="object-cover object-top" />
+        <Image src="/txme-assets/images/model.png" alt="준혁" fill className="object-cover object-top" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-14">
           <p className="text-[17px] font-bold text-white">준혁, 31</p>
@@ -52,8 +52,8 @@ function CanaScroll() {
 
   return (
     <div style={{ transform: `translateY(${y}px)`, willChange: "transform" }}>
-      <Image src="/images/home 3.png" alt="카나 프로필" width={375} height={2115} className="w-full h-auto block" />
-      <Image src="/images/home 3.png" alt="카나 프로필" width={375} height={2115} className="w-full h-auto block" />
+      <Image src="/txme-assets/images/home 3.png" alt="카나 프로필" width={375} height={2115} className="w-full h-auto block" />
+      <Image src="/txme-assets/images/home 3.png" alt="카나 프로필" width={375} height={2115} className="w-full h-auto block" />
     </div>
   );
 }

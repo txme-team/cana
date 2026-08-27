@@ -40,7 +40,7 @@ export default function HeroCardSkeleton() {
         {/* 헤더 */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-cana-rule px-6 py-3">
           <div className="flex items-center gap-2.5">
-            <img src="/logos/logo_black.svg" alt="cana" className="h-[15px]" />
+            <img src="/txme-assets/logos/logo_black.svg" alt="cana" className="h-[15px]" />
             <span className="h-3 w-px bg-cana-rule" />
             <span className="text-[9px] font-medium tracking-widest text-cana-ink3">CHRISTIAN ROTATION DATING</span>
           </div>

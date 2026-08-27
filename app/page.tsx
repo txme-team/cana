@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <>
       {/* LCP 이미지(히어로 첫 배경) 프리로드 */}
-      <link rel="preload" as="image" href="/hero/bg1.png" />
+      <link rel="preload" as="image" href="/txme-assets/hero/bg1.png" />
       <Navbar />
       <main>
         <Hero />
