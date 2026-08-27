@@ -40,7 +40,7 @@ export default function SuccessHandler() {
 
     sessionStorage.removeItem(PAYMENT_PENDING_KEY);
 
-    fetch('/api/payment/confirm', {
+    fetch('/api/rotation/payment/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

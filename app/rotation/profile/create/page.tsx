@@ -180,7 +180,7 @@ function ProfileCreateContent() {
   // Pre-fill from existing profile or onboarding user_metadata
   useEffect(() => {
     // 1) 기존 프로필 데이터로 pre-fill
-    fetch('/api/profile')
+    fetch('/api/rotation/profile')
       .then((r) => r.json())
       .then((profile) => {
         if (profile && !profile.error) {
@@ -327,7 +327,7 @@ function ProfileCreateContent() {
       };
       fd.append('data', JSON.stringify(payload));
 
-      const res = await fetch('/api/profile', { method: 'POST', body: fd });
+      const res = await fetch('/api/rotation/profile', { method: 'POST', body: fd });
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

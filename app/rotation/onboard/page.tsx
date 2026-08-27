@@ -30,7 +30,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/onboard', {
+      const res = await fetch('/api/rotation/onboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -127,7 +127,7 @@ function StepProfileIntro() {
 
           {/* 시간 */}
           <div className="flex items-start gap-3">
-            <img src="/icons/clock.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+            <img src="/txme-assets/icons/clock.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
             <div>
               <p className="text-base font-medium text-cana-ink">약 10분 소요돼요</p>
               <p className="text-sm text-cana-ink3">신앙, 가치관, 라이프스타일에 관한 질문들이 있어요</p>
@@ -136,15 +136,15 @@ function StepProfileIntro() {
 
           {/* 서류 */}
           <div className="flex items-start gap-3">
-            <img src="/icons/docs.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+            <img src="/txme-assets/icons/docs.svg" alt="" className="mt-0.5 h-5 w-5 flex-shrink-0" />
             <div>
               <p className="text-base font-medium text-cana-ink">마지막 단계에서 서류 인증이 필요해요</p>
               <p className="mb-3 text-sm text-cana-ink3">아래 서류를 미리 준비해주세요</p>
               <div className="flex flex-col gap-2">
                 {[
-                  { icon: '/icons/profile.svg',  text: '프로필 사진 (본인이 잘 나온 사진)' },
-                  { icon: '/icons/job.svg',       text: '직장 인증서류 — 명함, 사원증, 재직증명서, 4대보험 가입내역 중 하나' },
-                  { icon: '/icons/christian.svg', text: '교인 인증서류 — 최근 3개월 내 주보 또는 교인증명서' },
+                  { icon: '/txme-assets/icons/profile.svg', text: '프로필 사진 (본인이 잘 나온 사진)' },
+                  { icon: '/txme-assets/icons/job.svg',       text: '직장 인증서류 — 명함, 사원증, 재직증명서, 4대보험 가입내역 중 하나' },
+                  { icon: '/txme-assets/icons/christian.svg', text: '교인 인증서류 — 최근 3개월 내 주보 또는 교인증명서' },
                 ].map(({ icon, text }) => (
                   <div key={text} className="flex items-start gap-2">
                     <img src={icon} alt="" className="mt-0.5 h-4 w-4 flex-shrink-0" />
@@ -187,7 +187,7 @@ export default function OnboardPage() {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-16">
         {/* 로고 */}
         <div className="mb-10 flex items-center gap-2">
-          <Image src="/logos/logo_black.svg" alt="cana" width={48} height={14} />
+          <Image src="/txme-assets/logos/logo_black.svg" alt="cana" width={48} height={14} />
         </div>
 
         {/* 스텝 도트 */}

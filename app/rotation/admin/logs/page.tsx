@@ -34,7 +34,7 @@ export default function AdminLogsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/logs')
+    fetch('/api/rotation/admin/logs')
       .then((r) => r.json())
       .then((data) => setLogs(Array.isArray(data) ? data : []))
       .catch(() => {})

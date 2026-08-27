@@ -30,7 +30,7 @@ export default function RotationPromo() {
             {/* Image */}
             <div className="shrink-0 w-full lg:w-[400px] relative aspect-[4/3] rounded-2xl overflow-hidden">
               <Image
-                src="/hero/hf_20260605_094152_50de995d-b01b-44dd-a6f3-8896b8939fd9.png"
+                src="/txme-assets/hero/hf_20260605_094152_50de995d-b01b-44dd-a6f3-8896b8939fd9.png"
                 alt="로테이션 소개팅"
                 fill
                 className="object-cover"

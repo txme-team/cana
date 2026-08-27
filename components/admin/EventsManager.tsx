@@ -84,7 +84,7 @@ export default function EventsManager() {
 
   const fetchEvents = () => {
     setLoading(true);
-    fetch('/api/admin/events')
+    fetch('/api/rotation/admin/events')
       .then((r) => r.json())
       .then((data) => setEvents(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
@@ -120,7 +120,7 @@ export default function EventsManager() {
         age_range_male: formatAgeRange(minMale, maxMale),
         age_range_female: formatAgeRange(minFemale, maxFemale),
       };
-      await fetch('/api/admin/events', {
+      await fetch('/api/rotation/admin/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -136,7 +136,7 @@ export default function EventsManager() {
   const handleToggleActive = async (ev: EventRow) => {
     setTogglingId(ev.id);
     try {
-      await fetch('/api/admin/events', {
+      await fetch('/api/rotation/admin/events', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: ev.id, is_active: !ev.is_active }),
@@ -153,7 +153,7 @@ export default function EventsManager() {
     setDeleting(true);
     setDeleteError('');
     try {
-      const res = await fetch('/api/admin/events', {
+      const res = await fetch('/api/rotation/admin/events', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: deleteTarget.id }),

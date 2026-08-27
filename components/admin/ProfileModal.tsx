@@ -55,7 +55,7 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
   useEffect(() => {
     const raw = pr?.photo_urls?.[0];
     if (!raw) return;
-    fetch(`/api/admin/signed-url?url=${encodeURIComponent(raw)}`)
+    fetch(`/api/rotation/admin/signed-url?url=${encodeURIComponent(raw)}`)
       .then((r) => r.json())
       .then(({ signedUrl }) => { if (signedUrl) setPhotoUrl(signedUrl); })
       .catch(() => {});
@@ -64,7 +64,7 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
   // 일정 변경 이벤트 목록
   useEffect(() => {
     if (requestAction !== 'reschedule') return;
-    fetch('/api/admin/events')
+    fetch('/api/rotation/admin/events')
       .then((r) => r.json())
       .then((data: EventOption[]) => {
         setEvents(Array.isArray(data) ? data.filter((e) => e.id !== profile.event_id) : []);
@@ -80,7 +80,7 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
 
   const handleStatusChange = async (next: ProfileStatus) => {
     setUpdatingStatus(true);
-    const res = await fetch('/api/admin/update-status', {
+    const res = await fetch('/api/rotation/admin/update-status', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: profile.id, status: next }),
@@ -94,7 +94,7 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
 
   const handleCancel = async () => {
     setProcessing(true);
-    const res = await fetch('/api/admin/update-status', {
+    const res = await fetch('/api/rotation/admin/update-status', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: profile.id, status: '취소' }),
@@ -111,7 +111,7 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
   const handleReschedule = async () => {
     if (!targetEventId) return;
     setProcessing(true);
-    const res = await fetch(`/api/admin/applications/${profile.id}`, {
+    const res = await fetch(`/api/rotation/admin/applications/${profile.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event_id: targetEventId }),

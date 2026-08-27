@@ -4,7 +4,7 @@ import Script from 'next/script';
 import './globals.css';
 
 const pretendard = localFont({
-  src: '../public/fonts/PretendardVariable.woff2',
+  src: '../public/txme-assets/fonts/PretendardVariable.woff2',
   variable: '--font-pretendard',
   weight: '100 900',
   display: 'swap',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.png',
+        url: '/txme-assets/landing/og-image.png',
         width: 1200,
         height: 630,
         alt: '카나 | 크리스천끼리 설레는 이상형 찾기',
@@ -46,10 +46,16 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '카나 | 크리스천끼리 설레는 이상형 찾기',
     description: '같은 믿음을 가진 사람들을 위한 프리미엄 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
-    images: ['/og-image.png'],
+    images: ['/txme-assets/landing/og-image.png'],
   },
   alternates: {
     canonical: '/',
+  },
+  icons: {
+    icon: [
+      { url: '/txme-assets/app-icon.svg', type: 'image/svg+xml' },
+      { url: '/txme-assets/app-icon.png', type: 'image/png' },
+    ],
   },
 };
 

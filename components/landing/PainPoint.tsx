@@ -1,17 +1,17 @@
 export default function PainPoint() {
   const cards = [
     {
-      icon: '/icons/section1_1.svg',
+      icon: '/txme-assets/icons/section1_1.svg',
       title: '똑같은 자기소개만\n열 번 하다 지쳐요',
       description: '"직업이 어떻게 되세요? 몇 살이에요?"만 반복하다 끝납니다.',
     },
     {
-      icon: '/icons/section1_2.svg',
+      icon: '/txme-assets/icons/section1_2.svg',
       title: '대화가 깊어지려고 하면\n자리 이동할 시간이래요',
       description: '서로를 알아가기에는 주어진 시간이 너무나도 부족합니다.',
     },
     {
-      icon: '/icons/section1_3.svg',
+      icon: '/txme-assets/icons/section1_3.svg',
       title: '어떤 사람인지 알기도 전에\n판단해야 해요',
       description: '겉모습과 짧은 대화만으로 좋고 싫음을 결정하고 돌아갑니다.',
     },

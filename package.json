@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "prod": "node scripts/run-with-env.mjs .env.prod next dev",
+    "prebuild": "npm run check:gateway",
     "build": "next build",
     "build:prod": "node scripts/run-with-env.mjs .env.prod next build",
+    "check:gateway": "node scripts/check-gateway-boundaries.mjs",
     "start": "next start",
     "start:prod": "node scripts/run-with-env.mjs .env.prod next start",
     "lint": "next lint"

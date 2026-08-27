@@ -249,7 +249,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
 
   const load = () => {
     setLoading(true);
-    fetch(`/api/admin/events/${eventId}`)
+    fetch(`/api/rotation/admin/events/${eventId}`)
       .then((r) => r.json())
       .then((d: DetailData | { error: string }) => {
         if (!d || 'error' in d || !d.event) return;
@@ -289,7 +289,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
       const maxMale = toYearOrNull(form.birth_year_max_male);
       const minFemale = toYearOrNull(form.birth_year_min_female);
       const maxFemale = toYearOrNull(form.birth_year_max_female);
-      await fetch('/api/admin/events', {
+      await fetch('/api/rotation/admin/events', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -319,7 +319,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   const handleSaveVenue = async () => {
     setSavingVenue(true);
     try {
-      await fetch(`/api/admin/events/${eventId}`, {
+      await fetch(`/api/rotation/admin/events/${eventId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,7 +337,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   const handleSendVenueNotify = async () => {
     setSendingNotify(true);
     try {
-      const res = await fetch(`/api/admin/events/${eventId}/notify-venue`, { method: 'POST' });
+      const res = await fetch(`/api/rotation/admin/events/${eventId}/notify-venue`, { method: 'POST' });
       const json = await res.json() as { ok?: boolean; sent?: number; error?: string };
       if (!res.ok) throw new Error(json.error ?? '발송 실패');
       setNotifyResult({ sent: json.sent ?? 0 });
@@ -351,7 +351,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
 
   const handleToggleActive = async () => {
     if (!data) return;
-    await fetch('/api/admin/events', {
+    await fetch('/api/rotation/admin/events', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: eventId, is_active: !data.event.is_active }),
@@ -364,7 +364,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
     setCancelling(true);
     setCancelError('');
     try {
-      const res = await fetch(`/api/admin/events/${eventId}/cancel`, { method: 'PATCH' });
+      const res = await fetch(`/api/rotation/admin/events/${eventId}/cancel`, { method: 'PATCH' });
       const json = await res.json() as {
         ok?: boolean; affected?: number; refunded?: number; smsSent?: number;
         refundErrors?: string[]; error?: string;
@@ -667,7 +667,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                   onClick={async () => {
                     setCardGenerating(true);
                     try {
-                      const res = await fetch('/api/admin/profile-cards', {
+                      const res = await fetch('/api/rotation/admin/profile-cards', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ eventId }),
@@ -820,7 +820,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                 { label: '남자 프로필카드', sublabel: '(여성 참가자에게 발송)', token: cardTokens.male, color: 'bg-blue-400' },
                 { label: '여자 프로필카드', sublabel: '(남성 참가자에게 발송)', token: cardTokens.female, color: 'bg-pink-400' },
               ]).map(({ label, sublabel, token, color }) => {
-                const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cana.im';
+                const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cana.im').replace(/\/+$/, '');
                 const url = `${siteUrl}/rotation/profile-card/event/${token}`;
                 return (
                   <div key={token} className="rounded-xl bg-gray-50 px-4 py-3">

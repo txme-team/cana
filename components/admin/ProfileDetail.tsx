@@ -69,7 +69,7 @@ function FileLink({ url, label }: { url?: string; label: string }) {
   const handleOpen = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/signed-url?url=${encodeURIComponent(url)}`);
+      const res = await fetch(`/api/rotation/admin/signed-url?url=${encodeURIComponent(url)}`);
       const { signedUrl, error } = await res.json();
       if (error) throw new Error(error);
       window.open(signedUrl, '_blank', 'noopener,noreferrer');

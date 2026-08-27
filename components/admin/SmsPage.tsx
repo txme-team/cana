@@ -64,13 +64,13 @@ export default function SmsPage() {
 
   // ── 데이터 로드 ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch('/api/admin/sms-templates')
+    fetch('/api/rotation/admin/sms-templates')
       .then((r) => r.json())
       .then((data: SmsTemplate[]) => {
         setTemplates(data);
         if (data.length > 0) selectTemplate(data[0]);
       });
-    fetch('/api/admin/events')
+    fetch('/api/rotation/admin/events')
       .then((r) => r.json())
       .then((data: EventOption[]) => setEvents(data));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -93,7 +93,7 @@ export default function SmsPage() {
     if (!selectedKey) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/sms-templates/${selectedKey}`, {
+      const res = await fetch(`/api/rotation/admin/sms-templates/${selectedKey}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: editContent }),
@@ -117,7 +117,7 @@ export default function SmsPage() {
     if (!selectedKey) return;
     setToggling(true);
     try {
-      const res = await fetch(`/api/admin/sms-templates/${selectedKey}`, {
+      const res = await fetch(`/api/rotation/admin/sms-templates/${selectedKey}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: next }),
@@ -154,7 +154,7 @@ export default function SmsPage() {
     setSending(true);
     setSendError('');
     try {
-      const res = await fetch(`/api/admin/sms-templates/${selectedKey}/send`, {
+      const res = await fetch(`/api/rotation/admin/sms-templates/${selectedKey}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: sendEventId, recipients, genderFilter, extraVars }),

@@ -5,7 +5,7 @@ export default function Footer() {
 
         {/* 좌측 — 로고 */}
         <div className="flex-shrink-0">
-          <img src="/logos/logo_black.svg" alt="cana" className="h-[18px]" />
+          <img src="/txme-assets/logos/logo_black.svg" alt="cana" className="h-[18px]" />
         </div>
 
         {/* 우측 — 사업자 정보 + 링크 + 카피라이트 */}
@@ -31,14 +31,14 @@ export default function Footer() {
             </a>
             <span className="text-xs text-cana-rule">|</span>
             <a
-              href="https://cana.im/terms"
+              href="/terms"
               className="text-xs text-cana-ink3 transition hover:text-cana"
             >
               서비스 이용약관
             </a>
             <span className="text-xs text-cana-rule">|</span>
             <a
-              href="https://cana.im/privacy"
+              href="/privacy"
               className="text-xs font-bold text-cana-ink3 transition hover:text-cana"
             >
               개인정보처리방침

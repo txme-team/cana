@@ -145,7 +145,7 @@ export default function EventDetail({ eventId, onClose, onEdit, onRefresh }: Pro
 
   const load = () => {
     setLoading(true);
-    fetch(`/api/admin/events/${eventId}`)
+    fetch(`/api/rotation/admin/events/${eventId}`)
       .then((r) => r.json())
       .then((d: DetailData) => {
         setData(d);
@@ -159,7 +159,7 @@ export default function EventDetail({ eventId, onClose, onEdit, onRefresh }: Pro
   const handleSaveVenue = async () => {
     setSavingVenue(true);
     try {
-      await fetch(`/api/admin/events/${eventId}`, {
+      await fetch(`/api/rotation/admin/events/${eventId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ venue_detail: venueDetail }),

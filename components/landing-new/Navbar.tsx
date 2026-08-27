@@ -22,7 +22,7 @@ export default function Navbar() {
         {/* Logo */}
         <a href="/">
           <Image
-            src={scrolled ? "/logo-text-black.svg" : "/logo-text-white.svg"}
+            src={scrolled ? "/txme-assets/logo-text-black.svg" : "/txme-assets/logo-text-white.svg"}
             alt="카나"
             width={52.5}
             height={14}
@@ -34,9 +34,7 @@ export default function Navbar() {
 
         {/* CTA — white bg always on hero, solid on scroll */}
         <a
-          href="https://cana.im/home"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/home"
           className="inline-flex items-center justify-center text-[14px] font-semibold px-6 h-9 rounded-[8px] border border-[#D1C7C7] bg-[#EBE6E6] text-[#1C1B1A] hover:bg-[#D1C7C7] transition-colors duration-200"
         >
           시작하기

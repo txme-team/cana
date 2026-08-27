@@ -14,7 +14,7 @@ export default function FinalCTA() {
 
         <FadeUp delay={0.1}>
           <a
-            href="https://cana.im/home"
+            href="/home"
             className="inline-flex items-center justify-center bg-[#559BFF] text-white text-[17px] font-semibold px-10 py-5 rounded-[12px] hover:bg-[#3A6EA5] transition-colors duration-200 shadow-2xl shadow-[#559BFF]/30"
           >
             카나 시작하기
