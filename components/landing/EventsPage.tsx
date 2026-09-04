@@ -49,7 +49,7 @@ function ApplicantsPanel({ eventId }: { eventId: string }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/events/applicants?eventId=${eventId}`)
+    fetch(`/api/rotation/events/applicants?eventId=${eventId}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setApplicants(data);
@@ -105,7 +105,7 @@ export default function EventsPage() {
     if (!wl.event) return;
     setWl((m) => ({ ...m, loading: true, error: null }));
     try {
-      const res = await fetch('/api/waitlist', {
+      const res = await fetch('/api/rotation/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: wl.event.id }),
@@ -121,7 +121,7 @@ export default function EventsPage() {
   };
 
   useEffect(() => {
-    fetch('/api/events')
+    fetch('/api/rotation/events')
       .then((r) => r.json())
       .then((data) => setEvents(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
@@ -216,11 +216,11 @@ export default function EventsPage() {
               {/* 날짜 · 장소 */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1.5 text-base text-cana-ink3">
-                  <img src="/icons/calander.svg" alt="" className="h-5 w-5 flex-shrink-0" />
+                  <img src="/txme-assets/icons/calander.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                   <span>{formatEventDate(event.event_date)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-base text-cana-ink3">
-                  <img src="/icons/location.svg" alt="" className="h-5 w-5 flex-shrink-0" />
+                  <img src="/txme-assets/icons/location.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                   <span>{event.location}</span>
                 </div>
               </div>

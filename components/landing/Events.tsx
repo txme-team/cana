@@ -52,7 +52,7 @@ export default function Events({ preview = false }: Props) {
     if (!wl.event) return;
     setWl((m) => ({ ...m, loading: true, error: null }));
     try {
-      const res = await fetch('/api/waitlist', {
+      const res = await fetch('/api/rotation/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: wl.event.id }),
@@ -68,7 +68,7 @@ export default function Events({ preview = false }: Props) {
   };
 
   useEffect(() => {
-    fetch('/api/events')
+    fetch('/api/rotation/events')
       .then((r) => r.json())
       .then((data) => setEvents(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
@@ -114,11 +114,11 @@ export default function Events({ preview = false }: Props) {
               {/* 날짜 · 장소 */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 text-base text-cana-ink3">
-                  <img src="/icons/calander.svg" alt="" className="h-5 w-5 flex-shrink-0" />
+                  <img src="/txme-assets/icons/calander.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                   <span>{date} {time}</span>
                 </div>
                 <div className="flex items-center gap-2 text-base text-cana-ink3">
-                  <img src="/icons/location.svg" alt="" className="h-5 w-5 flex-shrink-0" />
+                  <img src="/txme-assets/icons/location.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                   <span>{event.location}</span>
                 </div>
               </div>

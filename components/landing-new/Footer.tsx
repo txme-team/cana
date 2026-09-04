@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="flex items-start gap-16">
           {/* Logo */}
           <Image
-            src="/logo-text-white.svg"
+            src="/txme-assets/logo-text-white.svg"
             alt="카나"
             width={72}
             height={20}
@@ -26,8 +26,8 @@ export default function Footer() {
             <div className="flex items-center gap-0 mb-6 text-[13px] text-white/40">
               {[
                 { label: "Instagram", href: "https://instagram.com/cana_for_love" },
-                { label: "서비스 이용약관", href: "https://cana.im/terms" },
-                { label: "개인정보처리방침", href: "https://cana.im/privacy" },
+                { label: "서비스 이용약관", href: "/terms" },
+                { label: "개인정보처리방침", href: "/privacy" },
               ].map(({ label, href }, i) => (
                 <span key={label} className="flex items-center">
                   {i !== 0 && <span className="mx-3 text-white/20">│</span>}

@@ -11,7 +11,7 @@ export default function Problem() {
           <FadeUp className="order-2 lg:order-1">
             <div className="relative w-full aspect-square rounded-3xl overflow-hidden">
               <Image
-                src="/hero/hf_20260605_073752_c334aed9-28d8-45f8-bb7f-4c40839ac8ce.png"
+                src="/txme-assets/hero/hf_20260605_073752_c334aed9-28d8-45f8-bb7f-4c40839ac8ce.png"
                 alt="카나 서비스 소개"
                 fill
                 className="object-cover"

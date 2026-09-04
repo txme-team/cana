@@ -2,7 +2,7 @@
 
 크리스천 직장인 로테이션 소개팅 서비스.  
 GitHub: `https://github.com/txme-team/cana.git`  
-프로덕션: `https://can-for-love.vercel.app`  
+프로덕션: `https://cana-for-love.vercel.app`  
 로컬 dev: `http://localhost:3000`
 
 ---
@@ -31,7 +31,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
 NEXT_PUBLIC_TOSS_AMOUNT=50000
-NEXT_PUBLIC_APP_URL=https://can-for-love.vercel.app
+NEXT_PUBLIC_APP_URL=https://cana.im
 
 TOSS_SECRET_KEY=
 
@@ -324,7 +324,7 @@ SMS 내용을 DB에서 관리. `key` 기준 조회 후 변수 치환.
 
 ## 인증 & 권한
 
-- **일반 유저**: Google OAuth (`/login` → `/auth/callback` → `/onboard` 또는 `/my`)
+- **일반 유저**: Google OAuth (`/rotation/login` → `/rotation/auth/callback` → `/rotation/onboard` 또는 `/rotation/my`)
 - **어드민**: `user.app_metadata.role === 'admin'` 확인
   - 어드민 권한 부여 SQL:
     ```sql
@@ -341,14 +341,14 @@ SMS 내용을 DB에서 관리. `key` 기준 조회 후 변수 치환.
 
 ```
 이벤트 선택 (Step0)
-  └─ 마감 이벤트 → 카드 내 "대기 신청하기" 텍스트 링크 → waitlist 모달 → POST /api/waitlist
+  └─ 마감 이벤트 → 카드 내 "대기 신청하기" 텍스트 링크 → waitlist 모달 → POST /api/rotation/waitlist
   └─ 모집 중 이벤트 → 선택 후 다음
 
 → 프로필 확인 (Step1 — DB 프로필 미리보기)
 → 약관 동의 (Step2)
 → Toss 결제창 (CARD, 50,000원)
-→ /apply/success → POST /api/payment/confirm → applications 생성 (status: 검토중)
-→ /apply/complete
+→ /rotation/apply/success → POST /api/rotation/payment/confirm → applications 생성 (status: 검토중)
+→ /rotation/apply/complete
 ```
 
 **대기 자리 알림 플로우:**
@@ -359,7 +359,7 @@ SMS 내용을 DB에서 관리. `key` 기준 조회 후 변수 치환.
 ```
 
 **독점 신청 권한:**  
-`/api/apply GET`에서 마감 이벤트는 `waitlist.status = '연락됨'`인 사람만 통과
+`/api/rotation/apply GET`에서 마감 이벤트는 `waitlist.status = '연락됨'`인 사람만 통과
 
 ---
 
@@ -380,7 +380,7 @@ SMS 내용을 DB에서 관리. `key` 기준 조회 후 변수 치환.
 ## 스토리지 (Supabase Storage)
 
 버킷: `profile-photos` (public)  
-업로드: `POST /api/profile` (FormData)  
+업로드: `POST /api/rotation/profile` (FormData)  
 파일 접두어: `photo-`, `workplace-`, `church-`  
 URL 형식: `getPublicUrl()` → 전체 공개 URL로 저장
 
@@ -390,14 +390,14 @@ URL 형식: `getPublicUrl()` → 전체 공개 URL로 저장
 
 | 메뉴 | 경로 | 주요 기능 |
 |------|------|-----------|
-| 신청자 명단 | `/admin` | 필터·검색, 상태 변경, 프로필 상세 모달 |
-| 이벤트 관리 | `/admin/events` | CRUD, 확정 인원 현황, waitlist 조회 |
-| 회원 목록 | `/admin/members` | 전체 프로필 조회 |
-| 결제 내역 | `/admin/payments` | 결제 취소 + 환불 + waitlist SMS |
-| 매출 현황 | `/admin/revenue` | 이벤트별 매출 집계 |
-| 문자 관리 | `/admin/sms` | 템플릿 편집, 수동 일괄 발송 |
-| 활동 로그 | `/admin/logs` | 관리자 액션 이력 |
-| 프로필 인쇄 | `/admin/print` | A4 프로필 카드 PDF 출력 |
+| 신청자 명단 | `/rotation/admin` | 필터·검색, 상태 변경, 프로필 상세 모달 |
+| 이벤트 관리 | `/rotation/admin/events` | CRUD, 확정 인원 현황, waitlist 조회 |
+| 회원 목록 | `/rotation/admin/members` | 전체 프로필 조회 |
+| 결제 내역 | `/rotation/admin/payments` | 결제 취소 + 환불 + waitlist SMS |
+| 매출 현황 | `/rotation/admin/revenue` | 이벤트별 매출 집계 |
+| 문자 관리 | `/rotation/admin/sms` | 템플릿 편집, 수동 일괄 발송 |
+| 활동 로그 | `/rotation/admin/logs` | 관리자 액션 이력 |
+| 프로필 인쇄 | `/rotation/admin/print` | A4 프로필 카드 PDF 출력 |
 
 ---
 

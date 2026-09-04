@@ -24,7 +24,7 @@ const features: { icon: IllustIconName; title: string; desc: string }[] = [
   },
 ];
 
-const images = ["/images/1.png", "/images/2.png", "/images/3.png"];
+const images = ["/txme-assets/images/1.png", "/txme-assets/images/2.png", "/txme-assets/images/3.png"];
 
 export default function Solution1() {
   const [active, setActive] = useState<number>(0);

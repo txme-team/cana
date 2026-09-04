@@ -16,12 +16,13 @@ function LoginContent() {
     // Redirect URL 허용 목록과 정확히 일치하지 않아 인증 후 기본 Site URL
     // (랜딩페이지)로 떨어지는 경우가 있다. 그래서 목적지는 쿠키로 별도 전달하고,
     // OAuth 콜백 URL 자체는 쿼리 없이 고정해둔다.
-    document.cookie = `cana_post_login_redirect=${encodeURIComponent(redirectTo)}; path=/; max-age=600; SameSite=Lax`;
+    const secureCookie = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `cana_post_login_redirect=${encodeURIComponent(redirectTo)}; Path=/; Max-Age=600; SameSite=Lax${secureCookie}`;
 
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/rotation/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        redirectTo: `${window.location.origin}/rotation/auth/callback`,
       },
     });
   };

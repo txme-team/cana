@@ -20,7 +20,6 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
-
   // ── /rotation/admin 보호 ────────────────────────────────────────────────────
   const isAdminPath = pathname.startsWith('/rotation/admin');
   const isAdminLogin = pathname === '/rotation/admin/login';

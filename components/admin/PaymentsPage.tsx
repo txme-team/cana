@@ -109,7 +109,7 @@ export default function PaymentsPage({
     setError(null);
 
     try {
-      const res = await fetch('/api/admin/payments', {
+      const res = await fetch('/api/rotation/admin/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicationId: p.id, paymentKey: p.payment_key }),

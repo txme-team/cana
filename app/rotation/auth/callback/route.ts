@@ -2,20 +2,43 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createServiceClient } from '@/lib/supabase/server';
 
+const POST_LOGIN_REDIRECT_COOKIE = 'cana_post_login_redirect';
+const DEFAULT_POST_LOGIN_REDIRECT = '/rotation/apply';
+
+function getSafePostLoginRedirect(rawValue: string | undefined, origin: string) {
+  if (!rawValue) return DEFAULT_POST_LOGIN_REDIRECT;
+
+  try {
+    // NextRequest.cookies already decodes the cookie value once. Decoding it
+    // again would alter legitimate encoded query-string values.
+    const destination = new URL(rawValue, origin);
+    const isRotationPath =
+      destination.pathname === '/rotation' ||
+      destination.pathname.startsWith('/rotation/');
+
+    if (destination.origin !== origin || !isRotationPath) {
+      return DEFAULT_POST_LOGIN_REDIRECT;
+    }
+
+    return `${destination.pathname}${destination.search}${destination.hash}`;
+  } catch {
+    return DEFAULT_POST_LOGIN_REDIRECT;
+  }
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  // 로그인 페이지에서 쿠키로 전달한 목적지를 우선 사용하고(쿼리스트링이 OAuth
-  // 리다이렉트 허용 목록과 어긋나 사라지는 경우를 대비), 없으면 쿼리의 next,
-  // 둘 다 없으면 신청 페이지로 보낸다.
-  const cookieNext = request.cookies.get('cana_post_login_redirect')?.value;
-  const next = cookieNext || searchParams.get('next') || '/rotation/apply';
+  // Supabase에는 허용 목록과 정확히 일치하는 고정 콜백 URL만 전달한다.
+  // 실제 목적지는 짧게 유지되는 쿠키에서 읽고 /rotation 내부로 제한한다.
+  const cookieNext = request.cookies.get(POST_LOGIN_REDIRECT_COOKIE)?.value;
+  const next = getSafePostLoginRedirect(cookieNext, origin);
 
   if (code) {
     // We need a mutable response; create a temporary redirect target first.
     const response = NextResponse.redirect(`${origin}${next}`);
     // 1회용 쿠키 — 사용 후 즉시 제거
-    response.cookies.delete('cana_post_login_redirect');
+    response.cookies.delete(POST_LOGIN_REDIRECT_COOKIE);
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,7 +79,7 @@ export async function GET(request: NextRequest) {
           response.cookies.getAll().forEach(({ name, value, ...opts }) => {
             nudgeResponse.cookies.set(name, value, opts);
           });
-          nudgeResponse.cookies.delete('cana_post_login_redirect');
+          nudgeResponse.cookies.delete(POST_LOGIN_REDIRECT_COOKIE);
           return nudgeResponse;
         }
       } catch {
@@ -67,5 +90,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/rotation/login?error=auth_failed`);
+  const failureResponse = NextResponse.redirect(`${origin}/rotation/login?error=auth_failed`);
+  failureResponse.cookies.delete(POST_LOGIN_REDIRECT_COOKIE);
+  return failureResponse;
 }

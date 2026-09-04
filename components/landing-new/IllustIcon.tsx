@@ -22,7 +22,7 @@ interface IllustIconProps {
 export default function IllustIcon({ name, size = 40, className = "" }: IllustIconProps) {
   return (
     <Image
-      src={`/icons/${name}.svg`}
+      src={`/txme-assets/icons/${name}.svg`}
       alt={name}
       width={size}
       height={size}

@@ -6,7 +6,7 @@ export default function Hero() {
     <section className="relative flex min-h-screen items-center overflow-hidden">
       {/* 배경 이미지 */}
       <Image
-        src="/images/hero.png"
+        src="/txme-assets/images/hero.png"
         alt="카나 로테이션 소개팅"
         fill
         priority

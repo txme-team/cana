@@ -57,7 +57,7 @@ export default function Nav() {
           <div className="flex items-center gap-6">
             <Link href="/rotation">
               <img
-                src={transparent ? '/logos/logo_white.svg' : '/logos/logo_black.svg'}
+                src={transparent ? '/txme-assets/logos/logo_white.svg' : '/txme-assets/logos/logo_black.svg'}
                 alt="cana"
                 className="h-[14px]"
               />
