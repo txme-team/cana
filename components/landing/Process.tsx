@@ -32,7 +32,7 @@ export default function Process() {
           <h2 className="mb-3 text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
             이렇게 진행돼요
           </h2>
-          <p className="text-base text-cana-ink3">총 소요 시간 약 120분, 4명의 이성과 대화합니다.</p>
+          <p className="text-base text-cana-ink3">총 소요 시간 약 120분, 4~10명의 이성과 대화합니다.</p>
         </div>
 
         {/* 스텝 */}
