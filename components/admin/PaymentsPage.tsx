@@ -26,9 +26,46 @@ export type PaymentFilter = '전체' | '성공' | '취소' | '반려';
 
 const SUCCESS_STATUSES = ['검토중', '대기', '확정'];
 
+// ─── Toss 건별 조회 응답 타입 (사용하는 필드만) ────────────────────────────────
+
+interface TossCancel {
+  cancelAmount: number;
+  cancelReason: string;
+  canceledAt: string;
+  transactionKey: string;
+}
+
+interface TossPaymentQuery {
+  status: string;
+  method: string | null;
+  orderId: string;
+  orderName: string;
+  totalAmount: number;
+  balanceAmount: number;
+  requestedAt: string;
+  approvedAt: string | null;
+  receipt?: { url: string } | null;
+  cancels?: TossCancel[] | null;
+  card?: { company?: string; number?: string; installmentPlanMonths?: number } | null;
+  virtualAccount?: { bankCode?: string; accountNumber?: string; dueDate?: string } | null;
+  easyPay?: { provider?: string } | null;
+  failure?: { code: string; message: string } | null;
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  READY: '결제 대기',
+  IN_PROGRESS: '진행 중',
+  WAITING_FOR_DEPOSIT: '입금 대기',
+  DONE: '결제 완료',
+  CANCELED: '전액 취소',
+  PARTIAL_CANCELED: '부분 취소',
+  ABORTED: '결제 실패',
+  EXPIRED: '만료',
+};
+
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 
-function fmtAmount(n: number | null) {
+function fmtAmount(n: number | null | undefined) {
   if (n == null) return '—';
   return n.toLocaleString('ko-KR') + '원';
 }
@@ -79,6 +116,11 @@ export default function PaymentsPage({
   const [cancelTarget, setCancelTarget] = useState<PaymentItem | null>(null);
   const [refundAmount, setRefundAmount] = useState<number | null>(null);
 
+  const [queryTarget, setQueryTarget]   = useState<PaymentItem | null>(null);
+  const [queryData, setQueryData]       = useState<TossPaymentQuery | null>(null);
+  const [queryLoading, setQueryLoading] = useState(false);
+  const [queryError, setQueryError]     = useState<string | null>(null);
+
   useEffect(() => setPayments(initial), [initial]);
 
   const FILTERS: PaymentFilter[] = ['전체', '성공', '취소', '반려'];
@@ -101,6 +143,24 @@ export default function PaymentsPage({
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
+
+  const handleQuery = async (p: PaymentItem) => {
+    if (!p.payment_key) return;
+    setQueryTarget(p);
+    setQueryData(null);
+    setQueryError(null);
+    setQueryLoading(true);
+    try {
+      const res = await fetch(`/api/rotation/admin/payments/query?paymentKey=${encodeURIComponent(p.payment_key)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? '조회 실패');
+      setQueryData(data as TossPaymentQuery);
+    } catch (e) {
+      setQueryError(e instanceof Error ? e.message : '오류가 발생했어요.');
+    } finally {
+      setQueryLoading(false);
+    }
+  };
 
   const handleCancelConfirm = async () => {
     const p = cancelTarget;
@@ -202,17 +262,12 @@ export default function PaymentsPage({
                     <td className="whitespace-nowrap px-4 py-3 text-gray-500">{fmtDate(p.paid_at)}</td>
                     <td className="px-4 py-3 text-center">
                       {p.payment_key ? (
-                        <a
-                          href={`https://dashboard.tosspayments.com/receipts/${p.payment_key}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-cana underline-offset-2 hover:underline"
+                        <button
+                          onClick={() => handleQuery(p)}
+                          className="text-xs text-cana underline-offset-2 hover:underline"
                         >
                           보기
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                          </svg>
-                        </a>
+                        </button>
                       ) : '—'}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -309,6 +364,106 @@ export default function PaymentsPage({
                 {cancelling ? '처리 중...' : '취소하기'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 결제 건별 조회 팝업 */}
+      {queryTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6"
+          onClick={() => setQueryTarget(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-base font-semibold text-gray-900">Toss 결제 조회</p>
+              <button
+                onClick={() => setQueryTarget(null)}
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="mb-3 text-xs text-gray-400">{queryTarget.nickname}님 · {queryTarget.event_title}</p>
+
+            {queryLoading ? (
+              <div className="py-10 text-center text-sm text-gray-400">조회 중...</div>
+            ) : queryError ? (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{queryError}</p>
+            ) : queryData ? (
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-gray-50 px-3 py-2.5">
+                  <div>
+                    <p className="text-[11px] text-gray-400">상태</p>
+                    <p className="font-medium text-gray-800">{STATUS_LABELS[queryData.status] ?? queryData.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-gray-400">결제수단</p>
+                    <p className="font-medium text-gray-800">
+                      {queryData.card?.company ?? queryData.easyPay?.provider ?? queryData.method ?? '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-gray-400">총 결제금액</p>
+                    <p className="font-medium text-gray-800">{fmtAmount(queryData.totalAmount)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-gray-400">잔여금액</p>
+                    <p className="font-medium text-gray-800">{fmtAmount(queryData.balanceAmount)}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-[11px] text-gray-400">승인 일시</p>
+                    <p className="font-medium text-gray-800">{fmtDate(queryData.approvedAt)}</p>
+                  </div>
+                </div>
+
+                {queryData.failure && (
+                  <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+                    실패: {queryData.failure.message} ({queryData.failure.code})
+                  </p>
+                )}
+
+                {/* 취소 이력 — 우리가 요청한 취소가 Toss에 실제로 반영됐는지 여기서 확인 */}
+                <div>
+                  <p className="mb-1.5 text-xs font-medium text-gray-700">취소 이력</p>
+                  {queryData.cancels && queryData.cancels.length > 0 ? (
+                    <div className="flex flex-col gap-1.5">
+                      {queryData.cancels.map((c) => (
+                        <div key={c.transactionKey} className="rounded-lg border border-gray-100 px-3 py-2 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-gray-800">{fmtAmount(c.cancelAmount)}</span>
+                            <span className="text-gray-400">{fmtDate(c.canceledAt)}</span>
+                          </div>
+                          <p className="mt-0.5 text-gray-500">{c.cancelReason}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400">취소 이력 없음</p>
+                  )}
+                </div>
+
+                {queryData.receipt?.url && (
+                  <a
+                    href={queryData.receipt.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-cana underline-offset-2 hover:underline"
+                  >
+                    영수증 페이지 열기
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
       )}
