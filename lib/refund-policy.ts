@@ -52,6 +52,26 @@ export function calcRefund(
   return { rate, amount: amt, label: tier.label };
 }
 
+/**
+ * 관리자가 취소 처리 시 직접 입력한 환불 금액이 있으면 그 값을 쓰고,
+ * 없으면 날짜 기반 정책 계산값을 기본값으로 쓴다.
+ * (우리 쪽 사유로 취소하는 경우 등 날짜 정책과 무관하게 전액/임의 금액을 줘야 할 때 사용)
+ */
+export function resolveRefund(
+  amount: number | null | undefined,
+  eventDateStr: string | null | undefined,
+  overrideAmount?: number | null,
+  now: Date = new Date(),
+): RefundResult {
+  const suggested = calcRefund(amount, eventDateStr, now);
+  if (overrideAmount == null || !Number.isFinite(overrideAmount)) return suggested;
+
+  const max = amount ?? 0;
+  const amt = Math.round(Math.max(0, Math.min(overrideAmount, max)));
+  const label = amt === 0 ? '환불 없음' : amt === max ? '전액 환불' : `${amt.toLocaleString('ko-KR')}원 환불`;
+  return { rate: max > 0 ? amt / max : 0, amount: amt, label };
+}
+
 /** SMS/알림 본문에 넣을 환불 안내 한 줄 */
 export function refundNoticeText(refund: RefundResult): string {
   if (refund.rate === 0) return '환불 규정상 참가비는 환불되지 않습니다.';

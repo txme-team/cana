@@ -77,6 +77,7 @@ export default function PaymentsPage({
   const [payments, setPayments]     = useState<PaymentItem[]>(initial);
   const [error, setError]           = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<PaymentItem | null>(null);
+  const [refundAmount, setRefundAmount] = useState<number | null>(null);
 
   useEffect(() => setPayments(initial), [initial]);
 
@@ -112,7 +113,11 @@ export default function PaymentsPage({
       const res = await fetch('/api/rotation/admin/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: p.id, paymentKey: p.payment_key }),
+        body: JSON.stringify({
+          applicationId: p.id,
+          paymentKey: p.payment_key,
+          ...(refundAmount != null ? { refundAmount } : {}),
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string };
@@ -213,7 +218,10 @@ export default function PaymentsPage({
                     <td className="px-4 py-3 text-center">
                       {SUCCESS_STATUSES.includes(p.status) && p.payment_key ? (
                         <button
-                          onClick={() => setCancelTarget(p)}
+                          onClick={() => {
+                            setRefundAmount(calcRefund(p.amount, p.event_date).amount);
+                            setCancelTarget(p);
+                          }}
                           disabled={cancelling === p.id}
                           className="rounded-lg border border-red-200 px-2.5 py-1 text-xs text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                         >
@@ -246,19 +254,41 @@ export default function PaymentsPage({
             <p className="mb-1 text-base font-semibold text-gray-900">결제를 취소할까요?</p>
 
             {(() => {
-              const refund = calcRefund(cancelTarget.amount, cancelTarget.event_date);
+              const suggested = calcRefund(cancelTarget.amount, cancelTarget.event_date);
+              const max = cancelTarget.amount ?? 0;
+              const current = refundAmount ?? suggested.amount;
               return (
                 <>
                   <p className="text-sm text-gray-600">
-                    환불 규정상 <span className="font-medium text-gray-900">{refund.label}</span>
-                    {refund.rate > 0 && (
-                      <> (<span className="font-medium text-gray-900">{refund.amount.toLocaleString('ko-KR')}원</span>)</>
+                    환불 규정 기본값: <span className="font-medium text-gray-900">{suggested.label}</span>
+                    {suggested.rate > 0 && (
+                      <> (<span className="font-medium text-gray-900">{suggested.amount.toLocaleString('ko-KR')}원</span>)</>
                     )}
-                    됩니다.
                   </p>
                   <ul className="mt-2 list-disc space-y-0.5 pl-4 text-xs text-gray-400">
                     {REFUND_POLICY_TEXT.map((t) => <li key={t}>{t}</li>)}
                   </ul>
+
+                  <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
+                    <label className="shrink-0 text-xs font-medium text-gray-700">환불 금액</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={max}
+                      step={100}
+                      value={current}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        if (Number.isNaN(n)) return;
+                        setRefundAmount(Math.max(0, Math.min(n, max)));
+                      }}
+                      className="w-full min-w-0 rounded-md border border-gray-200 px-2 py-1 text-right text-sm text-gray-800 outline-none focus:border-cana"
+                    />
+                    <span className="shrink-0 text-xs text-gray-400">원</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-gray-400">
+                    우리 쪽 사유로 취소하는 경우 등 날짜와 무관하게 금액을 직접 조정할 수 있어요.
+                  </p>
                 </>
               );
             })()}

@@ -37,6 +37,7 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
   const [processing, setProcessing]         = useState(false);
   const [photoUrl, setPhotoUrl]             = useState<string | null>(null);
   const [showFullPhoto, setShowFullPhoto]   = useState(false);
+  const [refundAmount, setRefundAmount]     = useState<number | null>(null);
 
   // ESC 닫기
   useEffect(() => {
@@ -97,7 +98,11 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
     const res = await fetch('/api/rotation/admin/update-status', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: profile.id, status: '취소' }),
+      body: JSON.stringify({
+        id: profile.id,
+        status: '취소',
+        ...(profile.amount != null && refundAmount != null ? { refundAmount } : {}),
+      }),
     });
     if (res.ok) {
       setStatus('취소');
@@ -251,7 +256,12 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
                       일정 변경
                     </button>
                     <button
-                      onClick={() => setRequestAction('cancel')}
+                      onClick={() => {
+                        setRefundAmount(
+                          profile.amount != null ? calcRefund(profile.amount, eventDate).amount : null
+                        );
+                        setRequestAction('cancel');
+                      }}
                       className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-red-300 transition hover:bg-red-50 hover:text-red-500"
                     >
                       취소 처리
@@ -269,19 +279,40 @@ export default function ProfileModal({ profile, eventDate, onClose, onStatusChan
                   상태가 <span className="font-medium text-gray-600">취소</span>로 변경되며 이벤트 명단에서 제외돼요.
                 </p>
                 {profile.amount != null ? (() => {
-                  const refund = calcRefund(profile.amount, eventDate);
+                  const suggested = calcRefund(profile.amount, eventDate);
+                  const current = refundAmount ?? suggested.amount;
                   return (
                     <div className="rounded-lg bg-gray-50 px-2.5 py-2">
                       <p className="text-[11px] leading-relaxed text-gray-600">
-                        환불 규정상 <span className="font-medium text-gray-800">{refund.label}</span>
-                        {refund.rate > 0 && (
-                          <> (<span className="font-medium text-gray-800">{refund.amount.toLocaleString('ko-KR')}원</span>)</>
+                        환불 규정 기본값: <span className="font-medium text-gray-800">{suggested.label}</span>
+                        {suggested.rate > 0 && (
+                          <> (<span className="font-medium text-gray-800">{suggested.amount.toLocaleString('ko-KR')}원</span>)</>
                         )}
-                        됩니다.
                       </p>
                       <ul className="mt-1.5 list-disc space-y-0.5 pl-3.5 text-[10px] text-gray-400">
                         {REFUND_POLICY_TEXT.map((t) => <li key={t}>{t}</li>)}
                       </ul>
+
+                      <div className="mt-2.5 flex items-center gap-2 border-t border-gray-200 pt-2.5">
+                        <label className="shrink-0 text-[11px] font-medium text-gray-700">환불 금액</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={profile.amount}
+                          step={100}
+                          value={current}
+                          onChange={(e) => {
+                            const n = Number(e.target.value);
+                            if (Number.isNaN(n)) return;
+                            setRefundAmount(Math.max(0, Math.min(n, profile.amount!)));
+                          }}
+                          className="w-full min-w-0 rounded-md border border-gray-200 bg-white px-2 py-1 text-right text-xs text-gray-800 outline-none focus:border-cana"
+                        />
+                        <span className="shrink-0 text-[11px] text-gray-400">원</span>
+                      </div>
+                      <p className="mt-1 text-[10px] text-gray-400">
+                        우리 쪽 사유로 취소하는 경우 등 날짜와 무관하게 금액을 직접 조정할 수 있어요. (최대 {profile.amount.toLocaleString('ko-KR')}원)
+                      </p>
                     </div>
                   );
                 })() : null}

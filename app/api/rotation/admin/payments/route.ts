@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
-import { calcRefund, refundNoticeText } from '@/lib/refund-policy';
+import { resolveRefund, refundNoticeText } from '@/lib/refund-policy';
 import { buildPublicUrl } from '@/lib/public-url';
 
 async function requireAdmin() {
@@ -66,9 +66,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
-    const { applicationId, paymentKey } = await req.json() as {
+    const { applicationId, paymentKey, refundAmount } = await req.json() as {
       applicationId: string;
       paymentKey: string;
+      refundAmount?: number;
     };
 
     if (!applicationId || !paymentKey) {
@@ -91,17 +92,18 @@ export async function POST(req: NextRequest) {
     }
 
     const eventDate = appRow.events?.event_date;
-    const refund = calcRefund(appRow.amount, eventDate);
+    // 관리자가 환불 금액을 직접 입력했으면 그 값을 쓰고, 없으면 날짜 기반 정책값을 기본으로 쓴다.
+    const refund = resolveRefund(appRow.amount, eventDate, typeof refundAmount === 'number' ? refundAmount : null);
 
     // Toss 결제 취소 API 호출 (환불 대상 금액이 있을 때만)
-    if (refund.rate > 0) {
+    if (refund.amount > 0) {
       const secretKey = process.env.TOSS_SECRET_KEY!;
       const token = Buffer.from(`${secretKey}:`).toString('base64');
 
       const cancelBody: { cancelReason: string; cancelAmount?: number } = {
         cancelReason: '관리자 요청 취소',
       };
-      if (refund.rate < 1) cancelBody.cancelAmount = refund.amount;
+      if (refund.amount < (appRow.amount ?? 0)) cancelBody.cancelAmount = refund.amount;
 
       const tossRes = await fetch(
         `https://api.tosspayments.com/v1/payments/${paymentKey}/cancel`,

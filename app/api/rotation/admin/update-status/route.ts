@@ -6,7 +6,7 @@ import { notifyApplicationCancelled } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 import { ensureProfileCardMeta } from '@/lib/profile-card';
-import { calcRefund, refundNoticeText } from '@/lib/refund-policy';
+import { resolveRefund, refundNoticeText, type RefundResult } from '@/lib/refund-policy';
 import { buildPublicUrl } from '@/lib/public-url';
 
 const VALID_STATUSES: ProfileStatus[] = ['검토중', '대기', '확정', '반려', '취소'];
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest) {
 
   // ── 취소: 상태를 바꾸기 전에 환불부터 처리 (실패 시 상태 변경 자체를 막는다) ──
   let cancelJoin: CancelJoinRow | null = null;
-  let cancelRefund: ReturnType<typeof calcRefund> | null = null;
+  let cancelRefund: RefundResult | null = null;
 
   if (body.status === '취소') {
     const { data: appRow } = await svc
@@ -61,17 +61,19 @@ export async function PATCH(req: NextRequest) {
     cancelJoin = appRow;
 
     const eventDate = appRow.events?.event_date;
-    const refund = calcRefund(appRow.amount, eventDate);
+    // 관리자가 환불 금액을 직접 입력했으면 그 값을 쓰고, 없으면 날짜 기반 정책값을 기본으로 쓴다.
+    const refundAmountOverride = typeof body.refundAmount === 'number' ? body.refundAmount : null;
+    const refund = resolveRefund(appRow.amount, eventDate, refundAmountOverride);
     cancelRefund = refund;
 
-    if (appRow.payment_key && refund.rate > 0) {
+    if (appRow.payment_key && refund.amount > 0) {
       const secretKey = process.env.TOSS_SECRET_KEY!;
       const token = Buffer.from(`${secretKey}:`).toString('base64');
 
       const cancelBody: { cancelReason: string; cancelAmount?: number } = {
         cancelReason: '운영진 취소 처리',
       };
-      if (refund.rate < 1) cancelBody.cancelAmount = refund.amount;
+      if (refund.amount < (appRow.amount ?? 0)) cancelBody.cancelAmount = refund.amount;
 
       const tossRes = await fetch(
         `https://api.tosspayments.com/v1/payments/${appRow.payment_key}/cancel`,
