@@ -9,6 +9,7 @@ import { notifyApplicationCancelled, notifyError } from '@/lib/slack';
 import { calcRefund, refundNoticeText } from '@/lib/refund-policy';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 import { buildPublicUrl } from '@/lib/public-url';
+import { logAdminAction } from '@/lib/admin-logger';
 
 const CANCELLABLE_STATUSES = ['검토중', '대기'];
 
@@ -90,12 +91,59 @@ export async function POST(
       );
 
       if (!refundRes.ok) {
-        const err = await refundRes.json().catch(() => ({})) as { message?: string };
+        const err = await refundRes.json().catch(() => ({})) as { message?: string; code?: string };
+        logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email ?? '',
+          action: 'PAYMENT_REFUND_FAILED',
+          targetType: 'application',
+          targetId: params.id,
+          detail: {
+            initiatedBy: 'user',
+            paymentKey: application.payment_key,
+            orderAmount: application.amount,
+            requestedRefundAmount: refund.amount,
+            tossRequest: cancelBody,
+            tossStatus: refundRes.status,
+            tossMessage: err.message,
+            tossCode: err.code,
+          },
+        }).catch(() => {});
         return NextResponse.json(
           { error: err.message ?? '환불 처리에 실패했어요. 운영팀에 문의해주세요.' },
           { status: 400 }
         );
       }
+
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_REFUND_SUCCEEDED',
+        targetType: 'application',
+        targetId: params.id,
+        detail: {
+          initiatedBy: 'user',
+          paymentKey: application.payment_key,
+          orderAmount: application.amount,
+          refundAmount: refund.amount,
+          refundLabel: refund.label,
+          tossRequest: cancelBody,
+        },
+      }).catch(() => {});
+    } else if (application.payment_key) {
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_REFUND_SKIPPED',
+        targetType: 'application',
+        targetId: params.id,
+        detail: {
+          initiatedBy: 'user',
+          paymentKey: application.payment_key,
+          orderAmount: application.amount,
+          reason: '환불 금액 0원 (정책상 환불 대상 아님)',
+        },
+      }).catch(() => {});
     }
 
     // 상태 → 취소

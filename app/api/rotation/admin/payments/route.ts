@@ -4,6 +4,7 @@ import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 import { resolveRefund, refundNoticeText } from '@/lib/refund-policy';
 import { buildPublicUrl } from '@/lib/public-url';
+import { logAdminAction } from '@/lib/admin-logger';
 
 async function requireAdmin() {
   const supabase = createClient();
@@ -65,7 +66,7 @@ export async function GET() {
 // POST — 결제 취소
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin();
+    const user = await requireAdmin();
     const { applicationId, paymentKey, refundAmount } = await req.json() as {
       applicationId: string;
       paymentKey: string;
@@ -119,12 +120,53 @@ export async function POST(req: NextRequest) {
       );
 
       if (!tossRes.ok) {
-        const err = await tossRes.json().catch(() => ({})) as { message?: string };
+        const err = await tossRes.json().catch(() => ({})) as { message?: string; code?: string };
+        logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email ?? '',
+          action: 'PAYMENT_REFUND_FAILED',
+          targetType: 'application',
+          targetId: applicationId,
+          detail: {
+            paymentKey,
+            orderAmount: appRow.amount,
+            requestedRefundAmount: refund.amount,
+            tossRequest: cancelBody,
+            tossStatus: tossRes.status,
+            tossMessage: err.message,
+            tossCode: err.code,
+          },
+        }).catch(() => {});
         return NextResponse.json(
           { error: err.message ?? '결제 취소에 실패했어요.' },
           { status: 400 }
         );
       }
+
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_REFUND_SUCCEEDED',
+        targetType: 'application',
+        targetId: applicationId,
+        detail: {
+          paymentKey,
+          orderAmount: appRow.amount,
+          refundAmount: refund.amount,
+          refundLabel: refund.label,
+          overridden: typeof refundAmount === 'number',
+          tossRequest: cancelBody,
+        },
+      }).catch(() => {});
+    } else {
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_REFUND_SKIPPED',
+        targetType: 'application',
+        targetId: applicationId,
+        detail: { paymentKey, orderAmount: appRow.amount, reason: '환불 금액 0원 (정책상 환불 대상 아님)' },
+      }).catch(() => {});
     }
 
     // applications 상태를 '취소'로 업데이트

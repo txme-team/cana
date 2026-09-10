@@ -89,12 +89,57 @@ export async function PATCH(req: NextRequest) {
       );
 
       if (!tossRes.ok) {
-        const err = await tossRes.json().catch(() => ({})) as { message?: string };
+        const err = await tossRes.json().catch(() => ({})) as { message?: string; code?: string };
+        logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email ?? '',
+          action: 'PAYMENT_REFUND_FAILED',
+          targetType: 'application',
+          targetId: body.id,
+          detail: {
+            paymentKey: appRow.payment_key,
+            orderAmount: appRow.amount,
+            requestedRefundAmount: refund.amount,
+            tossRequest: cancelBody,
+            tossStatus: tossRes.status,
+            tossMessage: err.message,
+            tossCode: err.code,
+          },
+        }).catch(() => {});
         return NextResponse.json(
           { error: err.message ?? '환불 처리에 실패했어요. 결제 상태를 확인해주세요.' },
           { status: 400 }
         );
       }
+
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_REFUND_SUCCEEDED',
+        targetType: 'application',
+        targetId: body.id,
+        detail: {
+          paymentKey: appRow.payment_key,
+          orderAmount: appRow.amount,
+          refundAmount: refund.amount,
+          refundLabel: refund.label,
+          overridden: refundAmountOverride != null,
+          tossRequest: cancelBody,
+        },
+      }).catch(() => {});
+    } else if (appRow.payment_key) {
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_REFUND_SKIPPED',
+        targetType: 'application',
+        targetId: body.id,
+        detail: {
+          paymentKey: appRow.payment_key,
+          orderAmount: appRow.amount,
+          reason: '환불 금액 0원 (정책상 환불 대상 아님)',
+        },
+      }).catch(() => {});
     }
   }
 

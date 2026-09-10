@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { notifyPaymentComplete, notifyError } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
+import { logAdminAction } from '@/lib/admin-logger';
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,6 +69,14 @@ export async function POST(req: NextRequest) {
 
     if (!tossRes.ok) {
       const tossErr = await tossRes.json().catch(() => ({})) as { message?: string; code?: string };
+      logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email ?? '',
+        action: 'PAYMENT_CONFIRM_FAILED',
+        targetType: 'payment',
+        targetId: orderId,
+        detail: { paymentKey, orderId, amount, eventId, tossStatus: tossRes.status, tossMessage: tossErr.message, tossCode: tossErr.code },
+      }).catch(() => {});
       return NextResponse.json(
         { error: tossErr.message ?? '결제 승인에 실패했어요.', code: tossErr.code },
         { status: 400 }
@@ -80,6 +89,15 @@ export async function POST(req: NextRequest) {
       method?: string;
       totalAmount?: number;
     };
+
+    logAdminAction({
+      adminId: user.id,
+      adminEmail: user.email ?? '',
+      action: 'PAYMENT_CONFIRM_SUCCEEDED',
+      targetType: 'payment',
+      targetId: orderId,
+      detail: { paymentKey, orderId, amount, eventId, tossAmount: tossPayment.totalAmount, method: tossPayment.method },
+    }).catch(() => {});
 
     // ── 중복 신청 최종 검사 ───────────────────────────────────────────────────
     const { data: existing } = await supa

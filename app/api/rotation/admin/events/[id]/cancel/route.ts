@@ -68,6 +68,10 @@ export async function PATCH(
     const token = Buffer.from(`${secretKey}:`).toString('base64');
 
     const refundErrors: string[] = [];
+    const refundResults: Array<{
+      applicationId: string; nickname: string; paymentKey: string; amount: number | null;
+      ok: boolean; tossStatus?: number; tossMessage?: string;
+    }> = [];
     let refunded = 0;
 
     for (const app of targets) {
@@ -88,11 +92,23 @@ export async function PATCH(
         if (!tossRes.ok) {
           const errBody = await tossRes.json().catch(() => ({})) as { message?: string };
           refundErrors.push(`${app.profiles?.nickname ?? app.id}: ${errBody.message ?? '환불 실패'}`);
+          refundResults.push({
+            applicationId: app.id, nickname: app.profiles?.nickname ?? '—', paymentKey: app.payment_key,
+            amount: app.amount, ok: false, tossStatus: tossRes.status, tossMessage: errBody.message,
+          });
           continue;
         }
         refunded += 1;
+        refundResults.push({
+          applicationId: app.id, nickname: app.profiles?.nickname ?? '—', paymentKey: app.payment_key,
+          amount: app.amount, ok: true,
+        });
       } catch (e) {
         refundErrors.push(`${app.profiles?.nickname ?? app.id}: ${(e as Error).message}`);
+        refundResults.push({
+          applicationId: app.id, nickname: app.profiles?.nickname ?? '—', paymentKey: app.payment_key,
+          amount: app.amount, ok: false, tossMessage: (e as Error).message,
+        });
       }
     }
 
@@ -132,7 +148,7 @@ export async function PATCH(
       action:     'EVENT_CANCELLED',
       targetType: 'event',
       targetId:   eventId,
-      detail:     { affected: targets.length, refunded, smsSent, refundErrors },
+      detail:     { affected: targets.length, refunded, smsSent, refundErrors, refundResults },
     }).catch(() => {});
 
     return NextResponse.json({
