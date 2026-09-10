@@ -133,14 +133,14 @@ export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
   );
   const eventIdx    = byEvent.findIndex(([id]) => id === selectedEventId);
   const selectedEv  = byEvent[eventIdx]?.[1];
-  const maxEventAmt = byEvent[0]?.[1]?.amount ?? 1;
+  const maxEventAmt = Math.max(...byEvent.map(([, v]) => v.amount), 1);
 
   const maxAgeAmt = Math.max(...byAge.map(([, v]) => v.amount), 1);
 
   const genderTotal  = (byGender['남성'].amount) + (byGender['여성'].amount);
   const maleRatioPct = genderTotal > 0 ? Math.round((byGender['남성'].amount / genderTotal) * 100) : 50;
 
-  const BAR_H = 60; // 바 영역 최대 높이 (px)
+  const BAR_H = 110; // 바 영역 최대 높이 (px)
 
   return (
     <div className="space-y-5">
@@ -201,7 +201,7 @@ export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
               {/* 바 차트 */}
               <div className="flex items-end gap-1.5">
                 {byMonth.map(([key, amt]) => {
-                  const barH = Math.max(Math.round((amt / maxMonthAmt) * BAR_H), 4);
+                  const barH = Math.min(Math.max(Math.round((amt / maxMonthAmt) * BAR_H), 4), BAR_H);
                   const sel  = key === selectedMonth;
                   return (
                     <button
@@ -269,7 +269,7 @@ export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
               {/* 바 차트 */}
               <div className="flex items-end gap-1.5">
                 {byEvent.map(([id, ev]) => {
-                  const barH = Math.max(Math.round((ev.amount / maxEventAmt) * BAR_H), 4);
+                  const barH = Math.min(Math.max(Math.round((ev.amount / maxEventAmt) * BAR_H), 4), BAR_H);
                   const sel  = id === selectedEventId;
                   return (
                     <button
