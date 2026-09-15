@@ -97,12 +97,12 @@ export default function ProfileTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50 text-sm text-gray-400">
-              <th className="px-4 py-3 text-left font-medium">이름</th>
-              <th className="px-4 py-3 text-left font-medium">나이</th>
-              <th className="px-4 py-3 text-left font-medium">직업 / 회사</th>
-              <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">교회</th>
-              <th className="hidden px-4 py-3 text-left font-medium md:table-cell">이벤트</th>
-              <th className="px-4 py-3 text-left font-medium">상태</th>
+              <th className="px-2 py-3 text-left font-medium">이름</th>
+              <th className="px-2 py-3 text-left font-medium">나이</th>
+              <th className="px-2 py-3 text-left font-medium">직업 / 회사</th>
+              <th className="hidden px-2 py-3 text-left font-medium sm:table-cell">교회</th>
+              <th className="hidden px-2 py-3 text-left font-medium md:table-cell">이벤트</th>
+              <th className="px-2 py-3 text-left font-medium">상태</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -121,25 +121,25 @@ export default function ProfileTable({
                     onClick={() => setSelected(app)}
                     className="cursor-pointer transition hover:bg-gray-50"
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-2 py-3">
                       <span className="font-medium text-gray-800">{pr.nickname}</span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-2 py-3 text-sm text-gray-500">
                       {birthDisplay(pr.birth_year)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-2 py-3 text-sm text-gray-500">
                       <div>{pr.job}</div>
                       {pr.company_name && (
                         <div className="text-gray-400">{pr.company_name}</div>
                       )}
                     </td>
-                    <td className="hidden px-4 py-3 text-sm text-gray-500 sm:table-cell">
+                    <td className="hidden px-2 py-3 text-sm text-gray-500 sm:table-cell">
                       {pr.church_name ?? '—'}
                     </td>
-                    <td className="hidden px-4 py-3 text-sm text-gray-500 md:table-cell">
+                    <td className="hidden px-2 py-3 text-sm text-gray-500 md:table-cell">
                       {app.event_id ? (eventMap[app.event_id] ?? '—') : '—'}
                     </td>
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
                       <StatusBadge status={app.status ?? '검토중'} />
                     </td>
                   </tr>

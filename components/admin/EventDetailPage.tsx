@@ -160,7 +160,7 @@ function ParticipantTable({
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-xs text-gray-400">
                 <th className="px-3 py-2.5 text-left font-medium w-20">이름</th>
-                <th className="px-3 py-2.5 text-left font-medium w-14">나이</th>
+                <th className="px-3 py-2.5 text-left font-medium w-14">년생</th>
                 <th className="px-3 py-2.5 text-left font-medium w-36">연락처</th>
                 <th className="px-3 py-2.5 text-left font-medium w-4">MBTI</th>
                 <th className="px-3 py-2.5 text-left font-medium w-36">직업 / 직장</th>
@@ -182,7 +182,9 @@ function ParticipantTable({
                     onClick={() => onRowClick(p)}
                   >
                     <td className="px-3 py-3 font-medium text-gray-800">{pr.nickname}</td>
-                    <td className="px-3 py-3 text-gray-500">{pr.birth_year ? `${2026 - pr.birth_year}세` : '-'}</td>
+                    <td className="px-3 py-3 text-gray-500">
+                      {pr.birth_year ? `${String(pr.birth_year < 100 ? 1900 + pr.birth_year : pr.birth_year).slice(2)}년생` : '-'}
+                    </td>
                     <td className="px-3 py-3 text-gray-500">{pr.phone || '-'}</td>
                     <td className="px-3 py-3 text-gray-500">{pr.mbti || '-'}</td>
                     <td className="px-3 py-3">
