@@ -5,7 +5,7 @@ import BackButton from '@/components/landing/BackButton';
 
 export const metadata = {
   title: '자주 묻는 질문',
-  description: '카나 로테이션 소개팅 이용 전 자주 묻는 질문을 확인해보세요.',
+  description: '카나 크리스천 로테이션 소개팅 이용 전 자주 묻는 질문을 확인해보세요.',
 };
 
 export default function FAQPage() {

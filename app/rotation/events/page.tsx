@@ -5,7 +5,7 @@ import BackButton from '@/components/landing/BackButton';
 
 export const metadata = {
   title: '소개팅 일정',
-  description: '카나에서 진행되는 로테이션 소개팅 일정을 확인하고 신청하세요.',
+  description: '카나에서 진행되는 크리스천 로테이션 소개팅 일정을 확인하고 신청하세요.',
 };
 
 export default function EventsPage() {

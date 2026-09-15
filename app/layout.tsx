@@ -22,13 +22,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cana.im';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: '카나 | 크리스천끼리 설레는 이상형 찾기',
+    default: '카나 | 크리스천 소개팅, 크리스천끼리 설레는 이상형 찾기',
     template: '%s | 카나',
   },
-  description: '같은 믿음을 가진 사람들을 위한 프리미엄 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
+  description: '같은 믿음을 가진 사람들을 위한 프리미엄 크리스천 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
   openGraph: {
-    title: '카나 | 크리스천끼리 설레는 이상형 찾기',
-    description: '같은 믿음을 가진 사람들을 위한 프리미엄 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
+    title: '카나 | 크리스천 소개팅, 크리스천끼리 설레는 이상형 찾기',
+    description: '같은 믿음을 가진 사람들을 위한 프리미엄 크리스천 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
     url: siteUrl,
     siteName: '카나',
     locale: 'ko_KR',
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
         url: '/txme-assets/landing/og-image.png',
         width: 1200,
         height: 630,
-        alt: '카나 | 크리스천끼리 설레는 이상형 찾기',
+        alt: '카나 | 크리스천 소개팅, 크리스천끼리 설레는 이상형 찾기',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '카나 | 크리스천끼리 설레는 이상형 찾기',
-    description: '같은 믿음을 가진 사람들을 위한 프리미엄 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
+    title: '카나 | 크리스천 소개팅, 크리스천끼리 설레는 이상형 찾기',
+    description: '같은 믿음을 가진 사람들을 위한 프리미엄 크리스천 소개팅 서비스. 크리스천끼리 설레는 이상형 찾기',
     images: ['/txme-assets/landing/og-image.png'],
   },
   alternates: {

@@ -24,7 +24,7 @@ export default function PainPoint() {
         {/* 섹션 라벨 */}
         <div className="mb-12 text-center">
           <h2 className="text-2xl font-bold leading-snug tracking-tight text-cana-ink sm:text-3xl">
-            로테이션 소개팅에서<br />인연 찾기 왜 힘들까?
+            크리스천 로테이션 소개팅에서<br />인연 찾기 왜 힘들까?
           </h2>
         </div>
 

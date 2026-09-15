@@ -7,7 +7,7 @@ export default function Hero() {
       {/* 배경 이미지 */}
       <Image
         src="/txme-assets/images/hero.png"
-        alt="카나 로테이션 소개팅"
+        alt="카나 크리스천 로테이션 소개팅"
         fill
         priority
         className="object-cover"
@@ -20,7 +20,7 @@ export default function Hero() {
       {/* 텍스트 */}
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-5 pt-24 text-center lg:items-start lg:pt-0 lg:text-left">
         <span className="text-[18px] font-medium tracking-wide text-white/75">
-          크리스천 직장인 로테이션 소개팅
+          직장인을 위한 크리스천 로테이션 소개팅
         </span>
 
         <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl sm:leading-tight xl:text-5xl xl:leading-tight">

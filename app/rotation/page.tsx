@@ -10,8 +10,8 @@ import CanaPromo from '@/components/landing/CanaPromo';
 import Footer from '@/components/landing/Footer';
 
 export const metadata = {
-  title: '로테이션 소개팅',
-  description: '신앙 안에서 진지한 만남을 찾는 크리스천을 위한 카나 로테이션 소개팅. 매주 새로운 인연을 만나보세요.',
+  title: { absolute: '카나 | 크리스천 로테이션 소개팅' },
+  description: '신앙 안에서 진지한 만남을 찾는 크리스천을 위한 카나의 크리스천 로테이션 소개팅. 매주 새로운 인연을 만나보세요.',
 };
 
 export default function LandingPage() {

@@ -9,7 +9,7 @@ const STEPS = [
   {
     num: '02',
     when: '당일',
-    title: '현장 로테이션 소개팅',
+    title: '현장 크리스천 로테이션 소개팅',
     desc: '1:1로 10분씩 대화해요. 마음에 드시면\n쪽지에 연락처를 적어 봉투에 넣습니다.',
     icon: '/txme-assets/icons/party-popper.svg',
   },
