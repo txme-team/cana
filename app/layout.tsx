@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import Script from 'next/script';
+import { organizationJsonLd } from '@/lib/rotation/schema';
 import './globals.css';
 
 const pretendard = localFont({
@@ -68,6 +69,10 @@ export default function RootLayout({
     <html lang="ko" className={pretendard.variable}>
       <body className="font-[family-name:var(--font-pretendard)] antialiased">
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+        />
         <Script
           id="meta-pixel"
           strategy="afterInteractive"

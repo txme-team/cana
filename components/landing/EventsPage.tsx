@@ -21,6 +21,11 @@ interface Applicant {
   mbti: string;
 }
 
+interface Props {
+  // 서버 컴포넌트에서 SSR로 미리 가져온 일정 (Events.tsx와 동일한 이유).
+  initialEvents?: EventItem[];
+}
+
 interface WaitlistModal {
   open: boolean;
   event: { id: string; title: string } | null;
@@ -90,9 +95,9 @@ function ApplicantsPanel({ eventId }: { eventId: string }) {
   );
 }
 
-export default function EventsPage() {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function EventsPage({ initialEvents }: Props) {
+  const [events, setEvents] = useState<EventItem[]>(initialEvents ?? []);
+  const [loading, setLoading] = useState(!initialEvents);
   const [wl, setWl] = useState<WaitlistModal>({ open: false, event: null, loading: false, done: false, error: null });
   const [expandedId, setExpandedId] = useState<string | null>(null);
 

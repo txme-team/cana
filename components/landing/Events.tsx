@@ -11,10 +11,6 @@ interface WaitlistModal {
   error: string | null;
 }
 
-interface Props {
-  preview?: boolean;
-}
-
 interface EventItem {
   id: string;
   title: string;
@@ -24,6 +20,14 @@ interface EventItem {
   age_range_female: string;
   capacity: number;
   confirmed_count: number;
+}
+
+interface Props {
+  preview?: boolean;
+  // 서버 컴포넌트에서 SSR로 미리 가져온 일정. 최초 렌더에서 크롤러에게도
+  // 실제 일정이 노출되도록 하고, 클라이언트에서는 이 값으로 초기화한 뒤
+  // 아래 useEffect가 최신 상태(마감 여부 등)로 갱신한다.
+  initialEvents?: EventItem[];
 }
 
 function formatEventDate(dateStr: string) {
@@ -38,9 +42,9 @@ function formatEventDate(dateStr: string) {
   return { date: `${month}월 ${day}일 (${dow})`, time: `${ampm} ${h}시` };
 }
 
-export default function Events({ preview = false }: Props) {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function Events({ preview = false, initialEvents }: Props) {
+  const [events, setEvents] = useState<EventItem[]>(initialEvents ?? []);
+  const [loading, setLoading] = useState(!initialEvents);
   const [wl, setWl] = useState<WaitlistModal>({ open: false, event: null, loading: false, done: false, error: null });
 
   const openWaitlist = (event: { id: string; title: string }) =>
