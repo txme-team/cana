@@ -5,6 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import type { PendingPayload } from '@/lib/payment';
 import { PAYMENT_PENDING_KEY } from '@/lib/payment';
 
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
+
 export default function SuccessHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -59,6 +65,10 @@ export default function SuccessHandler() {
           const err = await res.json().catch(() => ({})) as { error?: string };
           throw new Error(err.error ?? '결제 확인에 실패했어요.');
         }
+        window.fbq?.('track', 'Purchase', {
+          value: Number(amount),
+          currency: 'KRW',
+        });
         router.replace('/rotation/apply/complete');
       })
       .catch((err: unknown) => {
