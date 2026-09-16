@@ -3,6 +3,7 @@ import Hero from '@/components/landing/Hero';
 import PainPoint from '@/components/landing/PainPoint';
 import Process from '@/components/landing/Process';
 import WhyCana from '@/components/landing/WhyCana';
+import Testimonials from '@/components/landing/Testimonials';
 import TrustSafety from '@/components/landing/TrustSafety';
 import Events from '@/components/landing/Events';
 import FAQ from '@/components/landing/FAQ';
@@ -57,6 +58,7 @@ export default async function LandingPage() {
       <PainPoint />
       <WhyCana />
       <Process />
+      <Testimonials />
       <Events preview initialEvents={events} />
       <TrustSafety />
       <FAQ preview />

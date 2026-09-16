@@ -19,6 +19,7 @@ interface EventItem {
   age_range_male: string;
   age_range_female: string;
   capacity: number;
+  price?: number;
   confirmed_count: number;
 }
 
@@ -40,6 +41,10 @@ function formatEventDate(dateStr: string) {
   const ampm = hours < 12 ? '오전' : '오후';
   const h = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
   return { date: `${month}월 ${day}일 (${dow})`, time: `${ampm} ${h}시` };
+}
+
+function formatPrice(price: number) {
+  return `참가비 ${price.toLocaleString('ko-KR')}원`;
 }
 
 export default function Events({ preview = false, initialEvents }: Props) {
@@ -125,6 +130,12 @@ export default function Events({ preview = false, initialEvents }: Props) {
                   <img src="/txme-assets/icons/location.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                   <span>{event.location}</span>
                 </div>
+                {typeof event.price === 'number' && (
+                  <div className="flex items-center gap-2 text-base text-cana-ink3">
+                    <img src="/txme-assets/icons/creditcard.svg" alt="" className="h-5 w-5 flex-shrink-0" />
+                    <span>{formatPrice(event.price)}</span>
+                  </div>
+                )}
               </div>
 
               {/* 연령대 */}

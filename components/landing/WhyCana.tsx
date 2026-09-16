@@ -9,7 +9,7 @@ const POINTS = [
   {
     icon: '/txme-assets/icons/bubble-smile-2.svg',
     title: '깊은 대화로 바로 시작해요',
-    description: '아이스브레이킹 없이, 10분을 온전히 대화에 씁니다.',
+    description: '프로필 카드로 이미 알고 있으니, 짧은 자기소개 후엔 바로 1:1 데이트나 로테이션 대화로 이어져요.',
   },
   {
     icon: '/txme-assets/icons/flower.svg',
@@ -42,7 +42,7 @@ export default function WhyCana() {
           </h2>
           <p className="mx-auto max-w-lg text-base leading-relaxed text-cana-ink3">
             카나는 소개팅 전날, 참가자 전원의 프로필 카드를 미리 공유합니다.<br className="hidden sm:block" />
-            당일엔 형식적인 자기소개 없이 바로 진짜 대화를 시작할 수 있어요.
+            이미 서로를 알고 만나서, 짧은 자기소개 후엔 바로 진짜 대화를 시작할 수 있어요.
           </p>
         </div>
 

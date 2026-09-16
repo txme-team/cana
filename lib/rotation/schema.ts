@@ -22,7 +22,7 @@ export function rotationServiceJsonLd() {
     serviceType: '크리스천 로테이션 소개팅 매칭 서비스',
     url: `${SITE_URL}/rotation`,
     description:
-      '소개팅 전날 참가자 전원의 프로필 카드를 공유하고, 당일 1:1로 약 10분씩 대화를 나누는 사전 심사 기반 크리스천 로테이션 소개팅. 4~10명의 이성과 매칭.',
+      '소개팅 전날 참가자 전원의 프로필 카드를 공유하고, 당일 자기소개·Q&A와 첫인상 투표를 거쳐 매칭 시 1:1 데이트, 불발 시 로테이션 대화로 이어지는 사전 심사 기반 크리스천 로테이션 소개팅. 4~10명 규모로 진행.',
     provider: {
       '@type': 'Organization',
       name: '카나',
