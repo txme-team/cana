@@ -63,7 +63,7 @@ export default function TrustSafety() {
         {/* 헤더 */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-2xl font-bold tracking-tight text-cana-ink sm:text-3xl">
-            기대해도 좋은 사람들이,<br />안심할 수 있는 자리에서
+            기대해도 좋은 사람들이, <br />안심할 수 있는 자리에서
           </h2>
           <p className="mx-auto max-w-lg text-base leading-relaxed text-cana-ink3">
             카나는 누구에게나 열려 있지 않습니다.<br className="hidden sm:block" />

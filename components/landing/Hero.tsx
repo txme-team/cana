@@ -24,7 +24,7 @@ export default function Hero() {
         </span>
 
         <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl sm:leading-tight xl:text-5xl xl:leading-tight">
-          자기소개만 반복하다<br />
+          자기소개만 반복하다 <br />
           <span className="text-cana-light">끝나는 소개팅</span>은 이제 그만
         </h1>
 

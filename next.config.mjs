@@ -28,6 +28,24 @@ const nextConfig = {
       { source: '/privacy', destination: 'https://cana.im/privacy', permanent: false },
     ];
   },
+
+  // 이 앱이 서빙하는 /rotation/* 전체에 적용되는 기본 보안 헤더.
+  // CSP는 clickjacking 방지용 frame-ancestors만 건다 — Next.js 인라인
+  // 하이드레이션 스크립트를 막지 않으려고 script-src 등은 넣지 않았다.
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

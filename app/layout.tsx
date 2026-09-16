@@ -7,7 +7,9 @@ import './globals.css';
 const pretendard = localFont({
   src: '../public/txme-assets/fonts/PretendardVariable.woff2',
   variable: '--font-pretendard',
-  weight: '100 900',
+  // 실제 코드에서 쓰는 굵기는 400/500/600/700뿐이라 폰트 파일 자체를
+  // 해당 축으로 좁혀 용량을 줄였다(2.06MB → 1.42MB, 글자 커버리지는 동일).
+  weight: '400 700',
   display: 'swap',
   fallback: [
     '-apple-system',
@@ -67,6 +69,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={pretendard.variable}>
+      <head>
+        <link rel="preconnect" href="https://connect.facebook.net" />
+      </head>
       <body className="font-[family-name:var(--font-pretendard)] antialiased">
         {children}
         <script
@@ -75,7 +80,7 @@ export default function RootLayout({
         />
         <Script
           id="meta-pixel"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               !function(f,b,e,v,n,t,s)

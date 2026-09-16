@@ -49,11 +49,17 @@ const profiles = [
   },
 ];
 
+// 무한 스크롤 캐러셀이라 카드 세트를 두 번 이어붙여 애니메이션한다.
+// 뒤쪽 복제본은 화면엔 필요하지만 크롤러/스크린리더에는 같은 프로필이
+// 중복 콘텐츠로 보이므로 aria-hidden으로 감춘다.
 const loopedProfiles = [...profiles, ...profiles];
 
-function PromoCard({ p }: { p: (typeof profiles)[number] }) {
+function PromoCard({ p, duplicate = false }: { p: (typeof profiles)[number]; duplicate?: boolean }) {
   return (
-    <div className="relative aspect-[260/380] h-full shrink-0 overflow-hidden rounded-3xl">
+    <div
+      aria-hidden={duplicate || undefined}
+      className="relative aspect-[260/380] h-full shrink-0 overflow-hidden rounded-3xl"
+    >
       <Image
         src={p.image}
         alt={p.job}
@@ -81,6 +87,10 @@ function PromoCard({ p }: { p: (typeof profiles)[number] }) {
 export default function CanaPromoCards() {
   return (
     <div className="absolute inset-0 overflow-hidden">
+      {/* 실제 매칭 이력이 아닌 예시 프로필임을 명시 — 신뢰 리스크 방지 */}
+      <span className="absolute left-4 top-4 z-10 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-medium text-white/90 backdrop-blur-sm">
+        예시 프로필
+      </span>
       <motion.div
         className="flex h-full gap-3 p-3"
         animate={{ x: ['0%', '-50%'] }}
@@ -88,7 +98,7 @@ export default function CanaPromoCards() {
         style={{ width: 'max-content' }}
       >
         {loopedProfiles.map((p, i) => (
-          <PromoCard key={i} p={p} />
+          <PromoCard key={i} p={p} duplicate={i >= profiles.length} />
         ))}
       </motion.div>
     </div>
