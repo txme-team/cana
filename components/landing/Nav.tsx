@@ -11,6 +11,7 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // 히어로(이미지 배경) 페이지에서만 스크롤 전 흰색 테마 적용
   const isHeroPage = pathname === '/rotation';
@@ -22,6 +23,20 @@ export default function Nav() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -86,6 +101,7 @@ export default function Nav() {
 
           {/* 우측 — 인증 상태 + 신청 */}
           <div className="flex items-center gap-4">
+            <div className="hidden items-center gap-4 sm:flex">
             {userEmail ? (
               <>
                 <Link
@@ -119,16 +135,114 @@ export default function Nav() {
                 로그인
               </Link>
             )}
+            </div>
             <Link
               href="/rotation/apply"
-              className="inline-flex items-center justify-center text-[14px] font-semibold px-6 h-9 rounded-[8px] border border-[#D1C7C7] bg-[#EBE6E6] text-[#1C1B1A] hover:bg-[#D1C7C7] transition-colors duration-200"
+              className="hidden sm:inline-flex items-center justify-center text-[14px] font-semibold px-6 h-9 rounded-[8px] border border-[#D1C7C7] bg-[#EBE6E6] text-[#1C1B1A] hover:bg-[#D1C7C7] transition-colors duration-200"
             >
               신청하기
             </Link>
+            <button
+              type="button"
+              aria-label="메뉴 열기"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+              className={[
+                '-mr-2 flex h-10 w-10 items-center justify-center sm:hidden',
+                transparent ? 'text-white' : 'text-cana-ink',
+              ].join(' ')}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            </button>
           </div>
 
         </div>
       </header>
+
+      {/* 모바일 우측 슬라이드 메뉴 */}
+      <div
+        className={[
+          'fixed inset-0 z-[60] sm:hidden',
+          menuOpen ? 'pointer-events-auto' : 'pointer-events-none',
+        ].join(' ')}
+        aria-hidden={!menuOpen}
+      >
+        <div
+          className={[
+            'absolute inset-0 bg-black/40 transition-opacity duration-300',
+            menuOpen ? 'opacity-100' : 'opacity-0',
+          ].join(' ')}
+          onClick={() => setMenuOpen(false)}
+        />
+        <aside
+          className={[
+            'absolute inset-y-0 right-0 flex w-[280px] max-w-[80vw] flex-col bg-white shadow-xl transition-transform duration-300',
+            menuOpen ? 'translate-x-0' : 'translate-x-full',
+          ].join(' ')}
+        >
+          <div className="flex items-center justify-between px-5 py-4">
+            <img src="/txme-assets/logos/logo_black.svg" alt="cana" className="h-[14px]" />
+            <button
+              type="button"
+              aria-label="메뉴 닫기"
+              onClick={() => setMenuOpen(false)}
+              className="-mr-2 flex h-10 w-10 items-center justify-center text-cana-ink"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
+          <nav className="flex flex-col px-2 pb-6">
+            <Link
+              href="/rotation/events"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-lg px-3 py-3.5 text-base font-medium text-cana-ink hover:bg-cana-warm"
+            >
+              소개팅 일정
+            </Link>
+            <Link
+              href="/rotation/faq"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-lg px-3 py-3.5 text-base font-medium text-cana-ink hover:bg-cana-warm"
+            >
+              자주 묻는 질문
+            </Link>
+            <div className="mx-3 my-2 h-px bg-cana-rule" />
+            {userEmail ? (
+              <>
+                <Link
+                  href="/rotation/my"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg px-3 py-3.5 text-base font-medium text-cana-ink hover:bg-cana-warm"
+                >
+                  마이페이지
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setShowLogoutModal(true);
+                  }}
+                  className="rounded-lg px-3 py-3.5 text-left text-base font-medium text-cana-ink hover:bg-cana-warm"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/rotation/login?redirectTo=/rotation"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-3.5 text-base font-medium text-cana-ink hover:bg-cana-warm"
+              >
+                로그인
+              </Link>
+            )}
+          </nav>
+        </aside>
+      </div>
 
       {/* 로그아웃 확인 모달 */}
       {showLogoutModal && (
