@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-screen items-start overflow-hidden sm:items-center">
+    <section className="relative flex min-h-screen items-center overflow-hidden">
       {/* 배경 이미지 */}
       <Image
         src="/txme-assets/images/hero.png"
@@ -18,7 +18,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
 
       {/* 텍스트 */}
-      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-5 pt-28 text-center sm:pt-24 lg:items-start lg:pt-0 lg:text-left">
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-5 pt-24 text-center lg:items-start lg:pt-0 lg:text-left">
         <span className="text-[18px] font-medium tracking-wide text-white/75">
           직장인을 위한 크리스천 로테이션 소개팅
         </span>
