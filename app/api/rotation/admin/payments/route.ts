@@ -92,12 +92,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '신청 내역을 찾을 수 없어요.' }, { status: 404 });
     }
 
-    // 상태는 '취소'인데 Toss 환불이 안 된 건을 다시 처리하는 경우 — 환불만 재시도하고 상태/알림은 건드리지 않는다.
-    const alreadyCancelled = appRow.status === '취소';
+    // 이미 '취소'/'반려'로 상태가 바뀐 건 — Toss 환불만 처리하고 상태/알림은 건드리지 않는다.
+    // (반려는 환불 경로가 따로 없어 여기서 처리. 우리 쪽 사유이므로 금액 미지정 시 전액.)
+    const alreadyCancelled = appRow.status === '취소' || appRow.status === '반려';
+    const overrideAmount = typeof refundAmount === 'number'
+      ? refundAmount
+      : appRow.status === '반려' ? appRow.amount : null;
 
     const eventDate = appRow.events?.event_date;
     // 관리자가 환불 금액을 직접 입력했으면 그 값을 쓰고, 없으면 날짜 기반 정책값을 기본으로 쓴다.
-    const refund = resolveRefund(appRow.amount, eventDate, typeof refundAmount === 'number' ? refundAmount : null);
+    const refund = resolveRefund(appRow.amount, eventDate, overrideAmount);
 
     if (alreadyCancelled && refund.amount <= 0) {
       return NextResponse.json({ error: '환불 금액을 0원보다 크게 입력해주세요.' }, { status: 400 });
@@ -161,7 +165,8 @@ export async function POST(req: NextRequest) {
           orderAmount: appRow.amount,
           refundAmount: refund.amount,
           refundLabel: refund.label,
-          overridden: typeof refundAmount === 'number',
+          overridden: overrideAmount != null,
+          appStatus: appRow.status,
           tossRequest: cancelBody,
         },
       }).catch(() => {});
