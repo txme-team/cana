@@ -271,7 +271,7 @@ export default function PaymentsPage({
                       ) : '—'}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      {SUCCESS_STATUSES.includes(p.status) && p.payment_key ? (
+                      {(SUCCESS_STATUSES.includes(p.status) || p.status === '취소') && p.payment_key ? (
                         <button
                           onClick={() => {
                             setRefundAmount(calcRefund(p.amount, p.event_date).amount);
@@ -280,7 +280,7 @@ export default function PaymentsPage({
                           disabled={cancelling === p.id}
                           className="rounded-lg border border-red-200 px-2.5 py-1 text-xs text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                         >
-                          {cancelling === p.id ? '처리중...' : '취소'}
+                          {cancelling === p.id ? '처리중...' : p.status === '취소' ? '재취소' : '취소'}
                         </button>
                       ) : (
                         <span className="text-xs text-gray-300">—</span>
@@ -306,7 +306,15 @@ export default function PaymentsPage({
             className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="mb-1 text-base font-semibold text-gray-900">결제를 취소할까요?</p>
+            <p className="mb-1 text-base font-semibold text-gray-900">
+              {cancelTarget.status === '취소' ? '결제 취소를 다시 처리할까요?' : '결제를 취소할까요?'}
+            </p>
+            {cancelTarget.status === '취소' && (
+              <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">
+                이미 취소 처리된 신청이에요. Toss 환불만 다시 요청하고, 안내 문자와 대기자 알림은 다시 보내지 않아요.
+                환불 금액을 0원보다 크게 입력해주세요. 영수증 &lsquo;보기&rsquo;의 취소 이력에서 이미 환불됐는지 먼저 확인하세요.
+              </p>
+            )}
 
             {(() => {
               const suggested = calcRefund(cancelTarget.amount, cancelTarget.event_date);
@@ -361,7 +369,7 @@ export default function PaymentsPage({
                 disabled={!!cancelling}
                 className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:opacity-40"
               >
-                {cancelling ? '처리 중...' : '취소하기'}
+                {cancelling ? '처리 중...' : cancelTarget.status === '취소' ? '환불 다시 요청' : '취소하기'}
               </button>
             </div>
           </div>
