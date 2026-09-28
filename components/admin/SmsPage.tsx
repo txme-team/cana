@@ -157,7 +157,7 @@ export default function SmsPage() {
       const res = await fetch(`/api/rotation/admin/sms-templates/${selectedKey}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId: sendEventId, recipients, genderFilter, extraVars }),
+        body: JSON.stringify({ eventId: sendEventId, recipients, genderFilter, extraVars, content: editContent }),
       });
       const json = await res.json() as { ok?: boolean; sent?: number; error?: string };
       if (!res.ok) throw new Error(json.error ?? '발송 실패');

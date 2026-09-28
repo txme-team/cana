@@ -24,21 +24,26 @@ export async function POST(
       recipients: 'confirmed' | 'all_active';
       genderFilter?: 'all' | 'male' | 'female';
       extraVars?: Record<string, string>;
+      content?: string;
     };
 
-    const { eventId, recipients = 'confirmed', genderFilter = 'all', extraVars = {} } = body;
+    const { eventId, recipients = 'confirmed', genderFilter = 'all', extraVars = {}, content: overrideContent } = body;
     if (!eventId) return NextResponse.json({ error: 'eventId가 필요합니다.' }, { status: 400 });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supa = createServiceClient() as any;
 
-    // ── 템플릿 content 조회 (DB → 기본값 fallback) ─────────────────────────
-    const { data: tmplRow } = await supa
-      .from('sms_templates').select('content').eq('key', params.key).maybeSingle() as
-      { data: { content: string } | null };
-
-    const defaultContent = DEFAULT_TEMPLATES.find((t) => t.key === params.key)?.content ?? '';
-    const content = tmplRow?.content ?? defaultContent;
+    // ── 발송할 문구 결정 ─────────────────────────────────────────────────────
+    // 화면(미리보기)에서 편집 중인 내용을 그대로 전송받아 우선 사용 — 저장 여부와 무관하게
+    // 관리자가 확인 모달에서 본 내용과 실제 발송 내용을 일치시킨다. 없으면 DB → 기본값 순.
+    let content = overrideContent;
+    if (!content) {
+      const { data: tmplRow } = await supa
+        .from('sms_templates').select('content').eq('key', params.key).maybeSingle() as
+        { data: { content: string } | null };
+      const defaultContent = DEFAULT_TEMPLATES.find((t) => t.key === params.key)?.content ?? '';
+      content = tmplRow?.content ?? defaultContent;
+    }
     if (!content) return NextResponse.json({ error: '템플릿을 찾을 수 없어요.' }, { status: 404 });
 
     // ── 이벤트 정보 조회 ─────────────────────────────────────────────────────
