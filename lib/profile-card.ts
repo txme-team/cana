@@ -57,10 +57,14 @@ export async function ensureProfileCardMeta(supa: any, applicationId: string) {
   }
 
   if (app.display_no == null && app.profiles?.gender) {
+    // 취소/반려된 신청은 번호 산정에서 제외 — 그 사람이 예전에 부여받았던 번호가
+    // 여전히 남아 있어 그걸 '이미 쓰인 번호'로 세면, 이후 확정자 번호가 실제
+    // 확정 인원수보다 계속 커지기만 한다(재사용도 안 되고 결번만 쌓임).
     const { data: existing } = await supa
       .from('applications')
       .select('display_no, profiles!inner ( gender )')
       .eq('event_id', app.event_id)
+      .eq('status', '확정')
       .eq('profiles.gender', app.profiles.gender)
       .not('display_no', 'is', null) as {
         data: { display_no: number | null }[] | null;

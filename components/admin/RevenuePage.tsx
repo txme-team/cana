@@ -11,6 +11,7 @@ export interface RevenueItem {
   amount: number | null;
   event_id: string;
   event_title: string;
+  event_date: string | null;
   gender: string | null;       // 'male' | 'female'
   birth_year: number | null;
 }
@@ -32,9 +33,15 @@ function fmtShortMonth(key: string) {          // "YYYY-MM" → "3월"
 }
 
 // 이벤트 제목 → 바 레이블 ("cana 소개팅 1회차" → "1회차")
+// 앞에 "[특집]" 같은 대괄호 태그가 있으면 같이 남긴다 — 그냥 마지막 단어만 쓰면
+// "[특집] 20대끼리 소개팅 1회차"와 "cana 소개팅 1회차"가 둘 다 "1회차"로 겹쳐 보인다.
 function eventLabel(title: string) {
-  const parts = title.trim().split(/\s+/);
-  return parts[parts.length - 1] ?? title;
+  const trimmed = title.trim();
+  const tagMatch = trimmed.match(/^\[([^\]]+)\]\s*/);
+  const rest = tagMatch ? trimmed.slice(tagMatch[0].length) : trimmed;
+  const parts = rest.split(/\s+/).filter(Boolean);
+  const last = parts[parts.length - 1] ?? rest;
+  return tagMatch ? `${tagMatch[1]} ${last}` : last;
 }
 
 // 공용 화살표 버튼
@@ -69,15 +76,17 @@ export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
 
   const thisMonthKey    = new Date().toISOString().slice(0, 7);
   const thisMonthAmount = active
-    .filter((p) => p.paid_at?.startsWith(thisMonthKey))
+    .filter((p) => p.event_date?.startsWith(thisMonthKey))
     .reduce((s, p) => s + (p.amount ?? 0), 0);
 
   // ── 월별 (오름차순: 차트 왼→오른) ───────────────────────────────────────────
+  // 결제일이 아니라 '그 달에 열린 회차'(행사일=event_date) 기준으로 합산한다.
+  // 예: 3월에 결제했어도 4월 회차 신청이면 4월 매출로 잡힌다.
   const byMonth = useMemo(() => {
     const map: Record<string, number> = {};
     active.forEach((p) => {
-      if (!p.paid_at) return;
-      const key = p.paid_at.slice(0, 7);
+      if (!p.event_date) return;
+      const key = p.event_date.slice(0, 7);
       map[key] = (map[key] ?? 0) + (p.amount ?? 0);
     });
     return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));

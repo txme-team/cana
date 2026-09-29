@@ -17,7 +17,7 @@ export default async function AdminRevenuePage() {
       paid_at,
       amount,
       event_id,
-      events   ( title ),
+      events   ( title, event_date ),
       profiles ( gender, birth_year )
     `)
     .not('paid_at', 'is', null)
@@ -31,6 +31,7 @@ export default async function AdminRevenuePage() {
     amount:      row.amount,
     event_id:    row.event_id,
     event_title: row.events?.title ?? '—',
+    event_date:  row.events?.event_date ?? null,
     gender:      row.profiles?.gender     ?? null,
     birth_year:  row.profiles?.birth_year ?? null,
   }));
