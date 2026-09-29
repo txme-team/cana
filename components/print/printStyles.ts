@@ -76,7 +76,8 @@ export const PRINT_CARD_STYLES = `
   .cross-mark { font-size: 13px; color: rgba(255,255,255,0.45); }
   .num-wrap { display: flex; align-items: center; gap: 7px; }
   .num-label { font-size: 9px; color: rgba(255,255,255,0.6); letter-spacing: 0.14em; text-transform: uppercase; }
-  .num-pill { width: 38px; height: 20px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+  .num-pill { min-width: 38px; height: 20px; padding: 0 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+  .num-pill-text { font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
 
   /* 바디 */
   .pc-body { display: grid; grid-template-columns: 140mm 0.5px 1fr; height: 100%; }

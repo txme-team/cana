@@ -1,5 +1,11 @@
 import type { Profile } from '@/lib/types';
 
+// lib/profile-card.ts는 최상단에서 'crypto'(Node 전용)를 임포트해 클라이언트 번들에 넣을 수 없다.
+// 표기는 그쪽 genderLabel()과 동일한 포맷("남자1"/"여자1")을 유지한다.
+function genderLabel(gender: Profile['gender'], no: number): string {
+  return `${gender === 'male' ? '남자' : '여자'}${no}`;
+}
+
 // ─── 에세이 메타 ───────────────────────────────────────────────────────────────
 
 const ESSAY_META: { field: string; label: string }[] = [
@@ -65,7 +71,13 @@ function FaItems({ options, selected }: { options: string[]; selected?: string }
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 
-export default function ProfileCardTemplate({ profile: p }: { profile: Profile }) {
+export default function ProfileCardTemplate({
+  profile: p,
+  displayNo,
+}: {
+  profile: Profile;
+  displayNo?: number | null;
+}) {
   const essays = (p.profile_essays ?? {}) as Record<string, string>;
   const answeredEssays = ESSAY_META.filter((m) => essays[m.field]?.trim());
 
@@ -92,7 +104,11 @@ export default function ProfileCardTemplate({ profile: p }: { profile: Profile }
             <span className="cross-mark">✝</span>
             <div className="num-wrap">
               <span className="num-label">오늘의 번호</span>
-              <div className="num-pill" />
+              <div className="num-pill">
+                {displayNo != null && (
+                  <span className="num-pill-text">{genderLabel(p.gender, displayNo)}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>

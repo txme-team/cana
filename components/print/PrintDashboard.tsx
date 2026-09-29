@@ -74,8 +74,8 @@ export default function PrintDashboard({ list, eventMap, currentStatus }: PrintD
 
           return (
             <>
-              <ProfileCardTemplate key={`front-${app.id}`} profile={app.profiles} />
-              <ProfileCardBackTemplate key={`back-${app.id}`} oppositeApps={oppositeApps} />
+              <ProfileCardTemplate key={`front-${app.id}`} profile={app.profiles} displayNo={app.display_no} />
+              <ProfileCardBackTemplate key={`back-${app.id}`} oppositeApps={oppositeApps} ownApp={app} />
             </>
           );
         })}
@@ -275,12 +275,12 @@ export default function PrintDashboard({ list, eventMap, currentStatus }: PrintD
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ width: '673px', height: '476px', overflow: 'hidden' }}>
                     <div style={{ width: '297mm', height: '210mm', transform: 'scale(0.6)', transformOrigin: 'top left' }}>
-                      <ProfileCardTemplate profile={previewApp.profiles} />
+                      <ProfileCardTemplate profile={previewApp.profiles} displayNo={previewApp.display_no} />
                     </div>
                   </div>
                   <div style={{ width: '673px', height: '476px', overflow: 'hidden' }}>
                     <div style={{ width: '297mm', height: '210mm', transform: 'scale(0.6)', transformOrigin: 'top left' }}>
-                      <ProfileCardBackTemplate oppositeApps={oppositeApps} />
+                      <ProfileCardBackTemplate oppositeApps={oppositeApps} ownApp={previewApp} />
                     </div>
                   </div>
                 </div>

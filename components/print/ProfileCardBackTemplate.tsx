@@ -1,7 +1,14 @@
-import type { ApplicationWithProfile } from '@/lib/types';
+import type { ApplicationWithProfile, Profile } from '@/lib/types';
 
 interface BackTemplateProps {
   oppositeApps: ApplicationWithProfile[];
+  ownApp: ApplicationWithProfile;
+}
+
+// lib/profile-card.ts는 최상단에서 'crypto'(Node 전용)를 임포트해 클라이언트 번들에 넣을 수 없다.
+// 표기는 그쪽 genderLabel()과 동일한 포맷("남자1"/"여자1")을 유지한다.
+function genderLabel(gender: Profile['gender'], no: number): string {
+  return `${gender === 'male' ? '남자' : '여자'}${no}`;
 }
 
 const SUGGESTED_QUESTIONS = {
@@ -66,8 +73,10 @@ const Q_COLUMNS: (keyof typeof SUGGESTED_QUESTIONS)[][] = [
   ['신앙', '결혼', '가족', '가치관'],
 ];
 
-export default function ProfileCardBackTemplate({ oppositeApps }: BackTemplateProps) {
+export default function ProfileCardBackTemplate({ oppositeApps, ownApp }: BackTemplateProps) {
   const shown = oppositeApps.slice(0, 10);
+  const ownDisplayNo = ownApp.display_no;
+  const ownGender = ownApp.profiles?.gender;
 
   return (
     <div className="card-wrap">
@@ -84,7 +93,11 @@ export default function ProfileCardBackTemplate({ oppositeApps }: BackTemplatePr
             <span className="cross-mark">✝</span>
             <div className="num-wrap">
               <span className="num-label">오늘의 번호</span>
-              <div className="num-pill" />
+              <div className="num-pill">
+                {ownDisplayNo != null && ownGender && (
+                  <span className="num-pill-text">{genderLabel(ownGender, ownDisplayNo)}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
