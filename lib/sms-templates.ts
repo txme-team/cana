@@ -58,6 +58,17 @@ export const DEFAULT_TEMPLATES: Omit<SmsTemplate, 'updated_at'>[] = [
     ],
   },
   {
+    key: 'attendance_waitlisted',
+    name: '대기 안내',
+    content: '[카나] {{name}}님 {{event_date}} 소개팅은 현재 대기 상태예요. 자리가 확정되면 별도로 안내드릴게요.',
+    trigger_type: 'auto',
+    trigger_desc: '운영진이 대기 처리 시 즉시',
+    variables: [
+      { key: 'name',       label: '신청자 이름', desc: '프로필 이름' },
+      { key: 'event_date', label: '행사일',       desc: '예: 6월 14일' },
+    ],
+  },
+  {
     key: 'attendance_rejected',
     name: '참석 반려',
     content: '[카나] {{name}}님 이번 {{event_date}} 회차 참석이 어렵게 되었습니다. 참가비는 영업일 기준 3~5일 내 전액 환불됩니다. 다음 일정에서 좋은 인연을 만나시길 바랍니다.',

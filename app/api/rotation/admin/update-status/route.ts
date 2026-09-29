@@ -285,8 +285,8 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
-  // ── 확정 / 반려 SMS ───────────────────────────────────────────────────────
-  if (body.status === '확정' || body.status === '반려') {
+  // ── 확정 / 대기 / 반려 SMS ────────────────────────────────────────────────
+  if (body.status === '확정' || body.status === '대기' || body.status === '반려') {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const supa = serviceClient as any;
@@ -306,7 +306,10 @@ export async function PATCH(req: NextRequest) {
       const eventDate   = appData?.events?.event_date;
 
       if (phone && displayName && eventDate) {
-        const tmplKey = body.status === '확정' ? 'attendance_confirmed' : 'attendance_rejected';
+        const tmplKey =
+          body.status === '확정' ? 'attendance_confirmed' :
+          body.status === '대기' ? 'attendance_waitlisted' :
+          'attendance_rejected';
         const { content, enabled } = await getTemplateConfig(supa, tmplKey);
         if (enabled) {
           const text = substituteVars(content, { name: displayName, ...buildEventVars({ event_date: eventDate }) });
@@ -314,7 +317,7 @@ export async function PATCH(req: NextRequest) {
         }
       }
     } catch (smsErr) {
-      console.error('[확정/반려 SMS error]', smsErr);
+      console.error('[확정/대기/반려 SMS error]', smsErr);
     }
   }
 
