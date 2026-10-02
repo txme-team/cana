@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 const NAV_ITEMS = [
@@ -90,10 +90,34 @@ const NAV_ITEMS = [
   },
 ];
 
+const COLLAPSED_KEY = 'cana_admin_sidebar_collapsed';
+
 export default function AdminSidebar({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const [showLogout, setShowLogout] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // 접힘 상태는 이 브라우저에만 기억한다 (저장소를 못 쓰는 환경이면 기본값 = 펼침)
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(COLLAPSED_KEY) === '1');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COLLAPSED_KEY, next ? '1' : '0');
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -106,28 +130,59 @@ export default function AdminSidebar({ userEmail }: { userEmail: string }) {
 
   return (
     <>
-      <aside className="flex h-screen w-56 flex-col border-r border-gray-100 bg-white print:hidden">
+      {/* relative z-30: 가장자리에 걸치는 접기 버튼이 오른쪽 콘텐츠 영역에 가려지지 않도록 */}
+      <aside
+        className={[
+          'relative z-30 flex h-screen flex-shrink-0 flex-col border-r border-gray-100 bg-white transition-[width] duration-200 print:hidden',
+          collapsed ? 'w-16' : 'w-56',
+        ].join(' ')}
+      >
+        {/* 접기/펼치기 */}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? '사이드바 펼치기' : '사이드바 접기'}
+          aria-expanded={!collapsed}
+          className="absolute -right-3 top-6 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-cana text-white shadow-md transition hover:bg-cana-dark"
+        >
+          <svg
+            className={`h-3.5 w-3.5 transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
         {/* 로고 */}
-        <div className="border-b border-gray-100 px-5 py-5">
-          <span className="text-base font-bold text-cana">cana</span>
-          <span className="ml-2 text-sm text-gray-400">관리자</span>
+        <div className={`border-b border-gray-100 py-5 ${collapsed ? 'text-center' : 'px-5'}`}>
+          {collapsed ? (
+            <span className="text-base font-bold text-cana" title="cana 관리자">c</span>
+          ) : (
+            <>
+              <span className="text-base font-bold text-cana">cana</span>
+              <span className="ml-2 text-sm text-gray-400">관리자</span>
+            </>
+          )}
         </div>
 
         {/* 네비게이션 */}
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden p-3">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              title={collapsed ? item.label : undefined}
+              aria-label={collapsed ? item.label : undefined}
               className={[
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
+                'flex items-center rounded-xl py-2.5 text-sm font-medium transition',
+                collapsed ? 'justify-center px-0 [&>svg]:h-5 [&>svg]:w-5' : 'gap-3 px-3',
                 isActive(item.href, item.exact)
                   ? 'bg-cana/10 text-cana'
                   : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
               ].join(' ')}
             >
               {item.icon}
-              {item.label}
+              {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
             </Link>
           ))}
         </nav>
@@ -136,15 +191,22 @@ export default function AdminSidebar({ userEmail }: { userEmail: string }) {
         <div className="border-t border-gray-100 p-3">
           <button
             onClick={() => setShowLogout(true)}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-gray-50"
+            title={collapsed ? `${userEmail} (로그아웃)` : undefined}
+            aria-label={collapsed ? '로그아웃' : undefined}
+            className={[
+              'flex w-full items-center rounded-xl py-2.5 text-left transition hover:bg-gray-50',
+              collapsed ? 'justify-center px-0' : 'gap-3 px-3',
+            ].join(' ')}
           >
             <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cana/10 text-sm font-semibold text-cana">
               {userEmail.charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-gray-700">{userEmail}</p>
-              <p className="text-[10px] text-gray-400">로그아웃</p>
-            </div>
+            {!collapsed && (
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-gray-700">{userEmail}</p>
+                <p className="text-[10px] text-gray-400">로그아웃</p>
+              </div>
+            )}
           </button>
         </div>
       </aside>
