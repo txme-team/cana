@@ -35,13 +35,28 @@ export default async function PrintPage({ searchParams }: PageProps) {
   }
 
   const { data: applications } = await query;
-  const list = ((applications as ApplicationWithProfile[]) ?? []).filter((a) => a.profiles);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: events } = await (supabase as any).from('events').select('id, title');
-  const eventMap: Record<string, string> = Object.fromEntries(
-    ((events as { id: string; title: string }[]) ?? []).map((e) => [e.id, e.title])
+  const { data: events } = await (supabase as any).from('events').select('id, title, event_date');
+  const eventRows = (events as { id: string; title: string; event_date: string }[]) ?? [];
+  const eventMap: Record<string, string> = Object.fromEntries(eventRows.map((e) => [e.id, e.title]));
+  const eventTime: Record<string, number> = Object.fromEntries(
+    eventRows.map((e) => [e.id, Date.parse(e.event_date) || 0])
   );
+
+  // 정렬: 최신 행사 먼저 → 남자 → 여자 → 번호 오름차순(번호 없으면 맨 뒤, 같으면 신청 등록순).
+  // 이벤트 상세·웹 프로필 카드와 같은 번호 순서를 따른다.
+  const genderRank = (a: ApplicationWithProfile) => (a.profiles.gender === 'male' ? 0 : 1);
+  const noRank = (a: ApplicationWithProfile) => a.display_no ?? Number.MAX_SAFE_INTEGER;
+  const list = ((applications as ApplicationWithProfile[]) ?? [])
+    .filter((a) => a.profiles)
+    .sort(
+      (a, b) =>
+        (eventTime[b.event_id] ?? 0) - (eventTime[a.event_id] ?? 0) ||
+        genderRank(a) - genderRank(b) ||
+        noRank(a) - noRank(b) ||
+        Date.parse(a.created_at) - Date.parse(b.created_at),
+    );
 
   return (
     <>

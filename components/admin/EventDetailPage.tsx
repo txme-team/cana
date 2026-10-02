@@ -159,6 +159,7 @@ function ParticipantTable({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-xs text-gray-400">
+                <th className="px-3 py-2.5 text-left font-medium w-16">번호</th>
                 <th className="px-3 py-2.5 text-left font-medium w-20">이름</th>
                 <th className="px-3 py-2.5 text-left font-medium w-14">년생</th>
                 <th className="px-3 py-2.5 text-left font-medium w-36">연락처</th>
@@ -181,6 +182,15 @@ function ParticipantTable({
                     className="cursor-pointer hover:bg-gray-50/80 transition"
                     onClick={() => onRowClick(p)}
                   >
+                    <td className="px-3 py-3">
+                      {p.display_no != null ? (
+                        <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold ${accentBg} ${accentText}`}>
+                          {p.display_no}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300">-</span>
+                      )}
+                    </td>
                     <td className="px-3 py-3 font-medium text-gray-800">{pr.nickname}</td>
                     <td className="px-3 py-3 text-gray-500">
                       {pr.birth_year ? `${String(pr.birth_year < 100 ? 1900 + pr.birth_year : pr.birth_year).slice(2)}년생` : '-'}
@@ -386,8 +396,10 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
     }
   };
 
-  const males = (data?.participants ?? []).filter((p) => p.profiles.gender === 'male');
-  const females = (data?.participants ?? []).filter((p) => p.profiles.gender === 'female');
+  // 번호(display_no) 순으로 보여준다 — 번호 없는 사람은 맨 뒤
+  const byNo = (a: Participant, b: Participant) => (a.display_no ?? Infinity) - (b.display_no ?? Infinity);
+  const males = (data?.participants ?? []).filter((p) => p.profiles.gender === 'male').sort(byNo);
+  const females = (data?.participants ?? []).filter((p) => p.profiles.gender === 'female').sort(byNo);
   const waitlist = data?.waitlist ?? [];
   const waitlistMales = waitlist.filter((p) => p.profiles.gender === 'male');
   const waitlistFemales = waitlist.filter((p) => p.profiles.gender === 'female');

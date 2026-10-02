@@ -5,7 +5,7 @@ import { logAdminAction } from '@/lib/admin-logger';
 import { notifyApplicationCancelled } from '@/lib/slack';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
-import { ensureProfileCardMeta } from '@/lib/profile-card';
+import { ensureProfileCardMeta, renumberDisplayNos } from '@/lib/profile-card';
 import { resolveRefund, refundNoticeText, type RefundResult } from '@/lib/refund-policy';
 import { buildPublicUrl } from '@/lib/public-url';
 
@@ -163,7 +163,18 @@ export async function PATCH(req: NextRequest) {
     detail:     { status: body.status },
   }).catch(() => {});
 
-  // 확정 처리 시, 프로필 카드 공유 페이지용 토큰/번호 부여 (없으면 생성, idempotent)
+  // 확정자 번호(오늘의 번호)를 신청 순서대로 다시 매긴다 — 확정이 늘거나, 취소·반려·대기로 빠질 때 모두 반영.
+  // 응답 전에 끝내야 번호가 비는 일이 없다 (몇 번의 쿼리뿐이라 빠름).
+  try {
+    const { data: appEvent } = await svc
+      .from('applications').select('event_id').eq('id', body.id).maybeSingle() as
+      { data: { event_id: string } | null };
+    if (appEvent?.event_id) await renumberDisplayNos(svc, appEvent.event_id);
+  } catch (e) {
+    console.error('[renumberDisplayNos error]', e);
+  }
+
+  // 확정 처리 시, 프로필 카드 공유 페이지용 토큰 부여/AI 요약 (오래 걸려서 응답은 기다리지 않음)
   if (body.status === '확정') {
     ensureProfileCardMeta(serviceClient, body.id).catch((e) => {
       console.error('[ensureProfileCardMeta error]', e);

@@ -99,7 +99,7 @@ export default function ProfileCardItem({
       >
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cana/10 text-sm font-bold text-cana">
-            {label.slice(-1)}
+            {label.replace(/\D/g, '') || '-'}
           </span>
           <div className="text-left">
             <div className="text-sm font-semibold text-cana-ink">

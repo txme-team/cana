@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { renumberDisplayNos } from '@/lib/profile-card';
 import { sendSMS } from '@/lib/sms';
 import { notifyApplicationCancelled, notifyError } from '@/lib/slack';
 import { calcRefund, refundNoticeText } from '@/lib/refund-policy';
@@ -148,6 +149,7 @@ export async function POST(
 
     // 상태 → 취소
     await supa.from('applications').update({ status: '취소' }).eq('id', params.id);
+    await renumberDisplayNos(supa, application.event_id).catch((e) => console.error('[renumberDisplayNos error]', e));
 
     const cancelledApp = application;
 

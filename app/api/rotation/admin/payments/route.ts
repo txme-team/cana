@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { renumberDisplayNos } from '@/lib/profile-card';
 import { sendSMS } from '@/lib/sms';
 import { substituteVars, buildEventVars, getTemplateConfig } from '@/lib/sms-templates';
 import { resolveRefund, refundNoticeText } from '@/lib/refund-policy';
@@ -84,9 +85,9 @@ export async function POST(req: NextRequest) {
     // 환불 계산에 필요한 정보 조회 (DB 값을 신뢰 — 클라이언트 입력값 사용 안 함)
     const { data: appRow } = await supa
       .from('applications')
-      .select('status, amount, events ( event_date )')
+      .select('status, amount, event_id, events ( event_date )')
       .eq('id', applicationId)
-      .maybeSingle() as { data: { status: string; amount: number | null; events: { event_date: string } | null } | null };
+      .maybeSingle() as { data: { status: string; amount: number | null; event_id: string; events: { event_date: string } | null } | null };
 
     if (!appRow) {
       return NextResponse.json({ error: '신청 내역을 찾을 수 없어요.' }, { status: 404 });
@@ -187,6 +188,7 @@ export async function POST(req: NextRequest) {
 
     // applications 상태를 '취소'로 업데이트
     await supa.from('applications').update({ status: '취소' }).eq('id', applicationId);
+    await renumberDisplayNos(supa, appRow.event_id).catch((e) => console.error('[renumberDisplayNos error]', e));
 
     // ── 취소 당사자 안내 SMS ────────────────────────────────────────────────────
     try {
