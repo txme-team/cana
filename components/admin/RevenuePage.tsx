@@ -67,7 +67,7 @@ function NavArrow({
 
 export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
   const active = useMemo(
-    () => payments.filter((p) => p.amount != null && p.status !== '취소' && p.status !== '반려'),
+    () => payments.filter((p) => p.amount != null && p.amount > 0),
     [payments],
   );
 
@@ -159,7 +159,7 @@ export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
         <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-gray-400">총 매출</p>
           <p className="text-xl font-bold text-gray-900">{fmtAmount(total)}</p>
-          <p className="mt-1 text-[11px] text-gray-400">취소·반려 제외 {totalCount}건</p>
+          <p className="mt-1 text-[11px] text-gray-400">환불 차감 후 {totalCount}건</p>
         </div>
         <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-gray-400">이번 달 매출</p>
@@ -169,7 +169,7 @@ export default function RevenuePage({ payments }: { payments: RevenueItem[] }) {
         <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-gray-400">총 결제 건수</p>
           <p className="text-xl font-bold text-gray-900">{totalCount.toLocaleString()}건</p>
-          <p className="mt-1 text-[11px] text-gray-400">성공 기준</p>
+          <p className="mt-1 text-[11px] text-gray-400">환불 차감 후 매출 발생 건</p>
         </div>
       </div>
 

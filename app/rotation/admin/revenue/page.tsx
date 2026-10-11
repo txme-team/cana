@@ -9,26 +9,29 @@ export default async function AdminRevenuePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supa = supabase as any;
 
-  const { data } = await supa
-    .from('applications')
-    .select(`
-      id,
-      status,
-      paid_at,
-      amount,
-      event_id,
-      events   ( title, event_date ),
-      profiles ( gender, birth_year )
-    `)
-    .not('paid_at', 'is', null)
-    .order('paid_at', { ascending: false });
+  const buildQuery = (cols: string) =>
+    supa
+      .from('applications')
+      .select(`${cols}, events ( title, event_date ), profiles ( gender, birth_year )`)
+      .not('paid_at', 'is', null)
+      .order('paid_at', { ascending: false });
+
+  const base = 'id, status, paid_at, amount, event_id';
+  let { data, error } = await buildQuery(`${base}, refunded_amount`);
+  // refunded_amount 마이그레이션 적용 전에는 기존 방식으로 조회
+  const hasRefundColumn = !error;
+  if (error) ({ data } = await buildQuery(base));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payments: RevenueItem[] = (data ?? []).map((row: any) => ({
     id:          row.id,
     status:      row.status,
     paid_at:     row.paid_at,
-    amount:      row.amount,
+    amount:      row.amount == null
+      ? null
+      : hasRefundColumn
+        ? row.amount - (row.refunded_amount ?? 0)
+        : (row.status === '취소' || row.status === '반려') ? 0 : row.amount,
     event_id:    row.event_id,
     event_title: row.events?.title ?? '—',
     event_date:  row.events?.event_date ?? null,

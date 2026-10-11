@@ -120,6 +120,13 @@ export async function PATCH(
         .in('id', targets.map((a) => a.id));
     }
 
+    // 환불 성공한 건은 환불 금액(전액)을 기록
+    for (const r of refundResults) {
+      if (r.ok && r.amount != null) {
+        await supa.from('applications').update({ refunded_amount: r.amount }).eq('id', r.applicationId);
+      }
+    }
+
     // ── 이벤트 취소 처리 ──────────────────────────────────────────────────────
     await supa
       .from('events')

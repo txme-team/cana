@@ -68,6 +68,8 @@ export async function POST(
     const eventDate = application.events?.event_date;
     const refund = calcRefund(application.amount, eventDate);
 
+    let refundedAmount = 0;
+
     // Toss 환불 (결제됐고, 환불 대상 금액이 있을 때만)
     if (application.payment_key && refund.rate > 0) {
       const secretKey = process.env.TOSS_SECRET_KEY!;
@@ -131,6 +133,7 @@ export async function POST(
           tossRequest: cancelBody,
         },
       }).catch(() => {});
+      refundedAmount = refund.amount;
     } else if (application.payment_key) {
       logAdminAction({
         adminId: user.id,
@@ -148,7 +151,7 @@ export async function POST(
     }
 
     // 상태 → 취소
-    await supa.from('applications').update({ status: '취소' }).eq('id', params.id);
+    await supa.from('applications').update({ status: '취소', refunded_amount: refundedAmount }).eq('id', params.id);
     await renumberDisplayNos(supa, application.event_id).catch((e) => console.error('[renumberDisplayNos error]', e));
 
     const cancelledApp = application;

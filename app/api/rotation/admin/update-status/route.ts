@@ -43,6 +43,7 @@ export async function PATCH(req: NextRequest) {
   // ── 취소: 상태를 바꾸기 전에 환불부터 처리 (실패 시 상태 변경 자체를 막는다) ──
   let cancelJoin: CancelJoinRow | null = null;
   let cancelRefund: RefundResult | null = null;
+  let refundedAmount = 0;
 
   if (body.status === '취소') {
     const { data: appRow } = await svc
@@ -127,6 +128,7 @@ export async function PATCH(req: NextRequest) {
           tossRequest: cancelBody,
         },
       }).catch(() => {});
+      refundedAmount = refund.amount;
     } else if (appRow.payment_key) {
       logAdminAction({
         adminId: user.id,
@@ -146,7 +148,7 @@ export async function PATCH(req: NextRequest) {
   // DB 업데이트 (service role — RLS 우회)
   const { error } = await svc
     .from('applications')
-    .update({ status: body.status })
+    .update(body.status === '취소' ? { status: body.status, refunded_amount: refundedAmount } : { status: body.status })
     .eq('id', body.id);
 
   if (error) {

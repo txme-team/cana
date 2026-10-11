@@ -108,6 +108,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '환불 금액을 0원보다 크게 입력해주세요.' }, { status: 400 });
     }
 
+    let refundedAmount = 0;
+
     // Toss 결제 취소 API 호출 (환불 대상 금액이 있을 때만)
     if (refund.amount > 0) {
       const secretKey = process.env.TOSS_SECRET_KEY!;
@@ -171,6 +173,7 @@ export async function POST(req: NextRequest) {
           tossRequest: cancelBody,
         },
       }).catch(() => {});
+      refundedAmount = refund.amount;
     } else {
       logAdminAction({
         adminId: user.id,
@@ -187,7 +190,7 @@ export async function POST(req: NextRequest) {
     }
 
     // applications 상태를 '취소'로 업데이트
-    await supa.from('applications').update({ status: '취소' }).eq('id', applicationId);
+    await supa.from('applications').update({ status: '취소', refunded_amount: refundedAmount }).eq('id', applicationId);
     await renumberDisplayNos(supa, appRow.event_id).catch((e) => console.error('[renumberDisplayNos error]', e));
 
     // ── 취소 당사자 안내 SMS ────────────────────────────────────────────────────
