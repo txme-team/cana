@@ -17,10 +17,10 @@ export default async function AdminRevenuePage() {
       .order('paid_at', { ascending: false });
 
   const base = 'id, status, paid_at, amount, event_id';
-  let { data, error } = await buildQuery(`${base}, refunded_amount`);
+  const withRefund = await buildQuery(`${base}, refunded_amount`);
   // refunded_amount 마이그레이션 적용 전에는 기존 방식으로 조회
-  const hasRefundColumn = !error;
-  if (error) ({ data } = await buildQuery(base));
+  const hasRefundColumn = !withRefund.error;
+  const data = hasRefundColumn ? withRefund.data : (await buildQuery(base)).data;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payments: RevenueItem[] = (data ?? []).map((row: any) => ({
