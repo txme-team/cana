@@ -235,6 +235,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
   // 상세 장소 인라인 편집
   const [venueName, setVenueName] = useState('');
   const [venueUrl, setVenueUrl] = useState('');
+  const [venueAddress, setVenueAddress] = useState('');
   const [venueEditing, setVenueEditing] = useState(false);
   const [savingVenue, setSavingVenue] = useState(false);
 
@@ -268,6 +269,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
         setData(d);
         setVenueName(d.event.venue_name ?? '');
         setVenueUrl(d.event.venue_url ?? '');
+        setVenueAddress(d.event.venue_detail ?? '');
       })
       .finally(() => setLoading(false));
   };
@@ -336,6 +338,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           venue_name: venueName || null,
+          venue_detail: venueAddress || null,
           venue_url: venueUrl || null,
         }),
       });
@@ -574,6 +577,15 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                       />
                     </div>
                     <div>
+                      <label className="mb-1.5 block text-sm text-gray-500">주소</label>
+                      <input
+                        value={venueAddress}
+                        onChange={(e) => setVenueAddress(e.target.value)}
+                        placeholder="예: 서울 강남구 OO로 12, 3층"
+                        className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-cana focus:ring-1 focus:ring-cana/20"
+                      />
+                    </div>
+                    <div>
                       <label className="mb-1.5 block text-sm text-gray-500">장소 URL</label>
                       <input
                         value={venueUrl}
@@ -587,6 +599,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                         onClick={() => {
                           setVenueName(data.event.venue_name ?? '');
                           setVenueUrl(data.event.venue_url ?? '');
+                          setVenueAddress(data.event.venue_detail ?? '');
                           setVenueEditing(false);
                         }}
                         className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50"
@@ -615,6 +628,17 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                         label={data.event.venue_name}
                       />
                     ) : null}
+                    {data.event.venue_detail ? (
+                      <InfoRow
+                        icon={
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                          </svg>
+                        }
+                        label={data.event.venue_detail}
+                      />
+                    ) : null}
                     {data.event.venue_url ? (
                       <div className="flex items-center gap-2 text-base text-gray-600">
                         <span className="flex-shrink-0 text-gray-400">
@@ -632,7 +656,7 @@ export default function EventDetailPage({ eventId }: { eventId: string }) {
                         </a>
                       </div>
                     ) : null}
-                    {!data.event.venue_name && !data.event.venue_url && (
+                    {!data.event.venue_name && !data.event.venue_detail && !data.event.venue_url && (
                       <p className="text-sm text-gray-400">아직 입력된 장소 정보가 없어요.</p>
                     )}
 
